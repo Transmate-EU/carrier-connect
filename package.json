@@ -1,0 +1,33 @@
+{
+  "name": "carrier-connect",
+  "version": "1.0.0",
+  "description": "module to connect to carriers",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Transmate-EU/carrier-connect.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Transmate-EU/carrier-connect/issues"
+  },
+  "homepage": "https://github.com/Transmate-EU/carrier-connect#readme",
+  "dependencies": {
+    "@easypost/api": "^3.10.1",
+    "ajv": "^6.12.6",
+    "pg": "^8.5.1",
+    "postmen": "^1.0.4",
+    "shippo": "^1.6.0"
+  },
+  "devDependencies": {
+    "eslint": "^7.23.0",
+    "eslint-plugin-import": "^2.22.1",
+    "eslint-plugin-jsx-a11y": "^6.4.1",
+    "eslint-plugin-react": "^7.21.5",
+    "eslint-plugin-react-hooks": "^4 || ^3 || ^2.3.0 || ^1.7.0"
+  }
+}
