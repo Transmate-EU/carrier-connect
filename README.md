@@ -28,3 +28,5 @@ use postgress as db if needed (try to do witout)
 
 use dotEnv in testing, but set env's in class init in production
 
+the end result will be used in a graphql backend
+
