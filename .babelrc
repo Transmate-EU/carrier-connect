@@ -9,6 +9,10 @@
     ]
   ],
   "plugins": [
+<<<<<<< HEAD
     "@babel/plugin-syntax-dynamic-import","import-graphql"
+=======
+    "@babel/plugin-syntax-dynamic-import"
+>>>>>>> Create item.js
   ]
 }

@@ -2,6 +2,7 @@ import Ajv from "ajv"
 
 const ajv = new Ajv();
 
+<<<<<<< HEAD
 const validateSchema = (object, schema) => {
     const validate = ajv.compile(schema);
     const valid = validate(object);
@@ -142,6 +143,31 @@ const postmenRatesResponseSchema = {
         limit: {type: "string"},
         rates: {type: "string"},
         created_at_max: {type: "string"},
+=======
+const postmenAddressReqSchema = {
+    type: "object",
+    properties: {
+        contact_name: "string",
+        street1: "string",
+        city: "string",
+        state: "string",
+        postal_code: "string",
+        country: "string",
+        type: "string",
+        phone: "string",
+        email: "string"
+    },
+    additionalProperties: false
+}
+
+const postmenRatesResponseSchema = {
+    type: "object",
+    properties: {
+        next_token: "string",
+        limit: "string",
+        rates: "string",
+        created_at_max: "string",
+>>>>>>> Create item.js
         created_at_min: "string"
     },
     required: ["rates", "next_token", "limit"],
@@ -151,10 +177,17 @@ const postmenRatesResponseSchema = {
 const postmenLabelsResponseSchema = {
     type: "object",
     properties: {
+<<<<<<< HEAD
         next_token: {type: "string"},
         limit: {type: "string"},
         rates: {type: "string"},
         created_at_max: {type: "string"},
+=======
+        next_token: "string",
+        limit: "string",
+        rates: "string",
+        created_at_max: "string",
+>>>>>>> Create item.js
         created_at_min: "string"
     },
     required: ["rates", "next_token", "limit"],
@@ -162,6 +195,7 @@ const postmenLabelsResponseSchema = {
 }
 
 const postmenAddValRespSchema = {
+<<<<<<< HEAD
     type: {type: "object"},
     properties: {
         id: {type: "string"},
@@ -169,6 +203,15 @@ const postmenAddValRespSchema = {
         created_at: {type: "string"},
         updated_at: {type: "string"},
         address: {type: "object"},
+=======
+    type: "object",
+    properties: {
+        id: "string",
+        status: "string",
+        created_at: "string",
+        updated_at: "string",
+        address: "object",
+>>>>>>> Create item.js
         recommended_address: "object"
     },
     required: ["id", "status", "created_at", "updated_at", "address"],
@@ -178,6 +221,7 @@ const postmenAddValRespSchema = {
 const postmenManifestReqSchema = {
     type: "object",
     properties: {
+<<<<<<< HEAD
         shipper_account: {
             type: "object",
             properties: {
@@ -186,11 +230,17 @@ const postmenManifestReqSchema = {
         },
         async: {type: "boolean"},
         label_ids: {type: "array"}
+=======
+        shipper_account: "object",
+        async: "boolean",
+       label_ids: "array"
+>>>>>>> Create item.js
     },
     required: ["shipper_account"],
     additionalProperties: true
 }
 
+<<<<<<< HEAD
 const postmenGetTrackingSchema = {
     type: "object",
     properties: {
@@ -266,6 +316,17 @@ const postmenManifestRespSchema = {
         updated_at: {type: "string"},
         labels: {type: "array"},
         files: {type: "array"}
+=======
+const postmenManifestRespSchema = {
+    type: "object",
+    properties: {
+        id: "string",
+        status: "string",
+        created_at: "string",
+        updated_at: "string",
+        labels: "array",
+        files: "array"
+>>>>>>> Create item.js
     },
     required: ["id", "status", "created_at", "updated_at", "labels"],
     additionalProperties: true
@@ -274,17 +335,27 @@ const postmenManifestRespSchema = {
 const postmenGetTrackRespSchema = {
     type: "object",
     properties: {
+<<<<<<< HEAD
         page: {type: "string"},
         limit: {type: "string"},
         count: {type: "string"},
         slug: {type: "string"},
         created_at: {type: "string"},
         updated_at: {type: "string"},
+=======
+        page: "string",
+        limit: "string",
+        count: "string",
+        slug: "string",
+        created_at: "string",
+        updated_at: "string",
+>>>>>>> Create item.js
     },
     required: ["page", "limit", "created_at", "updated_at", "count", "slug"],
     additionalProperties: true
 }
 
+<<<<<<< HEAD
 const shippoCreateShipmentSchema = {
     type: "object",
     properties: {
@@ -326,23 +397,40 @@ const shippoGetRatesSchema = {
         next: {type: "string"},
         previous: {type: "string"},
         results: {type: "array"},
+=======
+const shippoGetRatesSchema = {
+    type: "object",
+    properties: {
+        next: "string",
+        previous: "string",
+        results: "array",
+>>>>>>> Create item.js
     },
     required: ["next", "previos", "results"],
     additionalProperties: true
 }
 
 const shippoGetLabelsSchema = {
+<<<<<<< HEAD
     type: {type: "object"},
     properties: {
         next: {type: "string"},
         previous: {type: "string"},
         results: {type: "array"},
+=======
+    type: "object",
+    properties: {
+        next: "string",
+        previous: "string",
+        results: "array",
+>>>>>>> Create item.js
     },
     required: ["next", "previos", "results"],
     additionalProperties: true
 }
 
 const shippoValidateAddRespSchema = {
+<<<<<<< HEAD
     type: {type: "object"},
     properties: {
         is_complete: {type: "boolean"},
@@ -365,6 +453,30 @@ const shippoValidateAddRespSchema = {
         metadata: {type: "string"},
         test: {type: "boolean"},
         validation_results: {type: "oject"},
+=======
+    type: "object",
+    properties: {
+        is_complete: "boolean",
+        object_created: "string",
+        object_updated: "string",
+        object_id: "string",
+        object_owner: "string",
+        name: "string",
+        company: "string",
+        street_no: "string",
+        street1:"string",
+        street2: "string",
+        city: "string",
+        state:"string",
+        zip: "string",
+        country: "string",
+        phone: "string",
+        email: "string",
+        is_residential: "boolean",
+        metadata: "string",
+        test: "boolean",
+        validation_results: "object"
+>>>>>>> Create item.js
     },
     required: [
         "is_complete",
@@ -389,6 +501,7 @@ const shippoValidateAddRespSchema = {
 const shippoGetManifestSchema = {
     type: "object",
     properties: {
+<<<<<<< HEAD
         object_created: {type: "string"},
         object_updated: {type: "string"},
         object_id: {type: "string"},
@@ -399,6 +512,18 @@ const shippoGetManifestSchema = {
         address_from: {type: "string"},
         transactions: {type: "array"},
         documents: {type: "array"}
+=======
+        object_created: "string",
+        object_updated: "string",
+        object_id: "string",
+        object_owner: "string",
+        carrier_account: "string",
+        shipment_date: "string",
+        status: "string",
+        address_from: "string",
+        transactions: "array",
+        documents: "array"
+>>>>>>> Create item.js
     },
     required: [
         "is_complete",
@@ -415,6 +540,7 @@ const shippoGetManifestSchema = {
     additionalProperties: true
 }
 
+<<<<<<< HEAD
 const shippoCarrierAccountSchema = {
     type: "object",
     properties: {
@@ -464,6 +590,8 @@ const shippoCreateLabelSchema = {
     additionalProperties: false
 }
 
+=======
+>>>>>>> Create item.js
 export { 
     postmenAddressReqSchema,
     postmenRatesResponseSchema,
@@ -477,6 +605,7 @@ export {
     shippoValidateAddRespSchema,
     shippoGetManifestSchema,
     ajv,
+<<<<<<< HEAD
     validateSchema,
     postmenCalculateSchema,
     postmenGetTrackingSchema,
@@ -487,4 +616,6 @@ export {
     shippoCreateManifestSchema,
     shippoAddressCreationSchema,
     shippoCreateLabelSchema
+=======
+>>>>>>> Create item.js
 };

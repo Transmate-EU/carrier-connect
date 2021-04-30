@@ -1,4 +1,5 @@
 import axios from "axios";
+<<<<<<< HEAD
 import shippoApi from 'shippo';
 import { 
     postmenAddressReqSchema,
@@ -184,6 +185,26 @@ class Shipment {
                             })
                         }
                     },
+=======
+import dotenv from 'dotenv';
+import { 
+    shippo,
+    postmentCredentialHeaders,
+    shippoCredentialHeaders,
+    postmenURL,
+    afterShipHeaders
+} from "../helpers/apiAdapter";
+
+dotenv.config();
+
+class Shipment {
+    static async createShipment(service, requestObject) {
+        try {    
+            if (service === 'shippo'){
+                const resultObject = await shippo.shipment.create(requestObject);
+                return {
+                    data: resultObject,
+>>>>>>> Create item.js
                     warnings: [],
                     errors: []
                 };
@@ -193,18 +214,27 @@ class Shipment {
                 return {
                     data: {},
                     warnings: [],
+<<<<<<< HEAD
                     errors: [error.response.data]
+=======
+                    errors: error.response.data
+>>>>>>> Create item.js
                 }
             }
 
             return { 
                 data: {},
                 warnings: [],
+<<<<<<< HEAD
                 errors: [error.message]
+=======
+                errors: error.message
+>>>>>>> Create item.js
             }
         }
     }
 
+<<<<<<< HEAD
     async createCarrierAccount(service, requestObject) {
         try {    
             if (service === 'shippo'){
@@ -219,6 +249,12 @@ class Shipment {
                 }
 
                 const resultObject = await this.shippo.carrieraccount.create(requestObject);
+=======
+    static async createCarrierAccount(service, requestObject) {
+        try {    
+            if (service === 'shippo'){
+                const resultObject = await shippo.carrieraccount.create(requestObject);
+>>>>>>> Create item.js
                 return {
                     data: resultObject,
                     warnings: [],
@@ -227,6 +263,7 @@ class Shipment {
             }   
 
             if (service === 'postmen'){
+<<<<<<< HEAD
                 const errors = validateSchema(requestObject, postmenCreateShipperAccount);
                 
                 if (errors){
@@ -243,6 +280,14 @@ class Shipment {
                     data: requestObject,
                     headers: { 
                         ...this.postmentCredentialHeaders.headers
+=======
+                const data = await axios({ 
+                    method: 'post',
+                    url: `${postmenURL}/shipper-accounts`,
+                    data: requestObject,
+                    headers: { 
+                        ...postmentCredentialHeaders.headers
+>>>>>>> Create item.js
                     }
                 });
                 return {
@@ -268,6 +313,7 @@ class Shipment {
         }
     }
 
+<<<<<<< HEAD
     async createManifest(service, manifest) {
         try {    
             if (service === 'shippo'){
@@ -302,12 +348,21 @@ class Shipment {
                         },
                         transactions: resultObject.transactions
                     },
+=======
+    static async createManifest(service, manifes) {
+        try {    
+            if (service === 'shippo'){
+                const resultObject = await shippo.manifest.create(manifest);
+                return {
+                    data: resultObject,
+>>>>>>> Create item.js
                     warnings: [],
                     errors: []
                 };
             }   
 
             if (service === 'postmen'){
+<<<<<<< HEAD
                 const formatedManifest = {
                     shipper_account: {
                         ...manifest.shipperAccount
@@ -360,6 +415,18 @@ class Shipment {
                         updatedAt: data.data.data.updated_at,
                         createdAt: data.data.data.created_at
                     },
+=======
+                const data = await axios({ 
+                    method: 'post',
+                    url: `${postmenURL}/manifests`,
+                    data: manifest,
+                    headers: { 
+                        ...postmentCredentialHeaders.headers
+                    }
+                });
+                return {
+                    data: data.data,
+>>>>>>> Create item.js
                     warnings: [],
                     errors: []
                 };
@@ -379,6 +446,7 @@ class Shipment {
         }
     }
 
+<<<<<<< HEAD
 
     async getRates(service, shipment) {
         /* 
@@ -425,12 +493,21 @@ class Shipment {
                             }
                         }),
                     },
+=======
+    static async getRates(service, shipment) {
+        try {    
+            if (service === 'shippo'){
+                const resultObject = await shippo.shipment.rates(shipment);
+                return {
+                    data: resultObject,
+>>>>>>> Create item.js
                     warnings: [],
                     errors: []
                 };
             }   
 
             if (service === 'postmen'){
+<<<<<<< HEAD
                 const formatedShipment = {
                     is_document: shipment.isDocument,
                     shipment: {
@@ -524,11 +601,17 @@ class Shipment {
                             }
                         })
                     },
+=======
+                const data = await axios.get(`${postmenURL}/rates`, postmentCredentialHeaders);
+                return {
+                    data: data.data.data,
+>>>>>>> Create item.js
                     warnings: [],
                     errors: []
                 };
             }
         } catch (error) {
+<<<<<<< HEAD
             if (error.detail){
                 return {
                     data: {},
@@ -537,6 +620,8 @@ class Shipment {
                 }
             }
 
+=======
+>>>>>>> Create item.js
             if (error.response){
                 return {
                     data: {},
@@ -553,6 +638,7 @@ class Shipment {
         }
     }
 
+<<<<<<< HEAD
     async createAddress(service, address) {
         try {    
             if (service === 'shippo'){
@@ -599,6 +685,14 @@ class Shipment {
                             validationResults: resultObject.validation_results
                         }
                     },
+=======
+    static async createAddress(service, address) {
+        try {    
+            if (service === 'shippo'){
+                const resultObject = await shippo.address.create(address);
+                return {
+                    data: resultObject,
+>>>>>>> Create item.js
                     warnings: [],
                     errors: []
                 };
@@ -620,6 +714,7 @@ class Shipment {
         }
     }
     
+<<<<<<< HEAD
     async validateAddress(service, address) {
         /* 
             To validate shippo address, we need to first create the address and 
@@ -647,12 +742,21 @@ class Shipment {
                             messages: resultObject.validation_results.messages
                         } 
                     },
+=======
+    static async validateAddress(service, address) {
+        try {    
+            if (service === 'shippo'){
+                const resultObject = await shippo.address.validate(address);
+                return {
+                    data: resultObject,
+>>>>>>> Create item.js
                     warnings: [],
                     errors: []
                 };
             } 
 
             if (service === 'postmen'){
+<<<<<<< HEAD
                 const formatedAddress = {
                     country: address.country,
                     contact_name: address.contactName,
@@ -720,6 +824,18 @@ class Shipment {
                         createdAt: data.data.data.created_at,
                         updatedAt: data.data.data.updated_at,
                     },
+=======
+                const data = await axios({ 
+                    method: 'post',
+                    url: `${postmenURL}/address-validations`,
+                    data: address,
+                    headers: { 
+                        ...postmentCredentialHeaders.headers
+                    }
+                });
+                return {
+                    data: data.data,
+>>>>>>> Create item.js
                     warnings: [],
                     errors: []
                 };
@@ -741,6 +857,7 @@ class Shipment {
         }
     }
 
+<<<<<<< HEAD
     async createLabel(service, label) {
         try {    
             if (service === 'shippo'){
@@ -782,12 +899,22 @@ class Shipment {
                         trackingStatus: resultObject.tracking_status,
                         trackingNumber: resultObject.tracking_number
                     },
+=======
+    static async createLabel(service, label) {
+        try {    
+            if (service === 'shippo'){
+                console.log("shippo", shippo);
+                const resultObject = await shippo.transaction.create(label);
+                return {
+                    data: resultObject,
+>>>>>>> Create item.js
                     warnings: [],
                     errors: []
                 };
             }   
 
             if (service === 'postmen'){
+<<<<<<< HEAD
                 const formatedLabel = {
                     is_document: label.isDocument,
                     service_type: label.serviceType,
@@ -906,6 +1033,18 @@ class Shipment {
                         createdAt: data.data.data.created_at,
                         updatedAt: data.data.data.updated_at,
                     },
+=======
+                const data = await axios({ 
+                    method: 'post',
+                    url: `${postmenURL}/labels`,
+                    data: label,
+                    headers: { 
+                        ...postmentCredentialHeaders.headers
+                    }
+                });
+                return {
+                    data: data.data.data,
+>>>>>>> Create item.js
                     warnings: [],
                     errors: []
                 };
@@ -922,11 +1061,16 @@ class Shipment {
             return { 
                 data: {},
                 warnings: [],
+<<<<<<< HEAD
                 errors: [error.detail ? error.detail : error.message]
+=======
+                errors: [error.message]
+>>>>>>> Create item.js
             }
         }
     }
 
+<<<<<<< HEAD
     async getLabels(service) {
         /* 
             To get shippo and postmen labels, we need to first create a lable using the label method,
@@ -954,12 +1098,21 @@ class Shipment {
                             }
                         })
                     },
+=======
+    static async getLabels(service) {
+        try {
+            if (service === 'shippo'){
+                const resultObject = await shippo.transaction.list();
+                return {
+                    data: resultObject,
+>>>>>>> Create item.js
                     warnings: [],
                     errors: []
                 };
             }
 
             if (service === 'postmen'){
+<<<<<<< HEAD
                 const data = await axios.get(`${this.postmenURL}/labels`, this.postmentCredentialHeaders);
 
                 if (data.data.meta.code === 4104){
@@ -1014,6 +1167,11 @@ class Shipment {
 
                         })
                     },
+=======
+                const data = await axios.get(`${postmenURL}/labels`, postmentCredentialHeaders);
+                return {
+                    data: data.data.data,
+>>>>>>> Create item.js
                     warnings: [],
                     errors: []
                 };
@@ -1035,6 +1193,7 @@ class Shipment {
         }
     }
 
+<<<<<<< HEAD
     async getAllManifests(service) {
         /* 
             To get shippo manifests, we need to first create the manifest using
@@ -1042,12 +1201,16 @@ class Shipment {
            do the same as querying would always return an empty array if none 
            is found
         */
+=======
+    static async getAllManifests(service) {
+>>>>>>> Create item.js
         try {    
             if (service === 'shippo'){
                 const data = await axios({ 
                     method: 'get',
                     url: `${process.env.SHIPPO_URL}/manifests`,
                     headers: { 
+<<<<<<< HEAD
                         ...this.shippoCredentialHeaders.headers
                     }
                 });
@@ -1069,6 +1232,13 @@ class Shipment {
                             }
                         })
                     },
+=======
+                        ...shippoCredentialHeaders.headers
+                    }
+                });
+                return {
+                    data: data.data,
+>>>>>>> Create item.js
                     warnings: [],
                     errors: []
                 };
@@ -1077,6 +1247,7 @@ class Shipment {
             if (service === 'postmen'){
                 const data = await axios({ 
                     method: 'get',
+<<<<<<< HEAD
                     url: `${this.postmenURL}/manifests`,
                     headers: { 
                         ...this.postmentCredentialHeaders.headers
@@ -1113,6 +1284,15 @@ class Shipment {
                             }
                         })
                     },
+=======
+                    url: `${postmenURL}/manifests`,
+                    headers: { 
+                        ...postmentCredentialHeaders.headers
+                    }
+                });
+                return {
+                    data: data.data,
+>>>>>>> Create item.js
                     warnings: [],
                     errors: []
                 };
@@ -1132,6 +1312,7 @@ class Shipment {
         }
     }
 
+<<<<<<< HEAD
     async getManifest(service, manifestId) {
         /* 
             To get shippo/postmen manifest, we need to provide a manifest id,
@@ -1155,12 +1336,21 @@ class Shipment {
                         documents: manifest.documents,
                         transactions: manifest.transactions
                     },
+=======
+    static async getManifest(service, manifest) {
+        try {    
+            if (service === 'shippo'){
+                const resultObject = await shippo.manifest.retrieve(manifest);
+                return {
+                    data: resultObject,
+>>>>>>> Create item.js
                     warnings: [],
                     errors: []
                 };
             }   
 
             if (service === 'postmen'){
+<<<<<<< HEAD
                 const data = await axios.get(`${this.postmenURL}/manifests/${manifestId}`, this.postmentCredentialHeaders);
 
                 if (data.data.meta.code === 4104 && !data.data.data.id){
@@ -1198,6 +1388,11 @@ class Shipment {
                         updatedAt: manifest.updated_at,
                         createdAt: manifest.created_at
                     },
+=======
+                const data = await axios.get(`${postmenURL}/manifests/${manifest}`, postmentCredentialHeaders);
+                return {
+                    data: data.data,
+>>>>>>> Create item.js
                     warnings: [],
                     errors: []
                 };
@@ -1219,6 +1414,7 @@ class Shipment {
         }
     }
 
+<<<<<<< HEAD
     async createTracking(service, trackingObj){
         /* 
             To create a tracking, we need to provide a body with the 
@@ -1319,6 +1515,21 @@ class Shipment {
                             courierDestinationCountryIso3: tracking.courier_destination_country_iso3,
                         },
                     },
+=======
+    static async createTracking(service, requestObj){
+        try {
+            if (service === 'postmen'){
+                const data = await axios({ 
+                    method: 'post',
+                    url: `${process.env.AFTER_SHIP_URL}/trackings`,
+                    data: requestObj,
+                    headers: { 
+                        ...afterShipHeaders.headers
+                    }
+                });
+                return {
+                    data: data.data.data,
+>>>>>>> Create item.js
                     warnings: [],
                     errors: []
                 };
@@ -1340,6 +1551,7 @@ class Shipment {
         }
     }
 
+<<<<<<< HEAD
     async getTrackings(service) {
         try {
             if (service === 'postmen'){
@@ -1403,6 +1615,14 @@ class Shipment {
                             }
                         })
                     },
+=======
+    static async getTrackings(service) {
+        try {
+            if (service === 'postmen'){
+                const data = await axios.get(`${process.env.AFTER_SHIP_URL}/trackings`, afterShipHeaders);
+                return {
+                    data: data.data.data,
+>>>>>>> Create item.js
                     warnings: [],
                     errors: []
                 };
@@ -1424,6 +1644,7 @@ class Shipment {
         }
     }
 
+<<<<<<< HEAD
     async getShipments(service) {
         try {
             if (service === "shippo"){
@@ -1596,12 +1817,21 @@ class Shipment {
                             })
                         }
                     },
+=======
+    static async getTracking(service, tracking) {
+        try {    
+            if (service === 'shippo'){
+                const data = await axios.get(`${process.env.SHIPPO_URL}/tracks/${tracking.carrier}/${tracking.trackingNumber}`, shippoCredentialHeaders);
+                return {
+                    data: data.data,
+>>>>>>> Create item.js
                     warnings: [],
                     errors: []
                 };
             }
             
             if (service === 'postmen') {
+<<<<<<< HEAD
                 const errors = validateSchema(trackingObj, postmenGetTrackingSchema);
                 
                 if (errors){
@@ -1681,6 +1911,11 @@ class Shipment {
                             courierDestinationCountryIso3: tracking.courier_destination_country_iso3,
                         }
                     },
+=======
+                const data = await axios.get(`${process.env.AFTER_SHIP_URL}/trackings/${tracking.trackingSlug}/${tracking.trackingId}`, afterShipHeaders);
+                return {
+                    data: data.data,
+>>>>>>> Create item.js
                     warnings: [],
                     errors: []
                 };
@@ -1702,6 +1937,7 @@ class Shipment {
         }
     }
 
+<<<<<<< HEAD
     async deleteLabel(service, labelId) {
         /* 
             To cancel postmen label, we need to provide the label id
@@ -1762,11 +1998,29 @@ class Shipment {
                         createdAt: data.data.data.createdAt,
                         updatedAt: data.data.data.updatedAt
                     },
+=======
+    static async deleteLabel(service, label) {
+        try {    
+            if (service === 'postmen'){
+                const data = await axios({ 
+                    method: 'post',
+                    url: `${postmenURL}/cancel-labels`,
+                    data: { 
+                        label: { id: label }, 
+                        async: false
+                    },
+                    headers: { ...postmentCredentialHeaders.headers }
+                });
+
+                return {
+                    data: data.data,
+>>>>>>> Create item.js
                     warnings: [],
                     errors: []
                 };
             }   
         } catch (error) {
+<<<<<<< HEAD
             if (error.detail){
                 return {
                     data: {},
@@ -1775,6 +2029,8 @@ class Shipment {
                 }
             }
 
+=======
+>>>>>>> Create item.js
             if (error.response){
                 return {
                     data: {},
