@@ -1,4 +1,4 @@
-import { uuid } from 'uuidv4';
+import { v4 as uuidV4 } from "uuid";
 
 const shippoAddressFrom  = {
     name: "Shawn Ippotle",
@@ -38,8 +38,8 @@ const shippoTransaction = {
 }
 
 const shippoAddress = {
-    name:"Shawn Ippotle",
-    company:"Shippo",
+    contact_name:"Shawn Ippotle",
+    company_name:"Shippo",
     street1:"215 Clayton St.",
     city:"San Francisco",
     state:"CA",
@@ -52,13 +52,45 @@ const shippoAddress = {
 const shippoShipment = {
     address_from: shippoAddressFrom,
     address_to: shippoAddressTo,
-    parcels: shippoParcel,
+    parcels: [shippoParcel],
     async: true
+}
+
+const shippoShipmentTesting = {
+    shipTo: {
+        contactName: "Mr Hippo",
+        street1: "Broadway 1",
+        city: "New York",
+        state: "NY",
+        zip: "10007",
+        country: "US"
+      },
+    shipFrom: {
+        contactName: "Shawn Ippotle",
+        street1: "215 Clayton St.",
+        city: "San Francisco",
+        state: "CA",
+        zip: "94117",
+        country: "US"
+    },
+    parcels: [
+        {
+            length: "5",
+            width: "5",
+            height: "5",
+            distanceUnit: "in",
+            weight:{
+                unit: "kg",
+                value: 2
+            },
+            massUnit: "lb"
+        }
+    ]
 }
 
 const shippoCarrierAccount = {
     carrier:"fedex", 
-    account_id: uuid(), 
+    account_id: uuidV4(), 
     parameters:{ "meter": "789987" },
     active: true,
     test:true
@@ -73,6 +105,52 @@ const shippoManifest = {
     ]
 }
 
+const shippoLabelCreation = {
+    shipment: {
+        shipTo: {
+          contactName: "Mr Hippo",
+          street1: "Broadway 1",
+          city: "New York",
+          state: "NY",
+          zip: "10007",
+          country: "US",
+          companyName: "Shippo",
+          email: "shippotle@goshippo.com",
+          isResidential: false,
+          phone: "+1 555 341 9393"
+       },
+        shipFrom: {
+          contactName: "Shawn Ippotle",
+          street1: "215 Clayton St.",
+          city: "San Francisco",
+          state: "CA",
+          zip: "94117",
+          country: "US",
+          companyName: "Shippod",
+          email: "shippotld@goshippo.com",
+          isResidential: false,
+          phone: "+1 555 341 9394"
+        },
+        parcels: [
+          {
+            length: "5",
+            width: "5",
+            height: "5",
+            distanceUnit: "in",
+            weight:{
+              unit: "kg",
+              value: 2
+            },
+            massUnit: "lb"
+          }
+        ]
+    },
+    shipperAccount: {
+        id: "ac2f2e4c2d76445589bba81599dd0eb8"
+    },
+    serviceToken: "usps_priority"
+}
+
 export { 
     shippoAddress,
     shippoTransaction,
@@ -82,4 +160,6 @@ export {
     shippoShipment,
     shippoCarrierAccount,
     shippoManifest,
+    shippoShipmentTesting,
+    shippoLabelCreation
 }

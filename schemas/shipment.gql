@@ -1,0 +1,495 @@
+enum APPROVE_DECLINE {
+  approve
+  decline
+}
+
+enum COST_TYPE {
+  base
+  additional
+}
+
+enum COST_SOURCE {
+  input
+  priceList
+  invoice
+}
+
+enum SHIPMENT_MASS_ACTIONS {
+  cancel
+  archive
+  delete
+  copy
+}
+
+enum SHIPMENT_LOCATION_TYPE {
+  address
+  location
+}
+
+enum SHIPMENT_PARTNER_ROLES {
+  shipper
+  consignee
+  provider
+}
+
+# old equipment structure:
+type DimensionsType {
+  length: Int
+  width: Int
+  height: Int
+  uom: String
+}
+
+type ReferencesEquipmentType {
+  containerNo: String
+  document: String
+  seal: String
+}
+
+type EquipmentsType {
+  quantity: Int
+  type: String
+  weight: String
+  sellerId: String
+  dimensions: DimensionsType
+  references: ReferencesEquipmentType
+}
+
+type CostParamsType {
+  currencyDate: Date
+  entity: String
+  customsClearance: Boolean
+  freeDays: JSON
+}
+
+type ResponseType {
+  approved: Boolean
+  reason: String
+  comment: String
+  responded: ByType
+}
+
+# raw database structure:
+type CostsType {
+  id: String
+  costId: String
+  isManualBaseCost: Boolean
+  description: String
+  tooltip: String
+  source: String
+  meta: String # blackbox Object stringified
+  priceListId: String
+  invoiced: Boolean
+  invoiceId: String
+  amount: AmountType
+  added: ByType
+  accountId: String
+  sellerId: String
+  date: Date
+  forApproval: Boolean
+  response: ResponseType
+  calculatedExchange: Float
+  orgIndex: Int # used in calculated projection
+}
+
+# projection that applies conversion and looks up invoice data:
+type ShipmentCostAndInvoiceType {
+  baseCurrency: String
+  calculated: [CostsType]
+  invoices: [Invoice]
+  totalShipmentCosts: Float
+  totalInvoiceCosts: Float
+  totalInvoiceDelta: Float
+}
+
+type FromToType {
+  latLng: LatLngType
+  countryCode: String
+  isValidated: Boolean
+  zipCode: String
+  addressId: String
+  locode: LocodeType
+  name: String
+  address: AddressType
+  timeZone: String
+  annotation: JSON
+}
+
+type ShipmentStopType {
+  location: FromToType
+  date: Date # requested pickup
+  # projections: (as this is stored in the stage)
+  datePlanned: Date # = [first|last]Stage.dates.[pickup|delivery].arrival.planned
+  dateActual: Date # = [first|last]Stage.dates.[pickup|delivery].arrival.actual
+}
+
+type ReferencesType {
+  number: String
+  booking: String
+  carrier: String
+  consignee: String
+  bof: String
+  fa: String
+  container: String
+  cmr: String
+}
+
+type NotesType {
+  BookingNotes: String
+  PlanningNotes: String
+  LoadingNotes: String
+  UnloadingNotes: String
+  OtherNotes: String
+  TemperatureControl: String
+}
+
+# projected in shipmentAggr query:
+type TotalCostType {
+  additional: Float
+  base: Float
+  fuel: Float
+  manual: Float
+  total: Float
+  orgCurrency: String
+  targetCurrency: String
+}
+
+type ShipmentTrackingPositionType {
+  lat: String
+  lng: String
+  source: String
+}
+
+type ShipmentTrackingType {
+  active: Boolean
+  updates: [Date]
+  stationary: [Date]
+  position: ShipmentTrackingPositionType
+  speed: Int
+  references: String # blackbox Object stringified
+}
+
+type ShipmentUpdatesType {
+  action: String
+  accountId: String
+  userId: String
+  data: JSON # blackbox Object stringified
+  ts: Date
+}
+
+# DO NOT USE:
+type Shipment {
+  id: String
+  pickup: ShipmentStopType
+  delivery: ShipmentStopType
+  number: String
+  type: String
+  serviceLevel: String
+  incoterm: String
+  status: String
+  plannerIds: [String]
+  accountId: String
+  shipperId: String
+  shipper: AccountType
+  carrier: AccountType
+  consigneeId: String
+  consignee: AccountType
+  carrierIds: [String]
+  providerIds: [String]
+  providers: [AccountType]
+  priceListId: String
+  priceRequestId: String
+  shipmentProjectId: String
+  stageIds: [String]
+  stage: Stage
+  deliveryDate: Date
+  pickupDate: Date
+  itemIds: [String]
+  items: [ItemType]
+  item: ItemType
+  nestedItems(depth: Int): [ShipmentItemType]
+  firstItem(type: String): ShipmentItemType
+  firstEquipment: ShipmentItemType
+  isTendered: Boolean
+  totalCost: Float
+  manualCost: Float
+  nonConformanceIds: [String]
+  edi: String # blackbox Object stringified
+  meta: String # blackbox Object stringified
+  demo: Boolean
+  flags: [String]
+  references: ReferencesType
+  notes: NotesType
+  costs: [CostsType]
+  costParams: CostParamsType
+  equipments: [EquipmentsType]
+  drivingDistance: Int
+  drivingDuration: Int
+  sphericalDistance: Int
+  created: ByType
+  updated: ByType
+  deleted: Boolean
+  isArchived: Boolean
+  updates: ShipmentUpdatesType
+  tracking: ShipmentTrackingType
+  canViewCosts: Boolean
+}
+
+type ShipmentLinks {
+  id: String
+  type: String
+  data: JSON
+}
+
+type ShipmentErrors {
+  type: String
+  data: JSON
+  message: String
+  dt: Date
+}
+
+type ShipmentAccess {
+  accountId: String
+  #action: String
+  #id: String #don't project this id as this will create an unwanted cache returing the same accountID for all
+}
+
+# same as shipment, no resolvers (all is fetched in aggregation) except permission queries
+type ShipmentAggr {
+  id: String
+  pickup: ShipmentStopType
+  delivery: ShipmentStopType
+  number: String
+  type: String
+  serviceLevel: String
+  incoterm: String
+  status: String
+  plannerIds: [String]
+  accountId: String
+  account: AccountTypeD
+  shipperId: String
+  shipper: AccountTypeD
+  carrier: AccountTypeD
+
+  consigneeId: String
+  consignee: AccountTypeD
+
+  carrierIds: [String]
+  providerIds: [String]
+  providers: [AccountTypeD]
+
+  access: [ShipmentAccess]
+
+  priceListId: String
+  priceRequestId: String
+  shipmentProjectId: String
+  stageIds: [String]
+  # itemIds: [String]
+
+  # item: ItemType
+  nestedItems(depth: Int): [ShipmentItemType]
+  firstItem(type: String): ShipmentItemType
+  firstEquipment: ShipmentItemType
+  isTendered: Boolean
+  totalCost: Float
+  manualCost: Float
+  totals: TotalCostType
+  nonConformanceIds: [String]
+  edi: JSON
+  errors: [ShipmentErrors]
+  meta: String # blackbox Object stringified
+  demo: Boolean
+  flags: [String]
+  references: ReferencesType
+  notes: NotesType
+  tags: [String]
+  costs: [CostsType] # db cost array
+  costParams: CostParamsType
+  equipments: [EquipmentsType] # to phase out
+  drivingDistance: Int
+  drivingDuration: Int
+  sphericalDistance: Int
+  created: ByType
+  updated: ByType
+  deleted: Boolean
+  isArchived: Boolean
+  updates: [ShipmentUpdatesType]
+  changes: [JSON]
+  tracking: ShipmentTrackingType
+  canViewCosts: Boolean
+
+  #projections
+  costDetail: ShipmentCostAndInvoiceType
+  stageCount: Int
+
+  documents: [DocumentType]
+  items: [ItemType]
+
+  deliveryDate: Date
+  pickupDate: Date
+  eta: Date
+  hasItems: Boolean
+  stage: Stage
+  stages: [Stage]
+  links: [ShipmentLinks]
+}
+
+#region insights
+type ShipmentInsightsFromTo {
+  country: String
+  zip: String
+  locode: String
+}
+
+type ShipmentInsightsStep {
+  CO2: Float
+  cost: Float
+  days: Float
+  from: ShipmentInsightsFromTo
+  hours: Float
+  km: Float
+  mode: String
+  to: ShipmentInsightsFromTo
+  type: String
+}
+
+type ShipmentInsightsDetail {
+  kg: Float
+  steps: [ShipmentInsightsStep]
+  totalCO2: Float
+  totalCost: Float
+  totalHours: Float
+  totalKm: Float
+  totalLeadtime: Float
+  warnings: [String]
+}
+
+type ShipmentInsights {
+  air: [ShipmentInsightsDetail]
+  ocean: [ShipmentInsightsDetail]
+  road: [ShipmentInsightsDetail]
+}
+#endregion
+
+input DeclineInput {
+  reason: String!
+  comment: String
+}
+
+input ApproveDeclineInput {
+  shipmentId: String!
+  index: Int!
+  action: APPROVE_DECLINE!
+  response: DeclineInput
+}
+
+input ShipmentCostAmountInput {
+  value: Float
+  currency: String
+  rate: Float
+}
+
+input ShipmentCostInput {
+  id: String # always available??
+  costId: String
+  description: String
+  amount: ShipmentCostAmountInput
+  type: COST_TYPE
+  invoiceId: String
+  sellerId: String
+  invoiced: Boolean
+  source: COST_SOURCE
+  accountId: String # partner account of cost
+}
+
+input UpdateShipmentCostInput {
+  shipmentId: String!
+  index: Int
+  cost: ShipmentCostInput
+  invoiceCostIndex: Int
+}
+
+input ShipmentMassActionInput {
+  action: SHIPMENT_MASS_ACTIONS!
+  shipmentIds: [String]!
+}
+
+type ShipmentMassActionResponse {
+  success: [String]
+  errors: [String]
+  newIds: [String]
+}
+
+input DuplicateShipmentOptionsInput {
+  dateOffset: Int
+  keepDates: Boolean
+}
+
+input DuplicateShipmentInput {
+  shipmentId: String!
+  options: DuplicateShipmentOptionsInput
+}
+
+input ShipmentLocationInput {
+  type: SHIPMENT_LOCATION_TYPE!
+  id: String!
+}
+
+input ShipmentStopInput {
+  location: ShipmentLocationInput!
+  date: Date!
+}
+
+input CreateShipmentInput {
+  pickup: ShipmentStopInput!
+  delivery: ShipmentStopInput!
+  projectType: String
+  projectId: String
+}
+
+input ShipmentPartnerInput {
+  partnerId: String!
+  role: SHIPMENT_PARTNER_ROLES
+}
+
+input UpdateShipmentPartnerInput {
+  shipmentId: String!
+  partner: ShipmentPartnerInput!
+  remove: Boolean # if true -> will be removed
+}
+
+extend type Query {
+  getShipmentById(shipmentId: String!): Shipment
+  getShipment(shipmentId: String!): ShipmentAggr
+  getShipmentInfoHeader(shipmentId: String!): ShipmentAggr
+  getShipmentCostDetails(shipmentId: String!, invoiceId: String): ShipmentAggr
+  getShipmentDocuments(shipmentId: String!): ShipmentAggr
+  getShipmentPartners(shipmentId: String!): ShipmentAggr
+  getShipmentLinks(shipmentId: String!): ShipmentAggr
+  getShipmentInsights(shipmentId: String!): ShipmentInsights
+  getShipmentTrackingInfo(shipmentId: String!): ShipmentAggr
+  getShipmentChanges(shipmentId: String!): ShipmentAggr
+  getShipmentsForAddress(addressId: String!): [ShipmentAggr]
+  getRatings(type: String, shipment: Shipment): Ratings
+}
+
+extend type Mutation {
+  selectShipmentCarrier(
+    shipmentId: String!
+    carrierId: String # unsets if blank
+    priceListId: String # unset priceList if blank
+    priceListResult: JSON
+  ): ShipmentAggr
+  updateShipmentTags(shipmentId: String!, tags: [String]): Boolean
+  cancelShipment(shipmentId: String!): ShipmentAggr
+  updateShipment(shipmentId: String!, updates: JSON): ShipmentAggr
+  updateShipmentPartner(input: UpdateShipmentPartnerInput!): ShipmentAggr
+  resetShipmentCosts(shipmentId: String!): ShipmentAggr
+  approveDeclineShipmentCosts(input: ApproveDeclineInput!): ShipmentAggr
+  editShipmentCosts(input: UpdateShipmentCostInput!): ShipmentAggr
+  massActionShipment(
+    input: ShipmentMassActionInput!
+  ): ShipmentMassActionResponse
+  duplicateShipment(input: DuplicateShipmentInput!): String!
+  createShipment(input: CreateShipmentInput!): String
+}
