@@ -1,7 +1,7 @@
 import shippoApi from 'shippo';
-import dotenv from 'dotenv';
+import dotenv from 'dotenv'
 
-dotenv.config();
+dotenv.config()
 
 const postmenURL = process.env.NODE_ENV === "testing" ? process.env.POSTMEN_SANDBOX_URL : process.env.POSTMEN_PROD_URL;
 const shippoApiKey = process.env.NODE_ENV === "testing" ? process.env.SHIPPO_TEST_API_KEY : process.env.SHIPPO_PROD_API_KEY;
@@ -29,12 +29,12 @@ const shippoCredentialHeaders = {
         Authorization: `ShippoToken ${shippoApiKey}`
     }
 }
-
+ 
 export { 
     shippo,
     postmenURL,
     postmentApiKey,
     afterShipHeaders,
     postmentCredentialHeaders,
-    shippoCredentialHeaders
+    shippoCredentialHeaders,
 };

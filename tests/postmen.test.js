@@ -10,15 +10,11 @@ import {
 import dotenv from 'dotenv';
 import resolvers from '../resolvers/resolvers';
 
-dotenv.config();
+dotenv.config();  
 const { expect } = chai;
 
 describe('Testing postmen API', function() {
     describe('Get postmen rates', function() {
-      it('should error with empty obj', async () => {
-        const postmenFetchRates = await Shipment.getRates('postmen', {});
-        expect(postmenFetchRates.errors[0].message).to.be.equal("should have required property 'shipment'");
-      });
       it('should get all rates', async () => {
         const postmenRates = await resolvers.Query.ratings(null, {type: 'postmen', shipment: postmenCalculateRate});
         expect(postmenRates[0]).to.have.property('chargeWeight');
@@ -101,7 +97,7 @@ describe('Testing postmen API', function() {
       });
  
       it('should get postmen mainfest details if manifest id is provided', async () => {
-        await resolvers.Mutation.createManifest(null, { type: "postmen", manifest: postmenManifestReq }) 
+        const createdManifest = await resolvers.Mutation.createManifest(null, { type: "postmen", manifest: postmenManifestReq }) 
         const manifests = await resolvers.Query.manifests(null, { type: "postmen" });
         const manifest = await resolvers.Query.manifest(null, { type: "postmen", manifestId: manifests[0].id })       
         expect(manifest).to.have.property('id');

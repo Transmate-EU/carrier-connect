@@ -129,7 +129,7 @@ const postmenCalculateRate = {
 
 const postmenManifestReq = {
     shipperAccount: {
-        id: "6f43fe77-b056-45c3-bce4-9fec4040da0c"
+        id: "3ba41ff5-59a7-4ff0-8333-64a4375c7f21"
     }
 }
 

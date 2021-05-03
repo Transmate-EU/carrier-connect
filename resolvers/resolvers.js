@@ -1,5 +1,4 @@
 import Shipment from "../controller/shipment";
-import users from "../data/users";
 
 const resolvers = {
     Query: {

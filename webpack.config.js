@@ -1,4 +1,3 @@
-/* eslint-disable no-return-assign */
 const path = require("path");
 const webpack = require("webpack");
 const { BundleAnalyzerPlugin } = require("webpack-bundle-analyzer");
@@ -11,7 +10,7 @@ if (isProduction) {
 }
 
 const files = {
-  rest: "./functions/rest.js",
+  rest: "./functions/main.js",
   graphql: "./functions/graphql.js"
 };
 

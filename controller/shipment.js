@@ -1,5 +1,4 @@
 import axios from "axios";
-import dotenv from 'dotenv';
 import { 
     shippo,
     postmentCredentialHeaders,
@@ -21,8 +20,6 @@ import {
     shippoAddressCreationSchema,
     shippoCreateLabelSchema
 } from "../schemas/schemas";
-
-dotenv.config();
 
 class Shipment {
     static async createShipment(service, requestObject) {
@@ -314,7 +311,7 @@ class Shipment {
                     }
                 });
 
-                if (data.data.meta.code === 4104){
+                if (data.data.meta.code === 4104 && !data.data.data){
                     return {
                         data: {},
                         warnings: [],
@@ -1220,7 +1217,6 @@ class Shipment {
                 };
             }
         } catch (error) {
-            console.log("error", error);
             if (error.response){
                 return {
                     data: {},
@@ -1270,8 +1266,6 @@ class Shipment {
                         ...afterShipHeaders.headers
                     }
                 });
-
-                console.log("data", data.data);
 
                 if (data.data.meta.code === 4104){
                     return {
@@ -1344,7 +1338,6 @@ class Shipment {
                 };
             }
         } catch (error){
-            console.log("error", error.response.data);
             if (error.response){
                 return {
                     data: {},
