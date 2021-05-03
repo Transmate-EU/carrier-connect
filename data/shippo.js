@@ -1,4 +1,4 @@
-import { uuid } from 'uuidv4';
+import { v4 as uuidV4 } from "uuid";
 
 const shippoAddressFrom  = {
     name: "Shawn Ippotle",
@@ -52,13 +52,13 @@ const shippoAddress = {
 const shippoShipment = {
     address_from: shippoAddressFrom,
     address_to: shippoAddressTo,
-    parcels: shippoParcel,
+    parcels: [shippoParcel],
     async: true
 }
 
 const shippoCarrierAccount = {
     carrier:"fedex", 
-    account_id: uuid(), 
+    account_id: uuidV4(), 
     parameters:{ "meter": "789987" },
     active: true,
     test:true

@@ -51,7 +51,7 @@ describe('Testing goshippo API', function() {
 
   describe('Get goshippo tracking status', function() {
     it('should not get goshippo tracking status when not provided with a slug/tracking id', async () => {
-      const shippoTracking = await Shipment.getTracking('shippo',);
+      const shippoTracking = await Shipment.getTracking('shippo');
       expect(shippoTracking).to.have.property('errors');
       expect(shippoTracking.errors.length).to.have.to.be.greaterThan(0);
     });

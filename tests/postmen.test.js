@@ -1,13 +1,15 @@
 import chai from 'chai';
 import Shipment from '../controller/shipment';
-import { postmenAddress } from '../data/postmen';
+import { postmenAddress, postmenCalculateRate, postmenManifestReq } from '../data/postmen';
+import dotenv from 'dotenv';
 
+dotenv.config();
 const { expect } = chai;
 
 describe('Testing postmen API', function() {
     describe('Get postmen rates', function() {
       it('should get all rates', async () => {
-        const postmenFetchRates = await Shipment.getRates('postmen');
+        const postmenFetchRates = await Shipment.getRates('postmen', postmenCalculateRate);
         expect(postmenFetchRates.data).to.have.property('rates');
       });
     });
@@ -21,7 +23,7 @@ describe('Testing postmen API', function() {
   
     describe('Validate postmen address', function() {
       it('should validate provided address', async () => {
-        const postmenAddy = await Shipment.validateAddress('postmen', {address: postmenAddress}); 
+        const postmenAddy = await Shipment.validateAddress('postmen', { address: postmenAddress }); 
         expect(postmenAddy.data).to.have.property('meta');
         expect(postmenAddy.data.data).to.have.property('id');
         expect(postmenAddy.data.meta).to.have.property('code');
@@ -30,8 +32,7 @@ describe('Testing postmen API', function() {
       it('should not validate address if not provided a body', async () => {
         const postmenAddy = await Shipment.validateAddress('postmen'); 
         expect(postmenAddy).to.have.property('errors');
-        expect(postmenAddy.data).to.have.property('meta');
-        expect(postmenAddy.data.meta.message).to.have.equal('The request was invalid or cannot be otherwise served.');
+        expect(postmenAddy.errors.length).to.be.greaterThan(0);
       });
     });
   
@@ -42,8 +43,19 @@ describe('Testing postmen API', function() {
       });
 
       it('should get postmen mainfest details if manifest id is provided', async () => {
-        const postmenManifests = await Shipment.getAllManifests('postmen');
-        const postmenManifest = await Shipment.getManifest('postmen', postmenManifests.data.data.manifests[0].id);
+        let postmenManifest
+        
+        const manifests = await Shipment.getAllManifests('postmen');
+
+        if (manifests.data.data.manifests.length > 0) {
+          postmenManifest = await Shipment.getManifest('postmen', manifests.data.data.manifests[0].id);
+        }
+
+        if (manifests.data.data.manifests.length === 0){
+          const manifest = await Shipment.createManifest('postmen', postmenManifestReq);
+          postmenManifest = await Shipment.getManifest('postmen', manifest.data.data.id);
+        }
+        
         expect(postmenManifest.data).to.have.property('meta');
         expect(postmenManifest.data.data).to.have.property('id');
         expect(postmenManifest.data.meta).to.have.property('code');

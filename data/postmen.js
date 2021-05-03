@@ -1,11 +1,11 @@
-import { uuid } from "uuidv4"
+import { v4 as uuidV4 } from "uuid";
 
 const postmenShipperAccount = {
     slug: "dhl",
     description: "My Shipper Account",
     timezone: "Asia/Hong_Kong",
     credentials: {
-        account_number: uuid(),
+        account_number: uuidV4(),
         password: "mannnurru",
         site_id: "none"
     },
@@ -64,8 +64,81 @@ const postmanTrackingObj = {
     pickup_note: "Reach out to our staffs when you arrive our stores for shipment pickup"
 }
 
+const postmenCalculateRate = {
+    async: false,
+	shipper_accounts: [
+	    {
+	      "id": "6f43fe77-b056-45c3-bce4-9fec4040da0c"
+	    }
+	],
+    shipment: {
+        parcels: [
+            {
+            description: "Food XS",
+            box_type: "custom",
+            weight: {
+                value: 2,
+                unit: "kg"
+            },
+            dimension: {
+                width: 20,
+                height: 40,
+                depth: 40,
+                unit: "cm"
+            },
+            items: [
+                {
+                description: "Food Bar",
+                origin_country: "JPN",
+                quantity: 2,
+                price: {
+                    "amount": 3,
+                    "currency": "JPY"
+                },
+                weight: {
+                    "value": 0.6,
+                    "unit": "kg"
+                },
+                sku: "PS4-2015"
+                }
+            ]
+            }
+        ],
+        ship_from: {
+            contact_name: "Yin Ting Wong",
+            street1: "Flat A, 29/F, Block 17\nLaguna Verde",
+            city: "Hung Hom",
+            state: "Kowloon",
+            country: "HKG",
+            phone: "96679797",
+            email: "test@test.test",
+            type: "residential"
+        },
+        ship_to: {
+            contact_name: "Mike Carunchia",
+            street1: "9504 W Smith ST",
+            city: "Yorktown",
+            state: "Indiana",
+            postal_code: "47396",
+            country: "USA",
+            phone: "7657168649",
+            email: "test@test.test",
+            type: "residential"
+        }
+    }
+}
+
+const postmenManifestReq = {
+    async: false,
+    shipper_account: {
+        id: "3ba41ff5-59a7-4ff0-8333-64a4375c7f21"
+    }
+}
+
 export {
     postmenAddress,
+    postmenManifestReq,
     postmanTrackingObj,
+    postmenCalculateRate,
     postmenShipperAccount
 }
