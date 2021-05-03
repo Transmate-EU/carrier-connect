@@ -5,11 +5,11 @@ import resolvers from '../resolvers/resolvers';
 
 const { expect } = chai;
 
-describe('Testing goshippo API', function() {
+describe('Testing goshippo Resolvers', function() {
   describe('Get goshippo rates', function() {
     it('should create shipment and get rates', async () => {
       const shipmentObj = await resolvers.Mutation.createShipment(null, { type: "shippo", shipment: shippoShipmentTesting });
-      const shippoRates = await resolvers.Query.ratings(null, {type: 'shippo', shipment: { shipmentId: shipmentObj.id }});
+      const shippoRates = await resolvers.Query.rates(null, {type: 'shippo', shipment: { shipmentId: shipmentObj.id }});
       expect(shipmentObj).to.have.property('id');
       expect(shipmentObj).to.have.property('createdAt');
       expect(shipmentObj).to.have.property('rates');
@@ -20,7 +20,7 @@ describe('Testing goshippo API', function() {
     });
     it('should not get rates when a shipment id does not exist', async () => {
       try {
-        await resolvers.Query.ratings(null, {type: 'shippo', shipment: { shipmentId: "898999999989898980ok" }});
+        await resolvers.Query.rates(null, {type: 'shippo', shipment: { shipmentId: "898999999989898980ok" }});
       } catch (error){
         const errorInArray = JSON.parse(error.message);
         expect(error).to.have.property('message');
@@ -29,7 +29,7 @@ describe('Testing goshippo API', function() {
     });
     it('should not get rates when a shipment is not provided', async () => {
       try {
-        await resolvers.Query.ratings(null, {type: 'shippo', shipment: { shipmentId: "" }});
+        await resolvers.Query.rates(null, {type: 'shippo', shipment: { shipmentId: "" }});
       } catch (error){
         const errorInArray = JSON.parse(error.message);
         expect(error).to.have.property('message');

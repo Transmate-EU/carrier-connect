@@ -9,8 +9,8 @@ import {
 
 const { expect } = chai;
 
-describe("Test postmen API", function () {
-    describe('should test(labels, ratings, manifest and shipments)', function() {
+describe("Test shippo API", function () {
+    describe('should test(labels, rates, manifest and shipments)', function() {
         let shippoShipment;
         let shippoLabel;
         let address;
@@ -24,7 +24,7 @@ describe("Test postmen API", function () {
                     shipment: shippoShipmentTesting
                 }
             });
-
+        
             shippoShipment = response.body.result;
             expect(shippoShipment).to.have.property('id');
             expect(shippoShipment).to.have.property('status');
@@ -35,7 +35,7 @@ describe("Test postmen API", function () {
         it('should calculate rate', async () => {
             const response = await api.main({
                 ...env,
-                type: 'ratings', 
+                type: 'rates', 
                 request: {
                     type: 'shippo',
                     shipment: { shipmentId: shippoShipment.id }
@@ -48,7 +48,7 @@ describe("Test postmen API", function () {
             expect(response.statusCode).to.be.equal(200);
         });
 
-        it('should create label', async () => {
+        it('should create label', async () => {  
             const response = await api.main({
                 ...env,
                 type: 'createLabel', 

@@ -6,13 +6,11 @@ import {
     postmenCreateLabel,
     postmenManifestReq,
 } from '../data/postmen'
-import dotenv from 'dotenv'
 
-dotenv.config()
 const { expect } = chai;
 
 describe("Test postmen API", function () {
-    describe('should test(labels, ratings, manifest and shipments)', function() {
+    describe('should test(labels, rates, manifest and shipments)', function() {
         let postmenLabel;
         let postmenLabels;
         let postmenManifest;
@@ -69,7 +67,7 @@ describe("Test postmen API", function () {
         it ('should calculate rates given a shipment', async () => {
             const response = await api.main({
                 ...env,
-                type: 'ratings', 
+                type: 'rates', 
                 request: {
                     type: 'postmen',
                     shipment: postmenCalculateRate

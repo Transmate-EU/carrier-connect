@@ -42,4 +42,8 @@ exports.setEnv = (params = {}) => {
     if (params.AFTER_SHIP_URL || process.env.AFTER_SHIP_URL){
         process.env.AFTER_SHIP_URL = params.AFTER_SHIP_URL || process.env.AFTER_SHIP_URL;
     }
+
+    if (params.SHIPPO_TEST_SHIPPER_ACCOUNT|| process.env.SHIPPO_TEST_SHIPPER_ACCOUNT){
+        process.env.SHIPPO_TEST_SHIPPER_ACCOUNT= params.SHIPPO_TEST_SHIPPER_ACCOUNT || process.env.SHIPPO_TEST_SHIPPER_ACCOUNT;
+    }
 }
