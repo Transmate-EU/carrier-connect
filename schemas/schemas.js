@@ -291,27 +291,27 @@ const shippoCreateShipmentSchema = {
         address_from: { 
             type: "object",
             properties: {
-                contact_name: {type: "string"},
+                name: {type: "string"},
                 street1: {type: "string"},
                 city: {type: "string"},
                 state: {type: "string"},
                 zip: {type: "string"},
                 country: {type: "string"}
             },
-            required: ["contact_name", "street1", "city", "state", "country", "zip"],
+            required: ["name", "street1", "city", "state", "country", "zip"],
             additionalProperties: true
         },
         address_to: { 
             type: "object",
             properties: {
-                contact_name: {type: "string"},
+                name: {type: "string"},
                 street1: {type: "string"},
                 city: {type: "string"},
                 state: {type: "string"},
                 zip: {type: "string"},
                 country: {type: "string"}
             },
-            required: ["contact_name", "street1", "city", "state", "country", "zip"],
+            required: ["name", "street1", "city", "state", "country", "zip"],
             additionalProperties: true
         },
         parcels: { type: "array" }
@@ -457,43 +457,10 @@ const shippoAddressCreationSchema = {
 const shippoCreateLabelSchema = {
     type: "object",
     properties: {
-        async: { type: "boolean" },
-        shipment: { 
-            type: "object",
-            properties: {
-                address_from: { 
-                    type: "object",
-                    properties: {
-                        name: {type: "string"},
-                        street1: {type: "string"},
-                        city: {type: "string"},
-                        state: {type: "string"},
-                        zip: {type: "string"},
-                        country: {type: "string"}
-                    },
-                    required: ["name", "street1", "city", "state", "country", "zip"],
-                    additionalProperties: true
-                },
-                address_to: { 
-                    type: "object",
-                    properties: {
-                        name: {type: "string"},
-                        street1: {type: "string"},
-                        city: {type: "string"},
-                        state: {type: "string"},
-                        zip: {type: "string"},
-                        country: {type: "string"}
-                    },
-                    required: ["name", "street1", "city", "state", "country", "zip"],
-                    additionalProperties: true
-                },
-                parcels: { type: "array" }
-            }
-        },
-        servicelevel_token: { type: "string" },
-        carrier_account: { type: "string" }
+        label_file_type: { type: "string" },
+        rate: { type: "string" }
     },
-    required: ["shipment", "carrier_account", "servicelevel_token"],
+    required: ["rate"],
     additionalProperties: false
 }
 

@@ -42,7 +42,7 @@ class Shipment {
                         }    
                     }),
                     address_from: {
-                        contact_name: requestObject.shipFrom.contactName,
+                        name: requestObject.shipFrom.contactName,
                         street1: requestObject.shipFrom.street1,
                         city: requestObject.shipFrom.city,
                         state: requestObject.shipFrom.state,
@@ -50,10 +50,10 @@ class Shipment {
                         country: requestObject.shipFrom.country,
                         phone: requestObject.shipFrom.phone,
                         email: requestObject.shipFrom.email,
-                        company_name: requestObject.shipFrom.companyName,
+                        company: requestObject.shipFrom.companyName,
                     },
                     address_to: {
-                        contact_name: requestObject.shipTo.contactName,
+                        name: requestObject.shipTo.contactName,
                         street1: requestObject.shipTo.street1,
                         city: requestObject.shipTo.city,
                         state: requestObject.shipTo.state,
@@ -61,7 +61,7 @@ class Shipment {
                         country: requestObject.shipTo.country,
                         phone: requestObject.shipTo.phone,
                         email: requestObject.shipTo.email,
-                        company_name: requestObject.shipFrom.companyName,
+                        company: requestObject.shipFrom.companyName,
                     }
                 }
                 
@@ -723,42 +723,8 @@ class Shipment {
         try {    
             if (service === 'shippo'){
                 const labelFormatedObj = {
-                    shipment: {
-                        parcels: label.shipment.parcels.map((parcel) => {     
-                            return { 
-                                width: parcel.width,
-                                length: parcel.length,
-                                height: parcel.height,
-                                mass_unit: parcel.massUnit ?  parcel.massUnit :  parcel.weight.unit,
-                                distance_unit: parcel.distanceUnit,
-                                weight: parcel.weight.value.toString(),     
-                            }    
-                        }),
-                        address_from: {
-                            name: label.shipment.shipFrom.contactName,
-                            street1: label.shipment.shipFrom.street1,
-                            city: label.shipment.shipFrom.city,
-                            state: label.shipment.shipFrom.state,
-                            zip: label.shipment.shipFrom.zip,
-                            country: label.shipment.shipFrom.country,
-                            phone: label.shipment.shipFrom.phone,
-                            email: label.shipment.shipFrom.email,
-                            company_name: label.shipment.shipFrom.companyName,
-                        },
-                        address_to: {
-                            name: label.shipment.shipTo.contactName,
-                            street1: label.shipment.shipTo.street1,
-                            city: label.shipment.shipTo.city,
-                            state: label.shipment.shipTo.state,
-                            zip: label.shipment.shipTo.zip,
-                            country: label.shipment.shipTo.country,
-                            phone: label.shipment.shipTo.phone,
-                            email: label.shipment.shipTo.email,
-                            company_name: label.shipment.shipFrom.companyName,
-                        },
-                    },
-                    carrier_account: label.shipperAccount.id,
-                    servicelevel_token: label.serviceToken
+                    rate: label.rate,
+                    label_file_type: "PDF"
                 }
                 const errors = validateSchema(labelFormatedObj, shippoCreateLabelSchema);
                 
@@ -770,7 +736,17 @@ class Shipment {
                     }
                 }
 
-                const resultObject = await shippo.transaction.create(labelFormatedObj);
+                const data = await axios({ 
+                    method: 'post',
+                    url: `${process.env.SHIPPO_URL}/transactions`,
+                    data: labelFormatedObj,
+                    headers: { 
+                        ...shippoCredentialHeaders.headers
+                    }
+                });
+
+                const resultObject = data.data;
+
                 return {
                     data: {
                         id: resultObject.object_id,
@@ -779,22 +755,10 @@ class Shipment {
                         createdAt: resultObject.object_created,
                         updatedAt: resultObject.object_updated,
                         rate: {
-                            id: resultObject.rate.id,
-                            totalCharge: {
-                                amount: resultObject.rate.amount,
-                                currency: resultObject.rate.currency
-                            },
-                            shipperAccount: {
-                                id: resultObject.rate.carrier_account
-                            },
-                            localTotalCharge: {
-                                amountLocal: resultObject.rate.amount_local,
-                                currencyLocal: resultObject.rate.currency_local
-                            },
-                            serviceName: resultObject.rate.servicelevel_name,
-                            serviceToken: resultObject.rate.servicelevel_token
+                            id: resultObject.rate,
                         },
                         trackingStatus: resultObject.tracking_status,
+                        trackingNumber: resultObject.tracking_number
                     },
                     warnings: [],
                     errors: []
