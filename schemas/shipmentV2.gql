@@ -1,0 +1,511 @@
+type User {
+    id: ID!
+    name: String!
+}
+
+input AddressInput {
+    id: String
+    isComplete: Boolean
+    contactName: String
+    street1: String
+    city: String
+    state: String
+    country: String
+    phone: String
+    email: String
+    type: String
+    postalCode: String
+    street2: String
+    street3: String
+    companyName: String
+    fax: String
+    taxId: String
+    zip: String
+    isResidential: Boolean
+    metadata: String
+}
+
+type AddressType {
+    contactName: String
+    street1: String
+    city: String
+    state: String
+    country: String
+    phone: String
+    email: String
+    type: String
+    postalCode: String
+    street2: String
+    street3: String
+    companyName: String
+    fax: String
+    zip: String
+    isResidential: String
+    metadata: String
+}
+
+type AddressOutput {
+    isComplete: Boolean
+    contactName: String
+    street1: String
+    city: String
+    state: String
+    country: String
+    phone: String
+    email: String
+    type: String
+    postalCode: String
+    street2: String
+    street3: String
+    companyName: String
+    fax: String
+    zip: String
+    isResidential: String
+    metadata: String
+    id: String
+    objectOwner: String
+    createdAt: String
+    updatedAt: String
+}
+
+input WeightInput {
+    value: Float
+	unit: String
+}
+
+type WeightType {
+    value: Float
+	unit: String
+}
+
+input DimensionInput {
+    width: Float
+    height: Float
+    depth: Float
+    unit: String
+}
+
+type DimensionType {
+    width: Float
+    height: Float
+    depth: Float
+    unit: String
+}
+
+input Price {
+    amount: Float
+    currency: String
+}
+
+type PriceType {
+    amount: Float
+    currency: String
+}
+
+input ItemInput {
+    description: String
+    originCountry: String
+    quantity: Float
+    sku: String
+    weight: WeightInput
+    price: Price
+}
+
+type ItemType {
+    description: String
+    originCountry: String
+    quantity: Float
+    sku: String
+    weight: WeightType
+    price: PriceType
+}
+
+input ParcelInput {
+    id: String
+    length: String
+    distanceUnit: String
+    description: String
+    boxType: String
+    weight: WeightInput
+    width: String
+    height: String
+    massUnit: String
+    dimension: DimensionInput
+    items: [ItemInput]
+}
+
+type ParcelType {
+    length: String
+    distanceUnit: String
+    description: String
+    boxType: String
+    weight: WeightType
+    height: String
+    massUnit: String
+    dimension: DimensionType
+    items: [ItemType]
+}
+
+input ShipperAccount {
+    id: String
+}
+
+type ShipperAccountType {
+    id: String
+    slug: String
+    description: String
+}
+
+type ChargeType {
+    amount: Float
+	currency: String
+}
+
+type LocalChargeType {
+    amountLocal: String
+    currencyLocal: String
+}
+
+type DetailedChargesType {
+    type: String
+    charge: ChargeType
+}
+
+type RateOutput {
+    id: String
+    status: String
+    totalCharge: ChargeType
+    chargeWeight: WeightType
+    localTotalCharge: LocalChargeType
+    shipperAccount: ShipperAccountType
+    serviceType: String
+    serviceName: String
+    serviceToken: String
+    pickupDeadline: String
+    objectOwner: String
+    bookingCutOff: String
+    durationTerms: String
+    deliveryDate: String
+    transitTime: Int,
+    createdAt: String
+    updatedAt: String
+    detailedCharges: [DetailedChargesType]
+}
+
+input CalculateRate {
+    shipmentId: String
+    shipment: ShipmentInput
+    isDocument: Boolean,
+    shipperAccounts: [ShipperAccount]
+}
+
+input ShipmentInput {
+    parcels: [ParcelInput!]!
+    shipFrom: AddressInput!
+    shipTo: AddressInput!
+}
+
+type FileLabel {
+    paper_size: String
+    url: String
+    file_type: String
+}
+
+type FileInvoice {
+    paper_size: String
+    url: String
+    file_type: String
+}
+
+type FileType {
+    label: FileLabel
+    invoice: FileInvoice
+    customs_declaration: String
+	manifest: String
+}
+
+type Label {
+    id: String
+    status: String
+    tracking_numbers: [String]
+    files: FileType
+    rate: RateOutput
+}
+
+type MessageType {
+    source: String
+    code: String
+    text: String
+}
+
+type ValidationResultsType {
+    isValid: Boolean
+    messages: [MessageType]
+}
+
+type AddressValidation {
+    id: String
+    isComplete: Boolean
+    contactName: String
+    street1: String
+    city: String
+    state: String
+    country: String
+    phone: String
+    email: String
+    type: String
+    postalCode: String
+    street2: String
+    street3: String
+    companyName: String
+    fax: String
+    taxId: String
+    zip: String
+    isResidential: Boolean
+    metadata: String
+    status: String
+    createdAt: String
+    updatedAt: String
+    objectOwner: String
+    recommendedAddress: AddressType
+    validationResults: ValidationResultsType
+}
+
+type ManifestLabel {
+    id: String
+    manifested: Boolean
+}
+
+type Manifest {
+    manifest: ManifestType
+}
+
+type ManifestType {
+    id: String
+    status: String
+    labels: [ManifestLabel]
+    files: FileType
+    createdAt: String
+    shipFromId: String
+    shipmentDate: String
+    transactions: [String]
+    shipperAccount: ShipperAccountType
+    updatedAt: String
+    documents: [String]
+}
+
+type LabelTypeCanceled {
+    id: String
+}
+
+type CanceledLabel {
+    id: String
+    status: String
+    label: LabelTypeCanceled
+    objectOwner: String
+    transaction: String
+    createdAt: String
+    updatedAt: String
+}
+
+input TrackingInput {
+    trackingNumber: String
+    trackingSlug: String
+}
+
+input CustomFieldsInput {
+    productName: String
+    productPrice: String
+}
+
+input CreateTrackingInput {
+    trackingNumber: String
+    slug: String
+    title: String
+    orderId: String
+    orderIdPath: String
+    language: String
+    pickupLocation: String
+    pickupNote: String
+    customFields: CustomFieldsInput
+    deliveryType: String
+    orderPromisedDeliveryDate: String
+    trackingOriginCountry: String
+    trackingDestinationCountry: String
+    trackingKey: String
+    trackingPostalCode: String
+    trackingShipDate: String
+    trackingState: String
+    note: String
+    destinationCountryIso3: String
+    customerName: String
+    smses: [String]
+    emails: [String]
+    ios: [String]
+    android: [String]
+}
+
+type TrackingStatusType {
+    id: String
+    status: String
+    location: AddressType
+    statusDate: String
+    statusDetails: String
+    createdAt: String
+    updatedAt: String
+}
+
+type TrackingOutput {
+    id: String
+    slug: String
+    serviceType: String
+    serviceToken: String
+    serviceName: String
+    createdAt: String
+    updatedAt: String
+    lastIpdatedAt: String
+    trackingNumber: String
+    active: Boolean
+    android: [String]
+    customFields: String
+    customerName: String
+    deliveryTime: Int
+    destinationCountryIso3: String
+    courierDestinationCountryIso3: String
+    emails: [String]
+    expectedDelivery: String
+    ios: [String]
+    note: String
+    orderId: String
+    orderIdPath: String
+    originCountryIso3: String
+    shipmentPackageCount: Int
+    shipmentPickupDate: String
+    shipmentDeliveryDate: String
+    shipmentType: String
+    shipmentWeight: Int
+    shipmentWeightUnit: String
+    signedBy: String
+    smses: [String]
+    source: String
+    tag: String
+    subtag: String
+    subtagMessage: String
+    title: String
+    trackedCount: Int
+    lastMileTrackingSupported: String
+    language: String
+    uniqueToken: String
+    checkpoints: [String]
+    subscribedSmses: [String]
+    subscribedEmails: [String]
+    returnToSender: Boolean
+    trackingAccountNumber: String
+    trackingOriginCountry: String
+    trackingDestinationCountry: String
+    trackingKey: String
+    trackingPostalCode: String
+    trackingShipDate: String
+    trackingState: String
+    orderPromisedDeliveryDate: String
+    deliveryType: String
+    pickupLocation: String
+    pickupNote: String
+    courierTrackingLink: String
+    courierRedirectLink: String
+    firstAttemptedAt: String
+    shipFrom: AddressType
+    shipTo: AddressType
+    trackingStatus: TrackingStatusType
+    trackingHistory: [TrackingStatusType]
+    transaction: String
+}
+
+
+input BillingInput {
+    paidBy: String
+}
+
+input CustomInput {
+    billing: BillingInput
+    termsOfTrade: String
+    purpose: String
+}
+
+input ManifestCreationInput {
+    shipperAccount: ShipperAccount
+    shipFromId: String
+    transactions: [String]
+    shipmentDate: String
+}
+
+input InvoiceInput {
+    date: String
+    number: String
+}
+
+input LabelInput {
+    shipperAccount: ShipperAccount
+    paperSize: String
+    returnShipment: Boolean
+    serviceToken: String
+    labelFileType: String
+    isDocument: Boolean
+    serviceType: String
+    references: [String]
+    shipment: ShipmentInput
+    billing: BillingInput
+    customs: CustomInput
+    invoice: InvoiceInput
+    rate: String
+}
+
+type LabelOutput {
+    id: String
+    objectOwner: String
+    status: String
+    labelUrl: String
+    qrCodeUrl: String
+    trackingStatus: String
+    trackingNumbers: [String]
+    files: [FileType]
+    rate: RateOutput
+    createdAt: String
+    updatedAt: String
+}
+
+type ShipmentOutput {
+    id: String
+    createdAt: String
+    updatedAt: String
+    objectOwner: String
+    addressReturn: AddressType
+    carrierAccounts: [String]
+    messages: [String]
+    status: String
+    shipmentDate: String
+    shipFrom: AddressType
+    parcels: ParcelType
+    shipTo: AddressType
+    rates: [RateOutput]
+}
+
+type Query {
+    ratings(type: String!, shipment: CalculateRate!): [RateOutput!]!
+    labels(type: String!): [LabelOutput!]!,
+    manifest(type: String!, manifestId: String!): ManifestType!
+    trackings(type: String!): [TrackingOutput!]!
+    trackingStatus(type: String!, tracking: TrackingInput!): TrackingOutput!
+    manifests(type: String!): [ManifestType!]!  
+    shipments(type: String!): [ShipmentOutput]! 
+}
+
+type Mutation {
+    validateAddress(type: String!, address: AddressInput!): AddressValidation!,
+    createManifest(type: String!, manifest: ManifestCreationInput!): ManifestType!
+    cancelOrDeleteLabel(type: String!, labelId: String!): CanceledLabel!
+    createTracking(type: String!, tracking: CreateTrackingInput!): TrackingOutput!
+    createLabel(type: String!, label: LabelInput!): LabelOutput!
+    createShipment(type: String!, shipment: ShipmentInput!): ShipmentOutput!
+    createAddress(type: String!, address: AddressInput!): AddressOutput!
+}

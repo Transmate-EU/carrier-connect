@@ -29,8 +29,8 @@ const postmenAddressReqSchema = {
                 phone: {type: "string"},
                 email: {type: "string"}
             },
-            required: ["contact_name", "street1", "city", "state", "postal_code", "country", "type", "phone", "email"],
-            additionalProperties: false
+            required: ["street1", "city", "state", "country"],
+            additionalProperties: true
         }  
     },
     required: ["address"],
@@ -86,15 +86,32 @@ const postmenCreateLabelSchema = {
     properties: {
         service_type: { type: "string" },
         return_shipment: { type: "boolean" },
-        is_document: { type: "string" },
+        is_document: { type: "boolean" },
         references: { type: "array" },
         shipper_account: {
             type: "object",
             properties: {
-                id: "string"
+                id: {type: "string" }
             },
             required: ["id"],
-            additionalProperties: false,
+            additionalProperties: true
+        },
+        billing: {
+            type: "object",
+            properties: {
+                paid_by: {type: "string"}
+            },
+            required: ['paid_by'],
+            additionalProperties: true,
+        },
+        invoice: {
+            type: "object",
+            properties: {
+                date: {type: "string"},
+                number: {type: "string"}
+            },
+            required: ['date', 'number'],
+            additionalProperties: false
         },
         customs: {
             type: "object",
@@ -109,12 +126,12 @@ const postmenCreateLabelSchema = {
                 purpose: { type: "string" },
                 
             },
-            required: ["billing", "terms_of_trade", "purpose"],
-            additionalProperties: false,
+            required: ["billing", "purpose"],
+            additionalProperties: true,
         },
     },
-    required: ["service_type", "return_shipment", "references", "is_document", "customs"],
-    additionalProperties: false,
+    required: ["service_type", "is_document", "shipper_account"],
+    additionalProperties: true,
 }
 
 
@@ -177,10 +194,10 @@ const postmenManifestReqSchema = {
 const postmenGetTrackingSchema = {
     type: "object",
     properties: {
-        trackingId: { type: "string" },
+        trackingNumber: { type: "string" },
         trackingSlug: { type: "string" }
     },
-    required: ["trackingId", "trackingSlug"],
+    required: ["trackingNumber", "trackingSlug"],
     additionalProperties: false,
 }
 
@@ -204,8 +221,8 @@ const postmenCalculateSchema = {
                         email: { type: "string" },
                         type: { type: "string" }
                     },
-                    required: ["contact_name", "street1", "city", "state", "country", "phone", "type"],
-                    additionalProperties: false
+                    required: ["contact_name", "street1", "city", "country", "phone"],
+                    additionalProperties: true
                 },
                 ship_to: {
                     type: "object",
@@ -227,10 +244,8 @@ const postmenCalculateSchema = {
                         "state",
                         "country",
                         "phone",
-                        "email",
-                        "type"
                     ],
-                    additionalProperties: false
+                    additionalProperties: true
                 }, 
             },
             required: ["ship_from", "ship_to", "parcels"],
@@ -276,31 +291,33 @@ const shippoCreateShipmentSchema = {
         address_from: { 
             type: "object",
             properties: {
-                name: {type: "string"},
+                contact_name: {type: "string"},
                 street1: {type: "string"},
                 city: {type: "string"},
                 state: {type: "string"},
                 zip: {type: "string"},
                 country: {type: "string"}
             },
-            required: ["name", "street1", "city", "state", "country", "zip"],
-            additionalProperties: false
+            required: ["contact_name", "street1", "city", "state", "country", "zip"],
+            additionalProperties: true
         },
         address_to: { 
             type: "object",
             properties: {
-                name: {type: "string"},
+                contact_name: {type: "string"},
                 street1: {type: "string"},
                 city: {type: "string"},
                 state: {type: "string"},
                 zip: {type: "string"},
                 country: {type: "string"}
             },
-            required: ["name", "street1", "city", "state", "country", "zip"],
-            additionalProperties: false
+            required: ["contact_name", "street1", "city", "state", "country", "zip"],
+            additionalProperties: true
         },
         parcels: { type: "array" }
-    }
+    },
+    required: ["parcels", "address_to", "address_from"],
+    additionalProperties: false
 }
 
 const shippoGetRatesSchema = {
@@ -413,11 +430,11 @@ const shippoCreateManifestSchema = {
     type: "object",
     properties: {
         carrier_account: {type: "string"},
-        shipment_date: {type: "shipment_date"},
+        shipment_date: {type: "string"},
         transactions: { type: "array" }
     },
     required: ["carrier_account", "shipment_date"],
-    additionalProperties: false
+    additionalProperties: true
 }
 
 const shippoAddressCreationSchema = {
@@ -433,19 +450,50 @@ const shippoAddressCreationSchema = {
         phone: {type: "string"},
         email: {type: "string"},
     },
-    required: ["name", "company", "street1", "city", "state", "zip", "country", "phone", "email"],
-    additionalProperties: false
+    required: ["street1", "city", "state", "zip", "country"],
+    additionalProperties: true
 }
 
 const shippoCreateLabelSchema = {
     type: "object",
     properties: {
         async: { type: "boolean" },
-        rate: { type: "string" },
-        metadata: { type: "string" },
-        label_file_type: { type: "string" }
+        shipment: { 
+            type: "object",
+            properties: {
+                address_from: { 
+                    type: "object",
+                    properties: {
+                        name: {type: "string"},
+                        street1: {type: "string"},
+                        city: {type: "string"},
+                        state: {type: "string"},
+                        zip: {type: "string"},
+                        country: {type: "string"}
+                    },
+                    required: ["name", "street1", "city", "state", "country", "zip"],
+                    additionalProperties: true
+                },
+                address_to: { 
+                    type: "object",
+                    properties: {
+                        name: {type: "string"},
+                        street1: {type: "string"},
+                        city: {type: "string"},
+                        state: {type: "string"},
+                        zip: {type: "string"},
+                        country: {type: "string"}
+                    },
+                    required: ["name", "street1", "city", "state", "country", "zip"],
+                    additionalProperties: true
+                },
+                parcels: { type: "array" }
+            }
+        },
+        servicelevel_token: { type: "string" },
+        carrier_account: { type: "string" }
     },
-    required: ["rate"],
+    required: ["shipment", "carrier_account", "servicelevel_token"],
     additionalProperties: false
 }
 

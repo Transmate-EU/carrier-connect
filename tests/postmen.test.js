@@ -1,7 +1,14 @@
 import chai from 'chai';
 import Shipment from '../controller/shipment';
-import { postmenAddress, postmenCalculateRate, postmenManifestReq } from '../data/postmen';
+import { 
+    postmenAddress,
+    postmenCalculateRate,
+    postmenCreateLabel,
+    postmenManifestReq,
+    postmenTracking
+} from '../data/postmen';
 import dotenv from 'dotenv';
+import resolvers from '../resolvers/resolvers';
 
 dotenv.config();
 const { expect } = chai;
@@ -13,82 +20,127 @@ describe('Testing postmen API', function() {
         expect(postmenFetchRates.errors[0].message).to.be.equal("should have required property 'shipment'");
       });
       it('should get all rates', async () => {
-        const postmenFetchRates = await Shipment.getRates('postmen', postmenCalculateRate);
-        expect(postmenFetchRates.data).to.have.property('rates');
+        const postmenRates = await resolvers.Query.ratings(null, {type: 'postmen', shipment: postmenCalculateRate});
+        expect(postmenRates[0]).to.have.property('chargeWeight');
+        expect(postmenRates[0]).to.have.property('totalCharge');
+        expect(postmenRates[0].totalCharge).to.have.property('amount');
+        expect(postmenRates[0].totalCharge).to.have.property('currency');
+        expect(postmenRates[0].totalCharge.currency).to.be.equal('USD');
+      });
+      it('should not get all rates when not provided shipment', async () => {
+        try {
+            await resolvers.Query.ratings(null, {type: 'postmen', shipment: {}});
+        } catch (error){
+            const errorInArray = JSON.parse(error.message);
+            expect(errorInArray.length).to.have.to.be.greaterThan(0);
+            expect(errorInArray[0]).to.be.equal("Cannot read property 'shipFrom' of undefined");
+        }  
+      });
+    });
+
+    describe('Get postmen labels', function() {
+      it('should create label', async () => {
+        const postmenLabel = await resolvers.Mutation.createLabel(null, {type: 'postmen', label: postmenCreateLabel});
+        expect(postmenLabel).to.have.property('id');
+        expect(postmenLabel).to.have.property('status');
+        expect(postmenLabel).to.have.property('trackingNumbers');
+        expect(postmenLabel.status).to.be.equal('created');
+      });
+      it('should not create label if shipFrom is not provided', async () => {
+        try {
+            await resolvers.Mutation.createLabel(null, {type: 'postmen', label: {}});
+        } catch (error){
+            const errorInArray = JSON.parse(error.message);
+            expect(errorInArray.length).to.be.greaterThan(0);
+            expect(errorInArray[0]).to.be.equal("Cannot read property 'shipFrom' of undefined");
+        }
       });
     });
   
     describe('Get postmen labels', function() {
       it('should get labels', async () => {
-        const postmenFetchLabels = await Shipment.getLabels('postmen');
-        expect(postmenFetchLabels.data).to.have.property('labels');
+        const postmenLabels = await resolvers.Query.labels(null, {type: 'postmen'});
+        expect(postmenLabels[0]).to.have.property('id');
+        expect(postmenLabels[0]).to.have.property('status');
+        expect(postmenLabels[0]).to.have.property('labelUrl');
+        expect(postmenLabels[0]).to.have.property('rate');
+        expect(postmenLabels[0].rate).to.have.property('totalCharge');
       });
     });
   
     describe('Validate postmen address', function() {
       it('should validate provided address', async () => {
-        const postmenAddy = await Shipment.validateAddress('postmen', { address: postmenAddress }); 
-        expect(postmenAddy.data).to.have.property('meta');
-        expect(postmenAddy.data.data).to.have.property('id');
-        expect(postmenAddy.data.meta).to.have.property('code');
+        const postmenAddy = await resolvers.Mutation.validateAddress(null, {type: 'postmen', address: postmenAddress });
+        expect(postmenAddy).to.have.property('id');
+        expect(postmenAddy).to.have.property('status');
+        expect(postmenAddy.status).to.have.be.equal('valid');
+        expect(postmenAddy).to.have.property('createdAt');
+        expect(postmenAddy).to.have.property('updatedAt');
       });
 
       it('should not validate address if not provided a body', async () => {
-        const postmenAddy = await Shipment.validateAddress('postmen'); 
-        expect(postmenAddy).to.have.property('errors');
-        expect(postmenAddy.errors.length).to.be.greaterThan(0);
+        try {
+            await resolvers.Mutation.validateAddress(null, {type: 'postmen', address: {}});
+        } catch (error){
+            const errorInArray = JSON.parse(error.message);
+            expect(errorInArray.length).to.be.greaterThan(0);
+            expect(errorInArray[0].message).to.be.equal("should have required property 'street1'");
+        }
       });
     });
   
     describe('Get postmen manifest', function() {
       it('should not get postmen mainfest details if not provided manifest', async () => {
-        const postmenManifest = await Shipment.getManifest('postmen');
-        expect(postmenManifest).to.have.property('errors');
+        try {
+            await resolvers.Query.manifest(null, { type: "postmen", manifestId: "jiji" }) 
+        } catch (error){
+            const errorInArray = JSON.parse(error.message);
+            expect(errorInArray.length).to.be.greaterThan(0);
+            expect(errorInArray[0]).to.be.equal("Item does not exist.");
+        }
       });
-
+ 
       it('should get postmen mainfest details if manifest id is provided', async () => {
-        let postmenManifest
-        
-        const manifests = await Shipment.getAllManifests('postmen');
-
-        if (manifests.data.data.manifests.length > 0) {
-          postmenManifest = await Shipment.getManifest('postmen', manifests.data.data.manifests[0].id);
-        }
-
-        if (manifests.data.data.manifests.length === 0){
-          const manifest = await Shipment.createManifest('postmen', postmenManifestReq);
-          postmenManifest = await Shipment.getManifest('postmen', manifest.data.data.id);
-        }
-        
-        expect(postmenManifest.data).to.have.property('meta');
-        expect(postmenManifest.data.data).to.have.property('id');
-        expect(postmenManifest.data.meta).to.have.property('code');
+        await resolvers.Mutation.createManifest(null, { type: "postmen", manifest: postmenManifestReq }) 
+        const manifests = await resolvers.Query.manifests(null, { type: "postmen" });
+        const manifest = await resolvers.Query.manifest(null, { type: "postmen", manifestId: manifests[0].id })       
+        expect(manifest).to.have.property('id');
+        expect(manifest).to.have.property('status');
       });
     });
 
     describe('Cancel/delete postmen label', function() {
-      it('should not cancel postmen label if not provided label id', async () => {
-        const postmenLabel = await Shipment.deleteLabel('postmen');
-        expect(postmenLabel).to.have.property('errors');
+        it('should cancel postmen label if not provided label id', async () => {
+            const postmenLabel = await resolvers.Mutation.createLabel(null, {
+                type: 'postmen',
+                label: postmenCreateLabel
+            });
+            const canceledLabel = await resolvers.Mutation.cancelOrDeleteLabel(null, { type: "postmen", labelId: postmenLabel.id });
+            expect(canceledLabel).to.have.property('id');
+            expect(canceledLabel).to.have.property('status');
+            expect(canceledLabel.status).to.be.equal('cancelled');
+        });
+
+       it('should not cancel postmen label if not provided label id', async () => {
+        try {
+            await resolvers.Mutation.cancelOrDeleteLabel(null, { type: "postmen", labelId: "as" }) 
+        } catch (error){
+            const errorInArray = JSON.parse(error.message);
+            expect(errorInArray.length).to.be.greaterThan(0);
+            expect(errorInArray[0]).to.be.equal("Item not found");
+        }
       });
     });
   
     describe('Get postmen tracking status', function() {
       it('should not get postmen tracking status when not provided with a slug/tracking id', async () => {
-        const postmenTracking = await Shipment.getTracking('postmen');
-        expect(postmenTracking).to.have.property('errors');
-        expect(postmenTracking.errors.length).to.be.greaterThan(0);
-      });
-
-      it('should not get postmen tracking status when testing', async () => {
-        const trackings = await Shipment.getTrackings('postmen');
-        const postmenTracking = await Shipment.getTracking('postmen', { 
-          trackingId: trackings.data.trackings[0].id,
-          trackingSlug: trackings.data.trackings[0].slug
-        });
-        expect(postmenTracking).to.have.property('errors');
-        expect(postmenTracking.errors[0]).to.have.property('meta');
-        expect(postmenTracking.errors[0].meta).to.have.property('message');
+        try {
+            await resolvers.Query.trackingStatus(null, { type: "postmen", tracking: {} });
+        } catch (error){
+            const errorInArray = JSON.parse(error.message);
+            expect(errorInArray.length).to.be.greaterThan(0);
+            expect(errorInArray[0].message).to.be.equal("should have required property 'trackingNumber'")
+        }
       });
     });
   });
