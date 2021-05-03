@@ -13,7 +13,7 @@
     "gql-test": "mocha --require @babel/register ./tests/gql --timeout 30000 --exit",
     "gql-test-webpack": "npm run build-test && export WEBPACK_TEST=yes && mocha ./tests/gql --timeout 30000 --exit",
     "start-prod": "node dist/main-local.js",
-    "deploy": "npm run build && ibmcloud fn action update graphqlTest dist/graphql.js --web true"
+    "deploy": "ibmcloud fn action update dev dist/main-local.js --web true"
   },
   "repository": {
     "type": "git",
@@ -32,12 +32,15 @@
     "@babel/register": "^7.6.2",
     "@easypost/api": "^3.10.1",
     "ajv": "^6.12.6",
+    "apollo-server": "^2.24.0",
+    "apollo-server-express": "^2.24.0",
     "axios": "^0.21.1",
-
     "dotenv": "^8.2.0",
     "graphql": "^15.5.0",
     "graphql-tools": "^7.0.5",
     "lodash.get": "^4.4.2",
+    "express": "^4.17.1",
+    "express-graphql": "^0.12.0",
     "moment": "^2.29.1",
     "nodemon": "^2.0.7",
     "openwhisk": "^3.21.3",
@@ -65,7 +68,7 @@
     "express": "^4.17.1",
     "express-graphql": "^0.12.0",
     "mocha": "^8.3.2",
-    "webpack": "^5.37.1",
+    "webpack": "^5.37.0",
     "webpack-bundle-analyzer": "^4.4.1",
     "webpack-cli": "^4.7.0",
     "webpack-graphql-loader": "^1.0.2"
