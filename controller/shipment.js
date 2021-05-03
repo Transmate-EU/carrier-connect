@@ -70,7 +70,7 @@ class Shipment {
                 
                 const errors = validateSchema(formatedObject, shippoCreateShipmentSchema);
 
-                if (errors){
+                 if (errors){
                     return {
                         data: {},
                         warnings: [],
