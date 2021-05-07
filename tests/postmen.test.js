@@ -8,6 +8,10 @@ const { expect } = chai;
 
 describe('Testing postmen API', function() {
     describe('Get postmen rates', function() {
+      it('should error with empty obj', async () => {
+        const postmenFetchRates = await Shipment.getRates('postmen', {});
+        expect(postmenFetchRates.errors[0].message).to.be.equal("should have required property 'shipment'");
+      });
       it('should get all rates', async () => {
         const postmenFetchRates = await Shipment.getRates('postmen', postmenCalculateRate);
         expect(postmenFetchRates.data).to.have.property('rates');
