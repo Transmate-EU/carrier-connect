@@ -470,7 +470,6 @@ extend type Query {
   getShipmentTrackingInfo(shipmentId: String!): ShipmentAggr
   getShipmentChanges(shipmentId: String!): ShipmentAggr
   getShipmentsForAddress(addressId: String!): [ShipmentAggr]
-  getRatings(type: String, shipment: Shipment): Ratings
 }
 
 extend type Mutation {
