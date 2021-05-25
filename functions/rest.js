@@ -3,7 +3,7 @@ async function main(params) {
     let statusCode
     let warnings
     
-    const { type, requestBody } = params;
+    const { type, request : requestBody } = params;
     
     try {
         switch (type.toLowerCase()){
@@ -78,33 +78,33 @@ async function main(params) {
                 }
                 result = label.data
             case "createManifest":
-                const manifest = await Shipment.createManifest(requestBody.type, requestBody.manifest);
-                if (manifest.errors.length > 0){
+                const createManifest = await Shipment.createManifest(requestBody.type, requestBody.manifest);
+                if (createManifest.errors.length > 0){
                     statusCode = 500;
-                    throw new Error(JSON.stringify(manifest.errors));
+                    throw new Error(JSON.stringify(createManifest.errors));
                 }
-                result = manifest.data
+                result = createManifest.data
             case "createTracking":
-                const tracking = await Shipment.createTracking(requestBody.type, requestBody.tracking);
-                if (tracking.errors.length > 0){
+                const createTracking = await Shipment.createTracking(requestBody.type, requestBody.tracking);
+                if (createTracking.errors.length > 0){
                     statusCode = 500;
-                    throw new Error(JSON.stringify(tracking.errors));
+                    throw new Error(JSON.stringify(createTracking.errors));
                 }
-                result = tracking.data.tracking;
+                result = createTracking.data.tracking;
             case "cancelOrDeleteLabel":
-                const label = await Shipment.deleteLabel(requestBody.type, requestBody.labelId);
-                if (label.errors.length > 0){
+                const cancelOrDeleteLabel = await Shipment.deleteLabel(requestBody.type, requestBody.labelId);
+                if (cancelOrDeleteLabel.errors.length > 0){
                     statusCode = 500;
-                    throw new Error(JSON.stringify(label.errors));
+                    throw new Error(JSON.stringify(cancelOrDeleteLabel.errors));
                 }
-                result = label.data;
+                result = cancelOrDeleteLabel.data;
             case "createAddress":
-                const address = await Shipment.createAddress(requestBody.type, requestBody.address);
-                if (address.errors.length > 0){
+                const createAddress = await Shipment.createAddress(requestBody.type, requestBody.address);
+                if (createAddress.errors.length > 0){
                     statusCode = 500;
-                    throw new Error(JSON.stringify(address.errors));
+                    throw new Error(JSON.stringify(createAddress.errors));
                 }
-                result = address.data.address
+                result = createAddress.data.address
         }
     } catch (error){
         return {

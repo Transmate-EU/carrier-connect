@@ -11,7 +11,7 @@ if (isProduction) {
 }
 
 const files = {
-  main: "./functions/main.js"
+  rest: "./functions/rest.js"
 };
 
 const plugins = [
