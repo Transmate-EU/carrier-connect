@@ -11,7 +11,8 @@ if (isProduction) {
 }
 
 const files = {
-  rest: "./functions/rest.js"
+  rest: "./functions/rest.js",
+  graphql: "./functions/graphql.js"
 };
 
 const plugins = [
@@ -34,7 +35,7 @@ module.exports = {
   entry: files,
   plugins,
   output: {
-    libraryTarget: "commonjs",
+   
     path: path.resolve(__dirname, "dist"),
     filename: `[name]${isProduction ? "" : "-local"}.js`
   },
@@ -42,9 +43,23 @@ module.exports = {
   module: {
     rules: [
       {
-        test: /\.js$/,
-        exclude: /node_modules/
+        test: /\.m?js$/,
+        exclude: /(node_modules|bower_components)/,
+        use: {
+          loader: 'babel-loader',
+          options: {
+            presets: [[
+              '@babel/preset-env',
+              {
+                targets: {
+                  esmodules: true,
+                },
+              },
+            ]]
+          }
+        }
       },
+     
       { 
         test: /\.graphql?$/,
         use: [
@@ -67,8 +82,7 @@ module.exports = {
 };
 
 const installedModules = [
-  "apollo-server",
-  "uuid"
+ 
 ];
 
 if (isProduction) {

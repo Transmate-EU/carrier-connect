@@ -8,7 +8,7 @@ const { GraphQLFileLoader } = require('@graphql-tools/graphql-file-loader');
 const { graphql } = require('graphql');
 
 
-async function resolve(args) {
+async function gqlResolve(args) {
   const schema = await loadSchema('./schemas/shipmentV2.gql', {  // load from a single schema file
     loaders: [
       new GraphQLFileLoader()
@@ -28,4 +28,5 @@ async function resolve(args) {
 }
 
 
-module.exports.main = resolve;
+
+exports.gqlResolve =gqlResolve;

@@ -4,12 +4,14 @@
   "description": "module to connect to carriers",
   "main": "index.js",
   "scripts": {
-    "build": "webpack --config webpack.config.js",
-    "test": "NODE_ENV=testing mocha --require @babel/register ./tests --timeout 30000 --exit",
+    "build": "export NODE_ENV=production && webpack --config webpack.config.js",
+    "build-test": "export NODE_ENV=test WEBPACK_TEST=yes && webpack --config webpack.config.js",
+    "test": "export NODE_ENV=testing mocha --require @babel/register ./tests --timeout 30000 --exit",
     "start": "nodemon ./index.js --exec babel-node",
     "start2": "export DEBUG='*,-babel*,-nodemon*,-express*' && nodemon ./serverNew.js --exec babel-node",
     "gql-function": "export DEBUG='*,-babel*,-nodemon*' && nodemon ./functions/graphql.js --exec babel-node",
-    "gql-test": "NODE_ENV=testing mocha --require @babel/register ./tests/gql --timeout 30000 --exit",
+    "gql-test": "mocha --require @babel/register ./tests/gql --timeout 30000 --exit",
+    "gql-test-webpack": "export WEBPACK_TEST=yes && mocha ./tests/gql --timeout 30000 --exit",
     "start-prod": "node dist/main-local.js",
     "deploy": "ibmcloud fn action update dev dist/main-local.js --web true"
   },
@@ -25,10 +27,8 @@
   "homepage": "https://github.com/Transmate-EU/carrier-connect#readme",
   "dependencies": {
     "@babel/cli": "^7.6.4",
-    "@babel/core": "^7.6.4",
     "@babel/node": "^7.6.3",
     "@babel/plugin-syntax-dynamic-import": "^7.2.0",
-    "@babel/preset-env": "^7.6.3",
     "@babel/register": "^7.6.2",
     "@easypost/api": "^3.10.1",
     "ajv": "^6.12.6",
@@ -47,6 +47,12 @@
     "uuidv4": "^6.2.7"
   },
   "devDependencies": {
+    "@babel/core": "^7.14.3",
+    "@babel/plugin-transform-runtime": "^7.14.3",
+    "@babel/preset-env": "^7.14.2",
+    "apollo-server": "^2.24.0",
+    "apollo-server-express": "^2.24.0",
+    "babel-loader": "^8.2.2",
     "chai": "^4.3.4",
     "dotenv-json": "^1.0.0",
     "eslint": "^7.23.0",
@@ -56,10 +62,8 @@
     "eslint-plugin-react-hooks": "^4 || ^3 || ^2.3.0 || ^1.7.0",
     "express": "^4.17.1",
     "express-graphql": "^0.12.0",
-    "apollo-server": "^2.24.0",
-    "apollo-server-express": "^2.24.0",
     "mocha": "^8.3.2",
-    "webpack": "^5.37.0",
+    "webpack": "^5.37.1",
     "webpack-bundle-analyzer": "^4.4.1",
     "webpack-cli": "^4.7.0",
     "webpack-graphql-loader": "^1.0.2"
