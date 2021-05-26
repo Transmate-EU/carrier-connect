@@ -15,7 +15,7 @@ if (process.env.WEBPACK_TEST) {
 
 describe('Testing serverless graphql', function () {
   it('shipments should return empty', async () => {
-    const result = await api.gqlResolve({ query: '{shipments(type:postmen){id}}' })
+    const result = await api.gqlResolve({ query: "{shipments(type:postmen){id}}"})
     expect(result).to.be.an("object").to.eql({ "data": { "shipments": [] } });
   });
 })

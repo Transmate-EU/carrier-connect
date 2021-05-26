@@ -131,4 +131,6 @@ async function main(params) {
     }
 }
 
-exports.main
+global.main = main; // for webpack export!
+
+exports.rest =main;

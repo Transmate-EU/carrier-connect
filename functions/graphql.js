@@ -1,22 +1,26 @@
 'use strict';
-
+import  typeDefs  from '../schemas/shipmentV2.gql';
 import resolvers from '../resolvers/resolvers';
 const debug = require("debug")("graphql:endpoint");
 const { loadSchema } = require('@graphql-tools/load');
-const { addResolversToSchema } =require ('@graphql-tools/schema');
+const { addResolversToSchema, makeExecutableSchema  } = require('@graphql-tools/schema');
 const { GraphQLFileLoader } = require('@graphql-tools/graphql-file-loader');
 const { graphql } = require('graphql');
 
 
 async function gqlResolve(args) {
-  const schema = await loadSchema('./schemas/shipmentV2.gql', {  // load from a single schema file
-    loaders: [
-      new GraphQLFileLoader()
-    ]
+  // const schema = await loadSchema('./schemas/shipmentV2.gql', {  // load from a single schema file
+  //   loaders: [
+  //     new GraphQLFileLoader()
+  //   ]
+  // });
+  const schemaWithResolvers = makeExecutableSchema({
+    typeDefs,
+    resolvers,
   });
-  const schemaWithResolvers = addResolversToSchema({ schema, resolvers });
-  const rootValue= resolvers;// {...resolvers.Query,...resolvers.Mutation};
-  debug("schema %o", schema);
+  //const schemaWithResolvers = addResolversToSchema({ schema, resolvers });
+
+  debug("schema %o", schemaWithResolvers);
   // The resolver for this action
   debug("get graphql args %o", args)
   return graphql(schemaWithResolvers, args.query, {}, args.context, args.variables, args.operationName).then((response) => {
@@ -28,5 +32,6 @@ async function gqlResolve(args) {
 }
 
 
+global.main = gqlResolve; // for webpack export!
 
-exports.gqlResolve =gqlResolve;
+exports.gqlResolve = gqlResolve;

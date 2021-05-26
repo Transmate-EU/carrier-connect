@@ -11,9 +11,9 @@
     "start2": "export DEBUG='*,-babel*,-nodemon*,-express*' && nodemon ./serverNew.js --exec babel-node",
     "gql-function": "export DEBUG='*,-babel*,-nodemon*' && nodemon ./functions/graphql.js --exec babel-node",
     "gql-test": "mocha --require @babel/register ./tests/gql --timeout 30000 --exit",
-    "gql-test-webpack": "export WEBPACK_TEST=yes && mocha ./tests/gql --timeout 30000 --exit",
+    "gql-test-webpack": "npm run build-test && export WEBPACK_TEST=yes && mocha ./tests/gql --timeout 30000 --exit",
     "start-prod": "node dist/main-local.js",
-    "deploy": "ibmcloud fn action update dev dist/main-local.js --web true"
+    "deploy": "npm run build && ibmcloud fn action update graphqlTest dist/graphql.js --web true"
   },
   "repository": {
     "type": "git",
@@ -33,6 +33,7 @@
     "@easypost/api": "^3.10.1",
     "ajv": "^6.12.6",
     "axios": "^0.21.1",
+
     "dotenv": "^8.2.0",
     "graphql": "^15.5.0",
     "graphql-tools": "^7.0.5",
@@ -53,6 +54,7 @@
     "apollo-server": "^2.24.0",
     "apollo-server-express": "^2.24.0",
     "babel-loader": "^8.2.2",
+    "babel-plugin-import-graphql": "^2.8.1",
     "chai": "^4.3.4",
     "dotenv-json": "^1.0.0",
     "eslint": "^7.23.0",

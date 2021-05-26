@@ -72,7 +72,7 @@ module.exports = {
     ]
   },
   resolve: {
-    extensions: [".js", ".ts", ".tsx", ".json", ".graphql"]
+    extensions: [".js", ".ts", ".tsx", ".json", ".graphql",".gql"]
   },
   node: {
     __dirname: true
