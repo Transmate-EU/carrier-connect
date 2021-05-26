@@ -8,7 +8,8 @@
     "test": "NODE_ENV=testing mocha --require @babel/register ./tests --timeout 30000 --exit",
     "start": "nodemon ./index.js --exec babel-node",
     "start2": "export DEBUG='*,-babel*,-nodemon*,-express*' && nodemon ./serverNew.js --exec babel-node",
-    "test-api": "export DEBUG='*,-babel*,-nodemon*' && nodemon ./functions/graphql.js --exec babel-node",
+    "gql-function": "export DEBUG='*,-babel*,-nodemon*' && nodemon ./functions/graphql.js --exec babel-node",
+    "gql-test": "NODE_ENV=testing mocha --require @babel/register ./tests/gql --timeout 30000 --exit",
     "start-prod": "node dist/main-local.js",
     "deploy": "ibmcloud fn action update dev dist/main-local.js --web true"
   },
