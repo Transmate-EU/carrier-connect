@@ -490,6 +490,11 @@ type ShipmentOutput {
     rates: [RateOutput]
 }
 
+enum ServiceTypes {
+  shippo
+  postmen
+}
+
 type Query {
     ratings(type: String!, shipment: CalculateRate!): [RateOutput!]!
     labels(type: String!): [LabelOutput!]!,
@@ -497,7 +502,7 @@ type Query {
     trackings(type: String!): [TrackingOutput!]!
     trackingStatus(type: String!, tracking: TrackingInput!): TrackingOutput!
     manifests(type: String!): [ManifestType!]!  
-    shipments(type: String!): [ShipmentOutput]! 
+    shipments(type: ServiceTypes!): [ShipmentOutput]! 
 }
 
 type Mutation {
