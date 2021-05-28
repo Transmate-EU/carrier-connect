@@ -7,16 +7,14 @@ import {
     postmenManifestReq,
     postmenTracking
 } from '../data/postmen';
-import dotenv from 'dotenv';
 import resolvers from '../resolvers/resolvers';
 
-dotenv.config();  
 const { expect } = chai;
 
-describe('Testing postmen API', function() {
+describe('Testing postmen Resolvers', function() {
     describe('Get postmen rates', function() {
       it('should get all rates', async () => {
-        const postmenRates = await resolvers.Query.ratings(null, {type: 'postmen', shipment: postmenCalculateRate});
+        const postmenRates = await resolvers.Query.rates(null, {type: 'postmen', shipment: postmenCalculateRate});
         expect(postmenRates[0]).to.have.property('chargeWeight');
         expect(postmenRates[0]).to.have.property('totalCharge');
         expect(postmenRates[0].totalCharge).to.have.property('amount');
@@ -25,7 +23,7 @@ describe('Testing postmen API', function() {
       });
       it('should not get all rates when not provided shipment', async () => {
         try {
-            await resolvers.Query.ratings(null, {type: 'postmen', shipment: {}});
+            await resolvers.Query.rates(null, {type: 'postmen', shipment: {}});
         } catch (error){
             const errorInArray = JSON.parse(error.message);
             expect(errorInArray.length).to.have.to.be.greaterThan(0);

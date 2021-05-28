@@ -729,7 +729,7 @@ class Shipment {
                                 width: parcel.width,
                                 length: parcel.length,
                                 height: parcel.height,
-                                mass_unit: parcel.massUnit,
+                                mass_unit: parcel.massUnit ?  parcel.massUnit :  parcel.weight.unit,
                                 distance_unit: parcel.distanceUnit,
                                 weight: parcel.weight.value.toString(),     
                             }    

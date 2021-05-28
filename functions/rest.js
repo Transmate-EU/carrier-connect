@@ -12,7 +12,7 @@ async function main(params) {
     
     try {
         switch (true){
-            case type === "ratings":
+            case type === "rates":
                 var rates = await Shipment.getRates(request.type, request.shipment);
                 if (rates.errors.length > 0){
                     statusCode = 500;

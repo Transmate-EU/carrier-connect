@@ -496,7 +496,7 @@ enum ServiceTypes {
 }
 
 type Query {
-    ratings(type: String!, shipment: CalculateRate!): [RateOutput!]!
+    rates(type: String!, shipment: CalculateRate!): [RateOutput!]!
     labels(type: String!): [LabelOutput!]!,
     manifest(type: String!, manifestId: String!): ManifestType!
     trackings(type: String!): [TrackingOutput!]!

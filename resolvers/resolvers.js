@@ -2,7 +2,7 @@ import Shipment from "../controller/shipment";
 
 const resolvers = {
     Query: {
-        ratings: async (parent, args) => {
+        rates: async (parent, args) => {
             const rates = await Shipment.getRates(args.type, args.shipment);
             if (rates.errors.length > 0){
                 throw new Error(JSON.stringify(rates.errors));
