@@ -2,6 +2,7 @@ import api from '../functions/api';
 import chai from 'chai';
 import env from '../env.json';
 import { 
+    postmenAddress,
     postmenCalculateRate,
     postmenCreateLabel,
     postmenManifestReq,
@@ -46,6 +47,23 @@ describe("Test postmen API", function () {
             expect(postmenLabels[0]).to.have.property('rate');
             expect(postmenLabels[0].rate).to.have.property('totalCharge');
             expect(response.statusCode).to.be.equal(200);
+        })
+
+        it ('should validate address', async () => {
+            const response = await api.main({
+                ...env,
+                type: 'validateAddress', 
+                request: {
+                    type: 'postmen',
+                    address: postmenAddress
+                }
+            });
+
+            expect(response.body.result).to.have.property('id');
+            expect(response.body.result).to.have.property('status');
+            expect(response.body.result.status).to.have.be.equal('valid');
+            expect(response.body.result).to.have.property('createdAt');
+            expect(response.body.result).to.have.property('updatedAt');
         })
 
         it ('should cancel label', async () => {
