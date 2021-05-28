@@ -38,5 +38,5 @@ jobs:
         echo AFTER_SHIP_TEST_API_KEY=10010a98-b79f-43f5-91f5-fb672ee8a18a >> .env
         echo AFTER_SHIP_PROD_API_KEY="" >> .env
         echo AFTER_SHIP_URL=https://api.aftership.com/v4 >> .env
-    - run: npm ci
+    - run: npm install
     - run: npm test
