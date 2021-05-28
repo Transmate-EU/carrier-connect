@@ -14,6 +14,7 @@ describe("Test shippo API", function () {
         let shippoShipment;
         let shippoLabel;
         let address;
+        let shippoRate;
 
         it('should create shipment', async () => {
             const response = await api.main({
@@ -42,6 +43,7 @@ describe("Test shippo API", function () {
                 }
             });
 
+            shippoRate = response.body.result[0]
             expect(response.body.result[0]).to.have.property('id');
             expect(response.body.result[0]).to.have.property('serviceType');
             expect(response.body.result[0]).to.have.property('serviceName');
@@ -54,7 +56,9 @@ describe("Test shippo API", function () {
                 type: 'createLabel', 
                 request: {
                     type: 'shippo',
-                    label: shippoLabelCreation
+                    label: {
+                        rate: shippoRate.id
+                    }
                 }
             });
 

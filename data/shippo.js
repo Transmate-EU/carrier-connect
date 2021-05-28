@@ -63,7 +63,9 @@ const shippoShipmentTesting = {
         city: "New York",
         state: "NY",
         zip: "10007",
-        country: "US"
+        country: "US",
+        phone: "4151234567",
+        email: "mrhippo@goshippo.com"
       },
     shipFrom: {
         contactName: "Shawn Ippotle",
@@ -71,7 +73,9 @@ const shippoShipmentTesting = {
         city: "San Francisco",
         state: "CA",
         zip: "94117",
-        country: "US"
+        country: "US",
+        phone: "4151234565",
+        email: "mrhippo2@goshippo.com"
     },
     parcels: [
         {
