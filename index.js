@@ -1,9 +1,8 @@
-import Shipment from "./controller/shipment"
-import { postmenAddress, postmenCalculateRate, postmenManifestReq } from "./data/postmen"
+import server from "./server";
+import dotenv from 'dotenv';
 
-const testFunctions = async () => {
-    const results = await Shipment.createManifest('postmen', postmenManifestReq);
-    console.log("results", results);
-}
+dotenv.config()
 
-testFunctions();
+server.listen({ port: 4000 }).then(({ url }) => {
+    console.log(`🚀  Server ready at ${url}`);
+});

@@ -28,11 +28,11 @@ const postmenShipperAccount = {
 }
 
 const postmenAddress = {
-    contact_name: "testing",
+    contactName: "testing",
     street1: "4901 N New Hope Rd Apt C1",
     city: "Raleigh",
     state: "NC",
-    postal_code: "27604",
+    postalCode: "27604",
     country: "USA",
     type: "business",
     phone: "17578976058",
@@ -65,17 +65,16 @@ const postmanTrackingObj = {
 }
 
 const postmenCalculateRate = {
-    async: false,
-	shipper_accounts: [
+	shipperAccounts: [
 	    {
-	      "id": "6f43fe77-b056-45c3-bce4-9fec4040da0c"
+	      id: "6f43fe77-b056-45c3-bce4-9fec4040da0c"
 	    }
 	],
     shipment: {
         parcels: [
             {
             description: "Food XS",
-            box_type: "custom",
+            boxType: "custom",
             weight: {
                 value: 2,
                 unit: "kg"
@@ -89,23 +88,23 @@ const postmenCalculateRate = {
             items: [
                 {
                 description: "Food Bar",
-                origin_country: "JPN",
+                originCountry: "JPN",
                 quantity: 2,
                 price: {
-                    "amount": 3,
-                    "currency": "JPY"
+                    amount: 3,
+                    currency: "JPY"
                 },
                 weight: {
-                    "value": 0.6,
-                    "unit": "kg"
+                    value: 0.6,
+                    unit: "kg"
                 },
                 sku: "PS4-2015"
                 }
             ]
             }
         ],
-        ship_from: {
-            contact_name: "Yin Ting Wong",
+        shipFrom: {
+            contactName: "Yin Ting Wong",
             street1: "Flat A, 29/F, Block 17\nLaguna Verde",
             city: "Hung Hom",
             state: "Kowloon",
@@ -114,12 +113,12 @@ const postmenCalculateRate = {
             email: "test@test.test",
             type: "residential"
         },
-        ship_to: {
-            contact_name: "Mike Carunchia",
+        shipTo: {
+            contactName: "Mike Carunchia",
             street1: "9504 W Smith ST",
             city: "Yorktown",
             state: "Indiana",
-            postal_code: "47396",
+            postalCode: "47396",
             country: "USA",
             phone: "7657168649",
             email: "test@test.test",
@@ -129,9 +128,103 @@ const postmenCalculateRate = {
 }
 
 const postmenManifestReq = {
-    async: false,
-    shipper_account: {
+    shipperAccount: {
         id: "3ba41ff5-59a7-4ff0-8333-64a4375c7f21"
+    }
+}
+
+const postmenTracking = {
+    slug: "dhl",
+    trackingNumber: "6123456759",
+    title: "Title Name",
+    smses: [
+        "+18555072509",
+        "+18555072501"
+    ],
+    emails: [
+        "email@yourdomain.com",
+        "another_email@yourdomain.com"
+    ],
+    orderId: "ID 1234",
+    orderIdPath: "http://www.aftership.com/order_id=1234",
+    customFields: {
+        productName: "iPhone Case",
+        productPrice: "USD19.99"
+    },
+    language: "en",
+    orderPromisedDeliveryDate: "2019-05-20",
+    deliveryType: "pickup_at_store",
+    pickupLocation: "Flagship Store",
+    pickupNote: "Reach out to our staffs when you arrive our stores for shipment pickup"
+}
+
+const postmenCreateLabel = {
+    shipperAccount: {
+        id: "6f43fe77-b056-45c3-bce4-9fec4040da0c"
+    },
+    isDocument: false,
+    customs: {
+      billing: {
+        paidBy: "recipient"
+      },
+      purpose: "gift"
+    },
+    serviceType: "fedex_international_priority",
+    shipment: {
+        shipFrom: {
+            contactName: "[FedEx] Contact name",
+            companyName: "[FedEx] Testing Company",
+            street1: "5/F Hull Lane",
+            country: "HKG",
+            type: "business",
+            city: "Sham Shui Po",
+            phone: "8095545803",
+            street2: "Hull",
+            email: "fedex@test.com",
+        },
+        shipTo: {
+            contactName: "Dr. Moises Corwin",
+            phone: "1-140-225-6410",
+            email: "Giovanna42@yahoo.com",
+            street1: "28292 Daugherty Orchard",
+            city: "Beverly Hills",
+            postalCode: "90209",
+            state: "CA",
+            country: "USA",
+            type: "residential"
+        },
+        parcels: [
+            {
+                description: "Food XS",
+                boxType: "custom",
+                weight: {
+                    value: 2,
+                    unit: "kg"
+                },
+                dimension: {
+                    width: 20,
+                    height: 40,
+                    depth: 40,
+                    unit: "cm"
+                },
+                items: [
+                    {
+                        description: "Food Bar",
+                        originCountry: "USA",
+                        quantity: 2,
+                        price: {
+                            amount: 3,
+                            currency: "USD"
+                        },
+                        weight: {
+                            value: 0.6,
+                            unit: "kg"
+                        },
+                        sku: "imac2014"
+                    }
+                ]
+            }
+        ]
     }
 }
 
@@ -140,5 +233,7 @@ export {
     postmenManifestReq,
     postmanTrackingObj,
     postmenCalculateRate,
-    postmenShipperAccount
+    postmenShipperAccount,
+    postmenCreateLabel,
+    postmenTracking
 }
