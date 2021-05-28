@@ -460,6 +460,7 @@ input LabelInput {
     rate: String
 }
 
+
 type LabelOutput {
     id: String
     objectOwner: String
