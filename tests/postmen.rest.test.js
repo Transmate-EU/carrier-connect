@@ -7,7 +7,7 @@ import {
     postmenCreateLabel,
     postmenManifestReq,
 } from '../data/postmen'
-import { envFile } from './test.data';
+const envFile = require("../.env.json");
 
 const { expect } = chai;
 

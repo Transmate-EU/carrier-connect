@@ -8,7 +8,7 @@ import {
     postmenTracking
 } from '../data/postmen';
 import resolvers from '../resolvers/resolvers';
-import { envFile } from './test.data';
+const envFile = require("../.env.json");
 
 const { expect } = chai;
 

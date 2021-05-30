@@ -1,7 +1,7 @@
 
 import api from '../functions/rest';
 import chai from 'chai';
-import { envFile } from './test.data';
+const envFile = require("../.env.json");
 import { 
     shippoAddress,
     shippoShipmentTesting,
