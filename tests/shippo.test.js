@@ -1,8 +1,8 @@
 import chai from 'chai';
-import { envFile } from './test.data';
+
 import { shippoShipment, shippoAddress, shippoShipmentTesting, shippoLabelCreation } from '../data/shippo';
 import resolvers from '../resolvers/resolvers';
-
+const envFile = require("../.env.json");
 const { expect } = chai;
 
 describe('Testing goshippo Resolvers', function() {
