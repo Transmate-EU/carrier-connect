@@ -1,6 +1,7 @@
 'use strict';
 import typeDefs from '../schemas/shipmentV2.gql';
 import resolvers from '../resolvers/resolvers';
+import { setEnv } from './setEnv';
 const debug = require("debug")("graphql:endpoint");
 const { loadSchema } = require('@graphql-tools/load');
 const { addResolversToSchema, makeExecutableSchema  } = require('@graphql-tools/schema');
@@ -23,7 +24,14 @@ async function gqlResolve(args) {
   debug("schema %o", schemaWithResolvers);
   // The resolver for this action
   debug("get graphql args %o", args)
-  return graphql(schemaWithResolvers, args.query, {}, args.context, args.variables, args.operationName).then((response) => {
+  return graphql(
+      schemaWithResolvers,
+      args.query,
+      {},
+      args.context,
+      args.variables,
+      args.operationName
+    ).then((response) => {
     debug("graphql response %o", response);
     return response;
   }).catch(error => {
