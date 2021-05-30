@@ -1,5 +1,5 @@
 'use strict';
-import  typeDefs  from '../schemas/shipmentV2.gql';
+import typeDefs from '../schemas/shipmentV2.gql';
 import resolvers from '../resolvers/resolvers';
 const debug = require("debug")("graphql:endpoint");
 const { loadSchema } = require('@graphql-tools/load');
@@ -32,6 +32,6 @@ async function gqlResolve(args) {
 }
 
 
-global.main = gqlResolve; // for webpack export!
+global.main = gqlResolve;
 
 exports.gqlResolve = gqlResolve;

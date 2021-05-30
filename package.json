@@ -11,7 +11,7 @@
     "start2": "export DEBUG='*,-babel*,-nodemon*,-express*' && nodemon ./serverNew.js --exec babel-node",
     "gql-function": "export DEBUG='*,-babel*,-nodemon*' && nodemon ./functions/graphql.js --exec babel-node",
     "gql-test": "mocha --require @babel/register ./tests/gql --timeout 30000 --exit",
-    "gql-test-webpack": "npm run build-test && export WEBPACK_TEST=yes && mocha ./tests/gql --timeout 30000 --exit",
+    "gql-test-webpack": "npm run build-test && WEBPACK_TEST=yes && mocha ./tests/gql --timeout 30000 --exit",
     "start-prod": "node dist/main-local.js",
     "deploy": "ibmcloud fn action update dev dist/main-local.js --web true"
   },

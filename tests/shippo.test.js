@@ -1,5 +1,5 @@
 import chai from 'chai';
-import Shipment from '../controller/shipment';
+import { envFile } from './test.data';
 import { shippoShipment, shippoAddress, shippoShipmentTesting, shippoLabelCreation } from '../data/shippo';
 import resolvers from '../resolvers/resolvers';
 
@@ -11,8 +11,14 @@ describe('Testing goshippo Resolvers', function() {
 
     describe('Get goshippo rates', function() {
         it('should create shipment and get rates', async () => {
-            const shipmentObj = await resolvers.Mutation.createShipment(null, { type: "shippo", shipment: shippoShipmentTesting });
-            const shippoRates = await resolvers.Query.rates(null, {type: 'shippo', shipment: { shipmentId: shipmentObj.id }});
+            const shipmentObj = await resolvers.Mutation.createShipment(null, 
+                { 
+                    type: "shippo",
+                    shipment: shippoShipmentTesting
+                },
+                envFile
+            );
+            const shippoRates = await resolvers.Query.rates(null, {type: 'shippo', shipment: { shipmentId: shipmentObj.id }}, envFile);
             
             shippoRate = shippoRates[0];
             expect(shipmentObj).to.have.property('id');
@@ -25,7 +31,7 @@ describe('Testing goshippo Resolvers', function() {
         });
         it('should not get rates when a shipment id does not exist', async () => {
             try {
-                await resolvers.Query.rates(null, {type: 'shippo', shipment: { shipmentId: "898999999989898980ok" }});
+                await resolvers.Query.rates(null, {type: 'shippo', shipment: { shipmentId: "898999999989898980ok" }}, envFile);
             } catch (error){
                 const errorInArray = JSON.parse(error.message);
                 expect(error).to.have.property('message');
@@ -34,7 +40,7 @@ describe('Testing goshippo Resolvers', function() {
         });
         it('should not get rates when a shipment is not provided', async () => {
             try {
-                await resolvers.Query.rates(null, {type: 'shippo', shipment: { shipmentId: "" }});
+                await resolvers.Query.rates(null, {type: 'shippo', shipment: { shipmentId: "" }}, envFile);
             } catch (error){
                 const errorInArray = JSON.parse(error.message);
                 expect(error).to.have.property('message');
@@ -49,9 +55,10 @@ describe('Testing goshippo Resolvers', function() {
                 type: "shippo",
                 label: {
                     rate: shippoRate.id
-                }
+                },
+                envFile
             });
-            const shippoLabels = await resolvers.Query.labels(null, {type: 'shippo'});
+            const shippoLabels = await resolvers.Query.labels(null, {type: 'shippo'}, envFile);
             expect(shippoLabels[0]).to.have.property('id');
             expect(shippoLabels[0]).to.have.property('status');
             expect(shippoLabels[0]).to.have.property('trackingNumbers');
@@ -60,8 +67,8 @@ describe('Testing goshippo Resolvers', function() {
 
     describe('Get goshippo validate address', function() {
         it('should create and  validate address', async () => {
-            const address = await resolvers.Mutation.createAddress(null, { type: 'shippo', address: shippoAddress });
-            const shippoValidatedAddress =  await resolvers.Mutation.validateAddress(null, { type: 'shippo', address: { id: address.id } });
+            const address = await resolvers.Mutation.createAddress(null, { type: 'shippo', address: shippoAddress }, envFile);
+            const shippoValidatedAddress =  await resolvers.Mutation.validateAddress(null, { type: 'shippo', address: { id: address.id } }, envFile);
             expect(address).to.have.property('id');
             expect(address).to.have.property('isComplete');
             expect(shippoValidatedAddress.isComplete).to.have.be.equal(true);
@@ -71,7 +78,7 @@ describe('Testing goshippo Resolvers', function() {
 
         it('should not create address when address body is not provided', async () => {
             try {
-                await resolvers.Mutation.createAddress(null, { type: 'shippo', address: {}});
+                await resolvers.Mutation.createAddress(null, { type: 'shippo', address: {}}, envFile);
             } catch (error) {
                 const errorInArray = JSON.parse(error.message);
                 expect(errorInArray.length).to.be.greaterThan(0);
@@ -81,7 +88,7 @@ describe('Testing goshippo Resolvers', function() {
 
         it('should not validate address when wrong address id is provided', async () => {
             try {
-                await resolvers.Mutation.validateAddress(null, { type: 'shippo', address: { id: 'sjsjsjs' }});
+                await resolvers.Mutation.validateAddress(null, { type: 'shippo', address: { id: 'sjsjsjs' }}, envFile);
             } catch (error) {
                 const errorInArray = JSON.parse(error.message); 
                 expect(errorInArray.length).to.be.greaterThan(0);
@@ -93,7 +100,7 @@ describe('Testing goshippo Resolvers', function() {
     describe('Get goshippo manifest', function() {
         it('should not get goshippo mainfest details if not provided manifest', async () => {
             try {
-                await resolvers.Query.manifest(null, { type: 'shippo', manifest: {}});
+                await resolvers.Query.manifest(null, { type: 'shippo', manifest: {}}, envFile);
             } catch (error) {
                 const errorInArray = JSON.parse(error.message);
                 expect(errorInArray.length).to.have.to.be.greaterThan(0);
@@ -105,7 +112,7 @@ describe('Testing goshippo Resolvers', function() {
     describe('Get goshippo tracking status', function() {
         it('should not get goshippo tracking status when not provided with a slug/tracking id', async () => {
             try {
-                await resolvers.Query.trackingStatus(null, { type: 'shippo', tracking: {}});
+                await resolvers.Query.trackingStatus(null, { type: 'shippo', tracking: {}}, envFile);
             } catch (error){
                 const errorInArray = JSON.parse(error.message);
                 expect(errorInArray.length).to.have.to.be.greaterThan(0);
@@ -116,7 +123,7 @@ describe('Testing goshippo Resolvers', function() {
             const tracking = await resolvers.Query.trackingStatus(null, { type: 'shippo', tracking: {
                 trackingNumber: "SHIPPO_DELIVERED",
                 trackingSlug: "shippo" 
-            }});
+            }}, envFile);
             expect(tracking).to.have.property('trackingStatus');
             expect(tracking.trackingStatus.status).to.be.equal('DELIVERED')
         });
@@ -124,14 +131,14 @@ describe('Testing goshippo Resolvers', function() {
 
     describe('Refund/Cancel label', function() {
         it('should create and cancel label when provided label id', async () => {
-            const canceledLabel = await resolvers.Mutation.cancelOrDeleteLabel(null, { type: 'shippo', labelId: shippoLabel.id });
+            const canceledLabel = await resolvers.Mutation.cancelOrDeleteLabel(null, { type: 'shippo', labelId: shippoLabel.id }, envFile);
             expect(canceledLabel).to.have.property('id');
             expect(canceledLabel).to.have.property('status');
             expect(canceledLabel.status).to.be.equal('QUEUED');
         });
         it('should not cancel goshippo label if wrong id is provided', async () => {
             try {
-                await resolvers.Mutation.cancelOrDeleteLabel(null, { type: 'shippo', labelId: 'label.id' });
+                await resolvers.Mutation.cancelOrDeleteLabel(null, { type: 'shippo', labelId: 'label.id' }, envFile);
             } catch (error){
                 const errorInArray = JSON.parse(error.message);
                 expect(errorInArray.length).to.have.to.be.greaterThan(0);
