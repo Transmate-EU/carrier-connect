@@ -1,19 +1,11 @@
-<<<<<<< HEAD
 import { v4 as uuidV4 } from "uuid";
-=======
-import { uuid } from "uuidv4"
->>>>>>> Create item.js
 
 const postmenShipperAccount = {
     slug: "dhl",
     description: "My Shipper Account",
     timezone: "Asia/Hong_Kong",
     credentials: {
-<<<<<<< HEAD
         account_number: uuidV4(),
-=======
-        account_number: uuid(),
->>>>>>> Create item.js
         password: "mannnurru",
         site_id: "none"
     },
@@ -36,19 +28,11 @@ const postmenShipperAccount = {
 }
 
 const postmenAddress = {
-<<<<<<< HEAD
     contactName: "testing",
     street1: "4901 N New Hope Rd Apt C1",
     city: "Raleigh",
     state: "NC",
     postalCode: "27604",
-=======
-    contact_name: "testing",
-    street1: "4901 N New Hope Rd Apt C1",
-    city: "Raleigh",
-    state: "NC",
-    postal_code: "27604",
->>>>>>> Create item.js
     country: "USA",
     type: "business",
     phone: "17578976058",
@@ -80,7 +64,6 @@ const postmanTrackingObj = {
     pickup_note: "Reach out to our staffs when you arrive our stores for shipment pickup"
 }
 
-<<<<<<< HEAD
 const postmenCalculateRate = {
 	shipperAccounts: [
 	    {
@@ -253,10 +236,4 @@ export {
     postmenShipperAccount,
     postmenCreateLabel,
     postmenTracking
-=======
-export {
-    postmenAddress,
-    postmanTrackingObj,
-    postmenShipperAccount
->>>>>>> Create item.js
 }

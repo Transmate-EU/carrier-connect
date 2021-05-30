@@ -4,7 +4,6 @@
   "description": "module to connect to carriers",
   "main": "index.js",
   "scripts": {
-<<<<<<< HEAD
     "build": "export NODE_ENV=production && webpack --config webpack.config.js",
     "build-test": "export NODE_ENV=testing WEBPACK_TEST=yes && webpack --config webpack.config.js",
     "test": "NODE_ENV=testing mocha --require @babel/register ./tests --timeout 30000 --exit",
@@ -12,13 +11,14 @@
     "gql-function": "export DEBUG='*,-babel*,-nodemon*' && nodemon ./functions/graphql.js --exec babel-node",
     "gql-test": "mocha --require @babel/register ./tests/gql --timeout 30000 --exit",
     "gql-test-webpack": "npm run build-test && WEBPACK_TEST=yes && mocha ./tests/gql --timeout 30000 --exit",
+<<<<<<< HEAD
     "start-prod": "node dist/graphql-local.js",
-    "deploy": "ibmcloud fn action update dev dist/rest-local.js --web true",
-    "deploy-graphql": "ibmcloud fn action update graphql dist/graphql-local.js --web true"
 =======
-    "test": "NODE_ENV=testing mocha --require @babel/register ./tests --timeout 10000 --exit",
+    "start-prod": "node dist/main-local.js",
+>>>>>>> step v1 test-fix
+    "deploy": "ibmcloud fn action update dev dist/rest-local.js --web true",
+    "deploy-graphql": "ibmcloud fn action update graphql dist/graphql-local.js --web true",
     "start": "nodemon ./index.js --exec babel-node"
->>>>>>> Create item.js
   },
   "repository": {
     "type": "git",
@@ -32,20 +32,12 @@
   "homepage": "https://github.com/Transmate-EU/carrier-connect#readme",
   "dependencies": {
     "@babel/cli": "^7.6.4",
-<<<<<<< HEAD
     "@babel/node": "^7.6.3",
     "@babel/plugin-syntax-dynamic-import": "^7.2.0",
-=======
-    "@babel/core": "^7.6.4",
-    "@babel/node": "^7.6.3",
-    "@babel/plugin-syntax-dynamic-import": "^7.2.0",
-    "@babel/preset-env": "^7.6.3",
->>>>>>> Create item.js
     "@babel/register": "^7.6.2",
     "@easypost/api": "^3.10.1",
     "ajv": "^6.12.6",
     "axios": "^0.21.1",
-<<<<<<< HEAD
     "graphql": "^15.5.0",
     "graphql-tools": "^7.0.5",
     "lodash.get": "^4.4.2",
@@ -65,18 +57,6 @@
     "apollo-server-express": "^2.24.0",
     "babel-loader": "^8.2.2",
     "babel-plugin-import-graphql": "^2.8.1",
-=======
-    "dotenv": "^8.2.0",
-    "moment": "^2.29.1",
-    "nodemon": "^2.0.7",
-    "pg": "^8.5.1",
-    "postmen": "^1.0.4",
-    "shippo": "^1.6.0",
-    "uuid": "^8.3.2",
-    "uuidv4": "^6.2.7"
-  },
-  "devDependencies": {
->>>>>>> Create item.js
     "chai": "^4.3.4",
     "dotenv-json": "^1.0.0",
     "eslint": "^7.23.0",
@@ -84,7 +64,6 @@
     "eslint-plugin-jsx-a11y": "^6.4.1",
     "eslint-plugin-react": "^7.21.5",
     "eslint-plugin-react-hooks": "^4 || ^3 || ^2.3.0 || ^1.7.0",
-<<<<<<< HEAD
     "express": "^4.17.1",
     "express-graphql": "^0.12.0",
     "mocha": "^8.3.2",
@@ -92,8 +71,5 @@
     "webpack-bundle-analyzer": "^4.4.1",
     "webpack-cli": "^4.7.0",
     "webpack-graphql-loader": "^1.0.2"
-=======
-    "mocha": "^8.3.2"
->>>>>>> Create item.js
   }
 }

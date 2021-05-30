@@ -1,8 +1,4 @@
-<<<<<<< HEAD
 import { v4 as uuidV4 } from "uuid";
-=======
-import { uuid } from 'uuidv4';
->>>>>>> Create item.js
 
 const shippoAddressFrom  = {
     name: "Shawn Ippotle",
@@ -42,13 +38,8 @@ const shippoTransaction = {
 }
 
 const shippoAddress = {
-<<<<<<< HEAD
     contact_name:"Shawn Ippotle",
     company_name:"Shippo",
-=======
-    name:"Shawn Ippotle",
-    company:"Shippo",
->>>>>>> Create item.js
     street1:"215 Clayton St.",
     city:"San Francisco",
     state:"CA",
@@ -61,7 +52,6 @@ const shippoAddress = {
 const shippoShipment = {
     address_from: shippoAddressFrom,
     address_to: shippoAddressTo,
-<<<<<<< HEAD
     parcels: [shippoParcel],
     async: true
 }
@@ -105,15 +95,6 @@ const shippoShipmentTesting = {
 const shippoCarrierAccount = {
     carrier:"fedex", 
     account_id: uuidV4(), 
-=======
-    parcels: shippoParcel,
-    async: true
-}
-
-const shippoCarrierAccount = {
-    carrier:"fedex", 
-    account_id: uuid(), 
->>>>>>> Create item.js
     parameters:{ "meter": "789987" },
     active: true,
     test:true
@@ -128,7 +109,6 @@ const shippoManifest = {
     ]
 }
 
-<<<<<<< HEAD
 const shippoLabelCreation = {
     shipment: {
         shipTo: {
@@ -175,8 +155,6 @@ const shippoLabelCreation = {
     serviceToken: "usps_priority"
 }
 
-=======
->>>>>>> Create item.js
 export { 
     shippoAddress,
     shippoTransaction,
@@ -186,9 +164,6 @@ export {
     shippoShipment,
     shippoCarrierAccount,
     shippoManifest,
-<<<<<<< HEAD
     shippoShipmentTesting,
     shippoLabelCreation
-=======
->>>>>>> Create item.js
 }
