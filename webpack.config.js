@@ -34,7 +34,6 @@ module.exports = {
   entry: files,
   plugins,
   output: {
-   
     path: path.resolve(__dirname, "dist"),
     filename: `[name]${isProduction ? "" : "-local"}.js`
   },
@@ -45,33 +44,34 @@ module.exports = {
         test: /\.m?js$/,
         exclude: /(node_modules|bower_components)/,
         use: {
-          loader: 'babel-loader',
+          loader: "babel-loader",
           options: {
-            presets: [[
-              '@babel/preset-env',
-              {
-                targets: {
-                  esmodules: true,
-                },
-              },
-            ]]
+            presets: [
+              [
+                "@babel/preset-env",
+                {
+                  targets: {
+                    esmodules: true
+                  }
+                }
+              ]
+            ]
           }
         }
       },
-     
-      { 
+
+      {
         test: /\.graphql?$/,
         use: [
           {
-            loader: 'webpack-graphql-loader'
+            loader: "webpack-graphql-loader"
           }
         ]
-        
       }
     ]
   },
   resolve: {
-    extensions: [".js", ".ts", ".tsx", ".json", ".graphql",".gql"]
+    extensions: [".js", ".ts", ".tsx", ".json", ".graphql", ".gql"]
   },
   node: {
     __dirname: true
@@ -80,9 +80,7 @@ module.exports = {
   target: "node"
 };
 
-const installedModules = [
- 
-];
+const installedModules = [];
 
 if (isProduction) {
   console.log("prepare file for production env!");

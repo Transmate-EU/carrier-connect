@@ -1,0 +1,8 @@
+dist/
+dist/*
+transmateSchemas/*
+**/dist/*.js
+**/node_modules/*
+**/not-used/*
+actions/*
+**/actions/*.js
