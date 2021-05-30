@@ -1,12 +1,7 @@
-<<<<<<< HEAD
-import api from '../functions/rest';
-import chai from 'chai';
 
-=======
 import api from '../functions/api';
 import chai from 'chai';
 import { envFile } from './test.data';
->>>>>>> fix webpack and package.json
 import { 
     shippoAddress,
     shippoShipmentTesting,
@@ -14,10 +9,6 @@ import {
  } from '../data/shippo';
 
 const { expect } = chai;
-<<<<<<< HEAD
-const envFile  =require( '../.env.json');
-=======
->>>>>>> fix webpack and package.json
 
 describe("Test shippo API", function () {
     describe('should test(labels, rates, manifest and shipments)', function() {

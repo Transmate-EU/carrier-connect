@@ -8,38 +8,11 @@ import {
     postmenTracking
 } from '../data/postmen';
 import resolvers from '../resolvers/resolvers';
-<<<<<<< HEAD
-
-const envFile  =require( '../.env.json');
-
-const { expect } = chai;
-
-describe('Testing postmen Resolvers', function() {
-    describe('Get postmen rates', function() {
-      it('should get all rates', async () => {
-        const postmenRates = await resolvers.Query.rates(null, {type: 'postmen', shipment: postmenCalculateRate}, envFile);
-        expect(postmenRates[0]).to.have.property('chargeWeight');
-        expect(postmenRates[0]).to.have.property('totalCharge');
-        expect(postmenRates[0].totalCharge).to.have.property('amount');
-        expect(postmenRates[0].totalCharge).to.have.property('currency');
-        expect(postmenRates[0].totalCharge.currency).to.be.equal('USD');
-      });
-      it('should not get all rates when not provided shipment', async () => {
-        try {
-            await resolvers.Query.rates(null, {type: 'postmen', shipment: {}}, envFile);
-        } catch (error){
-            const errorInArray = JSON.parse(error.message);
-            expect(errorInArray.length).to.have.to.be.greaterThan(0);
-            expect(errorInArray[0]).to.be.equal("Cannot read property 'shipFrom' of undefined");
-        }  
-      });
-    });
-
-=======
 import { envFile } from './test.data';
 
 const { expect } = chai;
 
+
 describe('Testing postmen Resolvers', function() {
     describe('Get postmen rates', function() {
       it('should get all rates', async () => {
@@ -61,7 +34,6 @@ describe('Testing postmen Resolvers', function() {
       });
     });
 
->>>>>>> fix webpack and package.json
     describe('Get postmen labels', function() {
       it('should create label', async () => {
         const postmenLabel = await resolvers.Mutation.createLabel(null, {type: 'postmen', label: postmenCreateLabel}, envFile);

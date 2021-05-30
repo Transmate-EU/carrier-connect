@@ -1,8 +1,4 @@
-<<<<<<< HEAD
-import api from '../functions/rest';
-=======
 import api from '../functions/api';
->>>>>>> fix webpack and package.json
 import chai from 'chai';
 
 import { 
@@ -11,11 +7,7 @@ import {
     postmenCreateLabel,
     postmenManifestReq,
 } from '../data/postmen'
-<<<<<<< HEAD
-const envFile  =require( '../.env.json');
-=======
 import { envFile } from './test.data';
->>>>>>> fix webpack and package.json
 
 const { expect } = chai;
 
