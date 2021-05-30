@@ -10,7 +10,7 @@ if (isProduction) {
 }
 
 const files = {
-  rest: "./functions/main.js",
+  rest: "./functions/rest.js",
   graphql: "./functions/graphql.js"
 };
 
