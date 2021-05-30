@@ -13,7 +13,8 @@
     "gql-test": "mocha --require @babel/register ./tests/gql --timeout 30000 --exit",
     "gql-test-webpack": "npm run build-test && WEBPACK_TEST=yes && mocha ./tests/gql --timeout 30000 --exit",
     "start-prod": "node dist/main-local.js",
-    "deploy": "ibmcloud fn action update dev dist/main-local.js --web true"
+    "deploy": "ibmcloud fn action update dev dist/rest-local.js --web true",
+    "deploy-graphql": "ibmcloud fn action update graphql dist/graphql-local.js --web true"
   },
   "repository": {
     "type": "git",
