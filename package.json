@@ -34,6 +34,7 @@
     "@easypost/api": "^3.10.1",
     "ajv": "^6.12.6",
     "axios": "^0.21.1",
+    "dotenv": "^10.0.0",
     "graphql": "^15.5.0",
     "graphql-tools": "^7.0.5",
     "lodash.get": "^4.4.2",
