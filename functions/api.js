@@ -13,7 +13,7 @@ async function main(params) {
     try {
         switch (true){
             case type === "rates":
-                var rates = await Shipment.getRates(request.type, request.shipment);
+                var rates = await new Shipment().getRates(request.type, request.shipment);
                 if (rates.errors.length > 0){
                     statusCode = 500;
                     throw new Error(JSON.stringify(rates.errors));
@@ -21,7 +21,7 @@ async function main(params) {
                 result = rates.data.rates
                 break
             case type === "labels":
-                var labels = await Shipment.getLabels(request.type);
+                var labels = await new Shipment().getLabels(request.type);
                 if (labels.errors.length > 0){
                     statusCode = 500;
                     throw new Error(JSON.stringify(labels.errors));
@@ -29,7 +29,7 @@ async function main(params) {
                 result = labels.data.labels;
                 break
             case type === "manifests":
-                var manifests = await Shipment.getAllManifests(request.type);
+                var manifests = await new Shipment().getAllManifests(request.type);
                 if (manifests.errors.length > 0){
                     statusCode = 500;
                     throw new Error(JSON.stringify(manifests.errors));
@@ -37,7 +37,7 @@ async function main(params) {
                 result = manifests.data.manifests
                 break
             case type === "manifest":
-                var manifest = await Shipment.getManifest(request.type, request.manifestId);
+                var manifest = await new Shipment().getManifest(request.type, request.manifestId);
                 if (manifest.errors.length > 0){
                     statusCode = 500;
                     throw new Error(JSON.stringify(manifest.errors));
@@ -45,7 +45,7 @@ async function main(params) {
                 result = manifest.data
                 break
             case type === "trackings":
-                var trackings = await Shipment.getTrackings(request.type);
+                var trackings = await new Shipment().getTrackings(request.type);
                 if (trackings.errors.length > 0){
                     statusCode = 500;
                     throw new Error(JSON.stringify(trackings.errors));
@@ -53,7 +53,7 @@ async function main(params) {
                 result = trackings.data.trackings
                 break
             case type === "trackingStatus":
-                var tracking = await Shipment.getTracking(request.type, request.tracking);
+                var tracking = await new Shipment().getTracking(request.type, request.tracking);
                 if (tracking.errors.length > 0){
                     statusCode = 500;
                     throw new Error(JSON.stringify(tracking.errors));
@@ -61,7 +61,7 @@ async function main(params) {
                 result = tracking.data.tracking
                 break
             case type === "shipments":
-                var shipments = await Shipment.getShipments(request.type);
+                var shipments = await new Shipment().getShipments(request.type);
                 if (shipments.errors.length > 0){
                     statusCode = 500;
                     throw new Error(JSON.stringify(shipments.errors));
@@ -69,7 +69,7 @@ async function main(params) {
                 result = shipments.data.shipments;
                 break
             case type === "createShipment":
-                var shipment = await Shipment.createShipment(request.type, request.shipment);
+                var shipment = await new Shipment().createShipment(request.type, request.shipment);
                 if (shipment.errors.length > 0){
                     statusCode = 500;
                     throw new Error(JSON.stringify(shipment.errors));
@@ -77,7 +77,7 @@ async function main(params) {
                 result = shipment.data.shipment
                 break
             case type === "validateAddress":
-                var address = await Shipment.validateAddress(request.type, request.address);
+                var address = await new Shipment().validateAddress(request.type, request.address);
                 if (address.errors.length > 0){
                     statusCode = 500;
                     throw new Error(JSON.stringify(address.errors));
@@ -85,7 +85,7 @@ async function main(params) {
                 result = address.data
                 break
             case type === "createLabel":
-                var label = await Shipment.createLabel(request.type, request.label);
+                var label = await new Shipment().createLabel(request.type, request.label);
                 if (label.errors.length > 0){
                     statusCode = 500;
                     throw new Error(JSON.stringify(label.errors));
@@ -93,7 +93,7 @@ async function main(params) {
                 result = label.data
                 break
             case type === "createManifest":
-                var manifest = await Shipment.createManifest(request.type, request.manifest);
+                var manifest = await new Shipment().createManifest(request.type, request.manifest);
                 if (manifest.errors.length > 0){
                     statusCode = 500;
                     throw new Error(JSON.stringify(manifest.errors));
@@ -101,7 +101,7 @@ async function main(params) {
                 result = manifest.data
                 break
             case type === "createTracking":
-                var tracking = await Shipment.createTracking(request.type, request.tracking);
+                var tracking = await new Shipment().createTracking(request.type, request.tracking);
                 if (tracking.errors.length > 0){
                     statusCode = 500;
                     throw new Error(JSON.stringify(tracking.errors));
@@ -109,7 +109,7 @@ async function main(params) {
                 result = tracking.data.tracking;
                 break
             case type === "cancelOrDeleteLabel":
-                var label = await Shipment.deleteLabel(request.type, request.labelId);
+                var label = await new Shipment().deleteLabel(request.type, request.labelId);
                 if (label.errors.length > 0){
                     statusCode = 500;
                     throw new Error(JSON.stringify(label.errors));
@@ -117,7 +117,7 @@ async function main(params) {
                 result = label.data;
                 break
             case type === "createAddress":
-                var address = await Shipment.createAddress(request.type, request.address);
+                var address = await new Shipment().createAddress(request.type, request.address);
                 if (address.errors.length > 0){
                     statusCode = 500;
                     throw new Error(JSON.stringify(address.errors));
