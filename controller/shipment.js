@@ -16,7 +16,7 @@ import {
 } from "../schemas/schemas";
 
 class Shipment {
-    constructor() {
+    constructor(context={}) {
         this.postmenURL = process.env.NODE_ENV === "testing" ? process.env.POSTMEN_SANDBOX_URL : process.env.POSTMEN_PROD_URL;
         const shippoApiKey = process.env.NODE_ENV === "testing" ? process.env.SHIPPO_TEST_API_KEY : process.env.SHIPPO_PROD_API_KEY;
         const postmentApiKey = process.env.NODE_ENV === "testing" ? process.env.POSTMENT_TEST_API_KEY : process.env.POSTMENT_PROD_API_KEY

@@ -46,6 +46,7 @@ async function start() {
   }));
 
   app.listen(4001);
+  console.log("server running on /graphql port 4001")
 }
 
 start();
