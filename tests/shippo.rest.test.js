@@ -1,3 +1,4 @@
+
 import api from '../functions/rest';
 import chai from 'chai';
 import { envFile } from './test.data';
@@ -6,7 +7,6 @@ import {
     shippoShipmentTesting,
     shippoLabelCreation
  } from '../data/shippo';
-
 const { expect } = chai;
 
 describe("Test shippo API", function () {
