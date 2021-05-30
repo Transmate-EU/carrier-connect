@@ -11,11 +11,7 @@
     "gql-function": "export DEBUG='*,-babel*,-nodemon*' && nodemon ./functions/graphql.js --exec babel-node",
     "gql-test": "mocha --require @babel/register ./tests/gql --timeout 30000 --exit",
     "gql-test-webpack": "npm run build-test && WEBPACK_TEST=yes && mocha ./tests/gql --timeout 30000 --exit",
-<<<<<<< HEAD
     "start-prod": "node dist/graphql-local.js",
-=======
-    "start-prod": "node dist/main-local.js",
->>>>>>> step v1 test-fix
     "deploy": "ibmcloud fn action update dev dist/rest-local.js --web true",
     "deploy-graphql": "ibmcloud fn action update graphql dist/graphql-local.js --web true",
     "start": "nodemon ./index.js --exec babel-node"
