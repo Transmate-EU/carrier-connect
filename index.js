@@ -1,3 +1,6 @@
 import Shipment from "./controller/shipment";
 
-export default Shipment;
+const { rest } = require("./functions/rest");
+const { gqlResolve } = require("./functions/graphql");
+
+export { Shipment, rest, gqlResolve };

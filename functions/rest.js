@@ -1,7 +1,7 @@
 import { setEnv } from "./setEnv";
 import Shipment from "../controller/shipment";
 
-async function main(params) {
+async function rest(params) {
   let result;
   let statusCode;
   let warnings;
@@ -183,6 +183,6 @@ async function main(params) {
   };
 }
 
-global.main = main;
+global.main = rest;
 
-exports.main = main;
+exports.rest = rest;
