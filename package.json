@@ -5,13 +5,17 @@
   "main": "index.js",
   "scripts": {
     "build": "export NODE_ENV=production && webpack --config webpack.config.js",
-    "build-test": "export NODE_ENV=test WEBPACK_TEST=yes && webpack --config webpack.config.js",
+    "build-test": "export NODE_ENV=testing WEBPACK_TEST=yes && webpack --config webpack.config.js",
     "test": "NODE_ENV=testing mocha --require @babel/register ./tests --timeout 30000 --exit",
     "start-gql-server": "export DEBUG='*,-babel*,-nodemon*,-express*' && nodemon ./server.js --exec babel-node",
     "gql-function": "export DEBUG='*,-babel*,-nodemon*' && nodemon ./functions/graphql.js --exec babel-node",
     "gql-test": "mocha --require @babel/register ./tests/gql --timeout 30000 --exit",
     "gql-test-webpack": "npm run build-test && WEBPACK_TEST=yes && mocha ./tests/gql --timeout 30000 --exit",
+<<<<<<< HEAD
     "start-prod": "node dist/main-local.js",
+=======
+    "start-prod": "node dist/graphql-local.js",
+>>>>>>> fix webpack and package.json
     "deploy": "ibmcloud fn action update dev dist/rest-local.js --web true",
     "deploy-graphql": "ibmcloud fn action update graphql dist/graphql-local.js --web true"
   },
