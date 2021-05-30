@@ -1,5 +1,3 @@
-import server from "./server";
+import Shipment from "./controller/shipment";
 
-server.listen({ port: 4000 }).then(({ url }) => {
-    console.log(`🚀  Server ready at ${url}`);
-});
+export default Shipment;
