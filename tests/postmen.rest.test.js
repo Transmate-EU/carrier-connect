@@ -19,7 +19,7 @@ describe("Test postmen API", () => {
     let postmenManifest;
 
     it("should create label", async () => {
-      const response = await api.main({
+      const response = await api.rest({
         ...envFile,
         type: "createLabel",
         request: {
@@ -35,7 +35,7 @@ describe("Test postmen API", () => {
     });
 
     it("should get labels", async () => {
-      const response = await api.main({
+      const response = await api.rest({
         ...envFile,
         type: "labels",
         request: {
@@ -52,7 +52,7 @@ describe("Test postmen API", () => {
     });
 
     it("should validate address", async () => {
-      const response = await api.main({
+      const response = await api.rest({
         ...envFile,
         type: "validateAddress",
         request: {
@@ -69,7 +69,7 @@ describe("Test postmen API", () => {
     });
 
     it("should cancel label", async () => {
-      const response = await api.main({
+      const response = await api.rest({
         ...envFile,
         type: "cancelOrDeleteLabel",
         request: {
@@ -85,7 +85,7 @@ describe("Test postmen API", () => {
     });
 
     it("should calculate rates given a shipment", async () => {
-      const response = await api.main({
+      const response = await api.rest({
         ...envFile,
         type: "rates",
         request: {
@@ -101,7 +101,7 @@ describe("Test postmen API", () => {
     });
 
     it("should create manifest", async () => {
-      const response = await api.main({
+      const response = await api.rest({
         ...envFile,
         type: "createManifest",
         request: {
@@ -118,7 +118,7 @@ describe("Test postmen API", () => {
     });
 
     it("should get created manifest", async () => {
-      const response = await api.main({
+      const response = await api.rest({
         ...envFile,
         type: "manifest",
         request: {

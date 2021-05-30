@@ -15,13 +15,16 @@ import {
   shippoCreateLabelSchema
 } from "../schemas/schemas";
 
+const debug = require("debug")("shipmentController");
+
 class Shipment {
   constructor(context = {}) {
+    debug("shipment constructor called %o", context);
     this.postmenURL =
       process.env.NODE_ENV === "testing"
         ? process.env.POSTMEN_SANDBOX_URL
         : process.env.POSTMEN_PROD_URL;
-    const shippoApiKey =
+    this.shippoApiKey =
       process.env.NODE_ENV === "testing"
         ? process.env.SHIPPO_TEST_API_KEY
         : process.env.SHIPPO_PROD_API_KEY;
@@ -34,7 +37,7 @@ class Shipment {
         ? process.env.AFTER_SHIP_TEST_API_KEY
         : process.env.AFTER_SHIP_PROD_API_KEY;
 
-    this.shippo = shippoApi(shippoApiKey);
+    this.shippo = this.shippoApiKey ? shippoApi(this.shippoApiKey) : null;
     this.postmentCredentialHeaders = {
       headers: {
         "content-type": "application/json",
@@ -51,12 +54,13 @@ class Shipment {
 
     this.shippoCredentialHeaders = {
       headers: {
-        Authorization: `ShippoToken ${shippoApiKey}`
+        Authorization: `ShippoToken ${this.shippoApiKey}`
       }
     };
   }
 
   async createShipment(service, requestObject) {
+    debug("call shipment create  %o , with obj %o" , service, requestObject);
     /* 
             To create shippo shipment, we need to provide a body
             with the following properties(address_from, address_to,
@@ -109,9 +113,9 @@ class Shipment {
             errors
           };
         }
-
+        
         const shipment = await this.shippo.shipment.create(formatedObject);
-
+        debug("shippo return %o", shipment);
         return {
           data: {
             shipment: {

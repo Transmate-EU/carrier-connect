@@ -1,3 +1,5 @@
+/* eslint-disable no-var */
+/* eslint-disable vars-on-top */
 import { setEnv } from "./setEnv";
 import Shipment from "../controller/shipment";
 

@@ -1,6 +1,15 @@
 import chai from "chai";
-import api from "../functions/rest";
+const debug = require("debug")("test:rest");
+let api;
 
+console.log("test api rest");
+if (process.env.WEBPACK_TEST) {
+  api = require("../dist/rest-local.js");
+  console.log("webpack test", "api", api);
+} else {
+  api = require("../functions/rest.js");
+  console.log("normal test", "api", api);
+}
 import {
   shippoAddress,
   shippoShipmentTesting,
@@ -11,6 +20,7 @@ const envFile = require("../.env.json");
 
 const { expect } = chai;
 
+
 describe("Test shippo API", () => {
   describe("should test(labels, rates, manifest and shipments)", () => {
     let shippoShipment;
@@ -18,8 +28,8 @@ describe("Test shippo API", () => {
     let address;
     let shippoRate;
 
-    it("should create shipment", async () => {
-      const response = await api.main({
+    it.only("should create shipment", async () => {
+      const response = await api.rest({
         ...envFile,
         type: "createShipment",
         request: {
@@ -27,7 +37,7 @@ describe("Test shippo API", () => {
           shipment: shippoShipmentTesting
         }
       });
-
+      debug("create shipment return %o", response);
       shippoShipment = response.body.result;
       expect(shippoShipment).to.have.property("id");
       expect(shippoShipment).to.have.property("status");
@@ -36,7 +46,7 @@ describe("Test shippo API", () => {
     });
 
     it("should calculate rate", async () => {
-      const response = await api.main({
+      const response = await api.rest({
         ...envFile,
         type: "rates",
         request: {
@@ -53,7 +63,7 @@ describe("Test shippo API", () => {
     });
 
     it("should create label", async () => {
-      const response = await api.main({
+      const response = await api.rest({
         ...envFile,
         type: "createLabel",
         request: {
@@ -72,7 +82,7 @@ describe("Test shippo API", () => {
     });
 
     it("should create address", async () => {
-      const response = await api.main({
+      const response = await api.rest({
         ...envFile,
         type: "createAddress",
         request: {
@@ -89,7 +99,7 @@ describe("Test shippo API", () => {
     });
 
     it("should validate address", async () => {
-      const response = await api.main({
+      const response = await api.rest({
         ...envFile,
         type: "validateAddress",
         request: {
@@ -104,7 +114,7 @@ describe("Test shippo API", () => {
     });
 
     it("should refund/cancel label", async () => {
-      const response = await api.main({
+      const response = await api.rest({
         ...envFile,
         type: "cancelOrDeleteLabel",
         request: {
@@ -119,7 +129,7 @@ describe("Test shippo API", () => {
     });
 
     it("should get tracking status label", async () => {
-      const response = await api.main({
+      const response = await api.rest({
         ...envFile,
         type: "trackingStatus",
         request: {
