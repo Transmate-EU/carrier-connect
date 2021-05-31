@@ -1,6 +1,7 @@
 const path = require("path");
 const webpack = require("webpack");
 const { BundleAnalyzerPlugin } = require("webpack-bundle-analyzer");
+const nodeExternals = require("webpack-node-externals");
 
 const isProduction = process.env.NODE_ENV === "production";
 if (isProduction) {
@@ -10,6 +11,7 @@ if (isProduction) {
 }
 
 const files = {
+  index: "./index.js",
   rest: "./functions/rest.js",
   graphql: "./functions/graphql.js"
 };
@@ -76,7 +78,9 @@ module.exports = {
   node: {
     __dirname: true
   },
-  externals: { saslprep: "require('saslprep')" },
+  externals: isProduction
+    ? { saslprep: "require('saslprep')" }
+    : [nodeExternals()],
   target: "node"
 };
 

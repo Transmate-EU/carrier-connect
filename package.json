@@ -5,10 +5,9 @@
   },
   "version": "1.0.2",
   "description": "module to connect to carriers",
-  "main": "index.js",
+  "main": "dist/index-local.js",
   "scripts": {
     "build": "export NODE_ENV=production && webpack --config webpack.config.js",
-    "pack": "babel root --presets babel-preset-es2015 --out-dir distribution",
     "build-test": "export NODE_ENV=testing WEBPACK_TEST=yes && webpack --config webpack.config.js",
     "test": "SANDBOX=true mocha --require @babel/register ./tests --timeout 30000 --exit",
     "test-webpack": "SANDBOX=true DEBUG='*,-babel*,-nodemon*,-mocha*,-follow-redirects*'  WEBPACK_TEST=yes mocha --require @babel/register ./tests --timeout 30000 --exit",
@@ -57,8 +56,6 @@
     "@babel/core": "^7.14.3",
     "@babel/plugin-transform-runtime": "^7.14.3",
     "@babel/preset-env": "^7.14.2",
-    "apollo-server": "^2.24.0",
-    "apollo-server-express": "^2.24.0",
     "babel-eslint": "^10.1.0",
     "babel-loader": "^8.2.2",
     "babel-plugin-import-graphql": "^2.8.1",
@@ -81,6 +78,7 @@
     "webpack": "^5.37.0",
     "webpack-bundle-analyzer": "^4.4.1",
     "webpack-cli": "^4.7.0",
-    "webpack-graphql-loader": "^1.0.2"
+    "webpack-graphql-loader": "^1.0.2",
+    "webpack-node-externals": "^3.0.0"
   }
 }
