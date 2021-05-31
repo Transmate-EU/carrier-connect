@@ -1,3 +1,4 @@
+/* eslint-disable mocha/no-mocha-arrows */
 import chai from "chai";
 
 import {
@@ -43,7 +44,7 @@ describe("Testing postmen Resolvers", () => {
     });
   });
 
-  describe("Get postmen labels", () => {
+  describe("Create postmen labels", () => {
     it("should create label", async () => {
       const postmenLabel = await resolvers.Mutation.createLabel(
         null,

@@ -1,3 +1,4 @@
+/* eslint-disable mocha/no-mocha-arrows */
 /* eslint-disable global-require */
 import chai from "chai";
 import { setEnv } from "../../functions/setEnv";

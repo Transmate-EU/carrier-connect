@@ -85,6 +85,7 @@ const installedModules = [];
 if (isProduction) {
   console.log("prepare file for production env!");
   installedModules.forEach(
+    // eslint-disable-next-line no-return-assign
     nodeModule =>
       (module.exports.externals[nodeModule] = `commonjs ${nodeModule}`)
   ); // don't bundle externals; leave as require('module')

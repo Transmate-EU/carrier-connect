@@ -201,6 +201,8 @@ class Shipment {
           errors: []
         };
       }
+
+      throw Error(service, " : not a valid service type!");
     } catch (error) {
       if (error.response) {
         return {
@@ -272,6 +274,7 @@ class Shipment {
           errors: []
         };
       }
+      throw Error(service, " : not a valid service type!");
     } catch (error) {
       if (error.response) {
         return {
@@ -392,6 +395,7 @@ class Shipment {
           errors: []
         };
       }
+      throw Error(service, " : not a valid service type!");
     } catch (error) {
       if (error.response) {
         return {
@@ -549,6 +553,7 @@ class Shipment {
           errors: []
         };
       }
+      throw Error(service, " : not a valid service type!");
     } catch (error) {
       if (error.detail) {
         return {
@@ -626,6 +631,7 @@ class Shipment {
           errors: []
         };
       }
+      throw Error(service, " : not a valid service type!");
     } catch (error) {
       if (error.response) {
         return {
@@ -750,6 +756,7 @@ class Shipment {
           errors: []
         };
       }
+      throw Error(service, " : not a valid service type!");
     } catch (error) {
       if (error.response) {
         return {
@@ -935,6 +942,7 @@ class Shipment {
           errors: []
         };
       }
+      throw Error(service, " : not a valid service type!");
     } catch (error) {
       if (error.response) {
         return {
@@ -1043,6 +1051,7 @@ class Shipment {
           errors: []
         };
       }
+      throw Error(service, " : not a valid service type!");
     } catch (error) {
       if (error.response) {
         return {
@@ -1138,6 +1147,7 @@ class Shipment {
           errors: []
         };
       }
+      throw Error(service, " : not a valid service type!");
     } catch (error) {
       if (error.response) {
         return {
@@ -1226,6 +1236,7 @@ class Shipment {
           errors: []
         };
       }
+      throw Error(service, " : not a valid service type!");
     } catch (error) {
       if (error.response) {
         return {
@@ -1348,6 +1359,7 @@ class Shipment {
           errors: []
         };
       }
+      throw Error(service, " : not a valid service type!");
     } catch (error) {
       if (error.response) {
         return {
@@ -1434,6 +1446,7 @@ class Shipment {
           errors: []
         };
       }
+      throw Error(service, " : not a valid service type!");
     } catch (error) {
       if (error.response) {
         return {
@@ -1547,6 +1560,7 @@ class Shipment {
           errors: []
         };
       }
+      throw Error(service, " : not a valid service type!");
     } catch (error) {
       if (error.response) {
         return {
@@ -1708,6 +1722,7 @@ class Shipment {
           errors: []
         };
       }
+      throw Error(service, " : not a valid service type!");
     } catch (error) {
       if (error.response) {
         return {
@@ -1788,6 +1803,7 @@ class Shipment {
           errors: []
         };
       }
+      throw Error(service, " : not a valid service type!");
     } catch (error) {
       if (error.detail) {
         return {

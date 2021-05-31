@@ -1,3 +1,4 @@
+/* eslint-disable global-require */
 /* eslint-disable mocha/no-mocha-arrows */
 import chai from "chai";
 import { shippoAddress, shippoShipmentTesting } from "../data/shippo";
