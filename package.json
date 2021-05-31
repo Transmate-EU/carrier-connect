@@ -4,8 +4,8 @@
   "description": "module to connect to carriers",
   "main": "index.js",
   "scripts": {
-    "build": "export NODE_ENV=testing && webpack --config webpack.config.js",
-    "build-test": "export NODE_ENV=production WEBPACK_TEST=yes && webpack --config webpack.config.js",
+    "build": "export NODE_ENV=production && webpack --config webpack.config.js",
+    "build-test": "export NODE_ENV=testing WEBPACK_TEST=yes && webpack --config webpack.config.js",
     "test": "SANDBOX=true mocha --require @babel/register ./tests --timeout 30000 --exit",
     "test-webpack": "SANDBOX=true DEBUG='*,-babel*,-nodemon*,-mocha*,-follow-redirects*'  WEBPACK_TEST=yes mocha --require @babel/register ./tests --timeout 30000 --exit",
     "start-gql-server": "export DEBUG='*,-babel*,-nodemon*,-express*' && nodemon ./server.js --exec babel-node",

@@ -1,11 +1,7 @@
+/* eslint-disable mocha/no-mocha-arrows */
 import chai from "chai";
 
-import {
-  shippoShipment,
-  shippoAddress,
-  shippoShipmentTesting,
-  shippoLabelCreation
-} from "../data/shippo";
+import { shippoAddress, shippoShipmentTesting } from "../data/shippo";
 import resolvers from "../resolvers/resolvers";
 
 const envFile = require("../.env.json");
@@ -32,7 +28,7 @@ describe("Testing goshippo Resolvers", () => {
         envFile
       );
 
-      shippoRate = shippoRates[0];
+      [shippoRate] = shippoRates;
       expect(shipmentObj).to.have.property("id");
       expect(shipmentObj).to.have.property("createdAt");
       expect(shipmentObj).to.have.property("rates");
@@ -159,7 +155,7 @@ describe("Testing goshippo Resolvers", () => {
         const errorInArray = JSON.parse(error.message);
         expect(errorInArray.length).to.have.to.be.greaterThan(0);
         expect(errorInArray[0]).to.be.equal(
-          "Shippo: I require argument \"id\", but I got: undefined"
+          "Shippo: I require argument 'id', but I got: undefined"
         );
       }
     });

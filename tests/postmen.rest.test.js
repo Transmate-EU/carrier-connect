@@ -2,6 +2,14 @@
 /* eslint-disable mocha/no-mocha-arrows */
 
 import chai from "chai";
+
+import {
+  postmenAddress,
+  postmenCalculateRate,
+  postmenCreateLabel,
+  postmenManifestReq
+} from "../data/postmen";
+
 let api;
 
 console.log("test api rest");
@@ -13,18 +21,11 @@ if (process.env.WEBPACK_TEST) {
   console.log("normal test", "api", api);
 }
 
-import {
-  postmenAddress,
-  postmenCalculateRate,
-  postmenCreateLabel,
-  postmenManifestReq
-} from "../data/postmen";
-
 const envFile = require("../.env.json");
 
 const { expect } = chai;
 
-describe("Test postmen API", () => {
+describe("Test postmen REST API", () => {
   describe("should test(labels, rates, manifest and shipments)", () => {
     let postmenLabel;
     let postmenLabels;

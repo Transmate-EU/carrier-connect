@@ -1,6 +1,9 @@
 /* eslint-disable mocha/no-mocha-arrows */
 import chai from "chai";
+import { shippoAddress, shippoShipmentTesting } from "../data/shippo";
+
 const debug = require("debug")("test:rest");
+
 let api;
 
 console.log("test api rest");
@@ -11,18 +14,12 @@ if (process.env.WEBPACK_TEST) {
   api = require("../functions/rest.js");
   console.log("normal test", "api", api);
 }
-import {
-  shippoAddress,
-  shippoShipmentTesting,
-
-} from "../data/shippo";
 
 const envFile = require("../.env.json");
 
 const { expect } = chai;
 
-
-describe("Test shippo API", () => {
+describe("Test shippo REST API", () => {
   describe("should test(labels, rates, manifest and shipments)", () => {
     let shippoShipment;
     let shippoLabel;

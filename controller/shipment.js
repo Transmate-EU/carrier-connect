@@ -19,25 +19,23 @@ const debug = require("debug")("shipmentController");
 
 class Shipment {
   constructor(context = {}) {
-    debug("node env %o ", process.env.SANDBOX);
+    debug("SANDBOX? %o ", process.env.SANDBOX);
     debug("shipment constructor called %o", context);
-    this.postmenURL =
-      process.env.SANDBOX 
-        ? process.env.POSTMEN_SANDBOX_URL
-        : process.env.POSTMEN_PROD_URL;
+    const sandbox =
+      process.env.SANDBOX === true || process.env.SANDBOX === "true";
+    this.postmenURL = sandbox
+      ? process.env.POSTMEN_SANDBOX_URL
+      : process.env.POSTMEN_PROD_URL;
 
-    this.shippoApiKey =
-      process.env.SANDBOX 
-        ? process.env.SHIPPO_TEST_API_KEY
-        : process.env.SHIPPO_PROD_API_KEY;
-    const postmentApiKey =
-      process.env.SANDBOX
-        ? process.env.POSTMEN_TEST_API_KEY
-        : process.env.POSTMENT_PROD_API_KEY;
-    const afterShipApiKey =
-      process.env.SANDBOX 
-        ? process.env.AFTER_SHIP_TEST_API_KEY
-        : process.env.AFTER_SHIP_PROD_API_KEY;
+    this.shippoApiKey = sandbox
+      ? process.env.SHIPPO_TEST_API_KEY
+      : process.env.SHIPPO_PROD_API_KEY;
+    const postmentApiKey = sandbox
+      ? process.env.POSTMEN_TEST_API_KEY
+      : process.env.POSTMENT_PROD_API_KEY;
+    const afterShipApiKey = sandbox
+      ? process.env.AFTER_SHIP_TEST_API_KEY
+      : process.env.AFTER_SHIP_PROD_API_KEY;
 
     this.shippo = this.shippoApiKey ? shippoApi(this.shippoApiKey) : null;
     this.postmentCredentialHeaders = {
