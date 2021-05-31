@@ -37,7 +37,7 @@ module.exports = {
     path: path.resolve(__dirname, "dist"),
     filename: `[name]${isProduction ? "" : "-local"}.js`
   },
-  mode: "production",
+  mode: isProduction ? "production" : "development", //= node env
   module: {
     rules: [
       {

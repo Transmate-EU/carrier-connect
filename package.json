@@ -7,7 +7,7 @@
     "build": "export NODE_ENV=production && webpack --config webpack.config.js",
     "build-test": "export NODE_ENV=testing WEBPACK_TEST=yes && webpack --config webpack.config.js",
     "test": "NODE_ENV=testing mocha --require @babel/register ./tests --timeout 30000 --exit",
-    "test-webpack": "NODE_ENV=testing DEBUG='*,-babel*,-nodemon*,-mocha*'  WEBPACK_TEST=yes mocha --require @babel/register ./tests --timeout 30000 --exit",
+    "test-webpack": "NODE_ENV=testing DEBUG='*,-babel*,-nodemon*,-mocha*,-follow-redirects*'  WEBPACK_TEST=yes mocha --require @babel/register ./tests --timeout 30000 --exit",
     "start-gql-server": "export DEBUG='*,-babel*,-nodemon*,-express*' && nodemon ./server.js --exec babel-node",
     "gql-function": "export DEBUG='*,-babel*,-nodemon*' && nodemon ./functions/graphql.js --exec babel-node",
     "gql-test": "mocha --require @babel/register ./tests/gql --timeout 30000 --exit",

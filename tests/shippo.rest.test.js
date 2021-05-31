@@ -1,3 +1,4 @@
+/* eslint-disable mocha/no-mocha-arrows */
 import chai from "chai";
 const debug = require("debug")("test:rest");
 let api;
@@ -28,7 +29,7 @@ describe("Test shippo API", () => {
     let address;
     let shippoRate;
 
-    it.only("should create shipment", async () => {
+    it("should create shipment", async () => {
       const response = await api.rest({
         ...envFile,
         type: "createShipment",

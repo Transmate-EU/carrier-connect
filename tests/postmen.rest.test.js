@@ -1,5 +1,17 @@
+/* eslint-disable global-require */
+/* eslint-disable mocha/no-mocha-arrows */
+
 import chai from "chai";
-import api from "../functions/rest";
+let api;
+
+console.log("test api rest");
+if (process.env.WEBPACK_TEST) {
+  api = require("../dist/rest-local.js");
+  console.log("webpack test", "api", api);
+} else {
+  api = require("../functions/rest.js");
+  console.log("normal test", "api", api);
+}
 
 import {
   postmenAddress,

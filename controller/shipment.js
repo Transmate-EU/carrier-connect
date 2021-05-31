@@ -19,21 +19,23 @@ const debug = require("debug")("shipmentController");
 
 class Shipment {
   constructor(context = {}) {
+    debug("node env %o ", process.env.NODE_ENV);
     debug("shipment constructor called %o", context);
     this.postmenURL =
-      process.env.NODE_ENV === "testing"
+      process.env.NODE_ENV !== "production"
         ? process.env.POSTMEN_SANDBOX_URL
         : process.env.POSTMEN_PROD_URL;
+
     this.shippoApiKey =
-      process.env.NODE_ENV === "testing"
+      process.env.NODE_ENV !== "production"
         ? process.env.SHIPPO_TEST_API_KEY
         : process.env.SHIPPO_PROD_API_KEY;
     const postmentApiKey =
-      process.env.NODE_ENV === "testing"
+      process.env.NODE_ENV !== "production"
         ? process.env.POSTMENT_TEST_API_KEY
         : process.env.POSTMENT_PROD_API_KEY;
     const afterShipApiKey =
-      process.env.NODE_ENV === "testing"
+      process.env.NODE_ENV !== "production"
         ? process.env.AFTER_SHIP_TEST_API_KEY
         : process.env.AFTER_SHIP_PROD_API_KEY;
 
@@ -60,7 +62,7 @@ class Shipment {
   }
 
   async createShipment(service, requestObject) {
-    debug("call shipment create  %o , with obj %o" , service, requestObject);
+    debug("call shipment create  %o , with obj %o", service, requestObject);
     /* 
             To create shippo shipment, we need to provide a body
             with the following properties(address_from, address_to,
@@ -113,7 +115,7 @@ class Shipment {
             errors
           };
         }
-        
+
         const shipment = await this.shippo.shipment.create(formatedObject);
         debug("shippo return %o", shipment);
         return {
