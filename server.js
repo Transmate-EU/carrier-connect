@@ -30,7 +30,7 @@ async function start() {
         const env = {
           NODE_ENV: req.headers.node_env,
           POSTMEN_SANDBOX_URL: req.headers.postmen_sandbox_url,
-          POSTMENT_TEST_API_KEY: req.headers.postmen_test_api_key,
+          POSTMEN_TEST_API_KEY: req.headers.postmen_test_api_key,
           SHIPPO_TEST_API_KEY: req.headers.shippo_test_api_key,
           POSTMEN_PROD_URL: req.headers.postmen_prod_url,
           POSTMENT_PROD_API_KEY: req.headers.postmen_prod_api_key,

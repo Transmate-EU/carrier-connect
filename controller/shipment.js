@@ -32,7 +32,7 @@ class Shipment {
         : process.env.SHIPPO_PROD_API_KEY;
     const postmentApiKey =
       process.env.NODE_ENV !== "production"
-        ? process.env.POSTMENT_TEST_API_KEY
+        ? process.env.POSTMEN_TEST_API_KEY
         : process.env.POSTMENT_PROD_API_KEY;
     const afterShipApiKey =
       process.env.NODE_ENV !== "production"

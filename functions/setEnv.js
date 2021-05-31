@@ -4,9 +4,9 @@ exports.setEnv = (params = {}) => {
       params.POSTMEN_SANDBOX_URL || process.env.POSTMEN_SANDBOX_URL;
   }
 
-  if (params.POSTMENT_TEST_API_KEY || process.env.POSTMENT_TEST_API_KEY) {
-    process.env.POSTMENT_TEST_API_KEY =
-      params.POSTMENT_TEST_API_KEY || process.env.POSTMENT_TEST_API_KEY;
+  if (params.POSTMEN_TEST_API_KEY || process.env.POSTMEN_TEST_API_KEY) {
+    process.env.POSTMEN_TEST_API_KEY =
+      params.POSTMEN_TEST_API_KEY || process.env.POSTMEN_TEST_API_KEY;
   }
 
   if (params.SHIPPO_TEST_API_KEY || process.env.SHIPPO_TEST_API_KEY) {
