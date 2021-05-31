@@ -5,9 +5,9 @@ name: Node.js CI
 
 on:
   push:
-    branches: [ carrier-connect, main ]
+    branches: [ carrier-connect, main , master]
   pull_request:
-    branches: [carrier-connect , main ]
+    branches: [carrier-connect , main , master]
 
 jobs:
   build:
