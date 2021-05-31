@@ -204,7 +204,7 @@ describe("Testing goshippo Resolvers", () => {
       );
       expect(canceledLabel).to.have.property("id");
       expect(canceledLabel).to.have.property("status");
-     // expect(canceledLabel.status).to.be.equal("QUEUED");
+      // expect(canceledLabel.status).to.be.equal("QUEUED");
     });
     it("should not cancel goshippo label if wrong id is provided", async () => {
       try {
