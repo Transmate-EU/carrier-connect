@@ -28,6 +28,7 @@ jobs:
     - name: Setup .env
       run: |
         touch .env
+        echo SANDBOX=true >> .env
         echo POSTMEN_SANDBOX_URL=https://sandbox-api.postmen.com/v3 >> .env
         echo POSTMEN_TEST_API_KEY=cb8630a0-aeb0-432b-ad1d-f16af2cb8f12 >> .env
         echo SHIPPO_TEST_API_KEY=shippo_test_32d7b1793f03f4b494877236d069fa3d1f989a58 >> .env
