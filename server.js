@@ -28,7 +28,7 @@ async function start() {
       graphiql: true,
       context: ({ req }) => {
         const env = {
-          NODE_ENV: req.headers.node_env,
+          SANDBOX: req.headers.sandbox,
           POSTMEN_SANDBOX_URL: req.headers.postmen_sandbox_url,
           POSTMEN_TEST_API_KEY: req.headers.postmen_test_api_key,
           SHIPPO_TEST_API_KEY: req.headers.shippo_test_api_key,

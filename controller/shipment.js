@@ -19,23 +19,23 @@ const debug = require("debug")("shipmentController");
 
 class Shipment {
   constructor(context = {}) {
-    debug("node env %o ", process.env.NODE_ENV);
+    debug("node env %o ", process.env.SANDBOX);
     debug("shipment constructor called %o", context);
     this.postmenURL =
-      process.env.NODE_ENV !== "production"
+      process.env.SANDBOX 
         ? process.env.POSTMEN_SANDBOX_URL
         : process.env.POSTMEN_PROD_URL;
 
     this.shippoApiKey =
-      process.env.NODE_ENV !== "production"
+      process.env.SANDBOX 
         ? process.env.SHIPPO_TEST_API_KEY
         : process.env.SHIPPO_PROD_API_KEY;
     const postmentApiKey =
-      process.env.NODE_ENV !== "production"
+      process.env.SANDBOX
         ? process.env.POSTMEN_TEST_API_KEY
         : process.env.POSTMENT_PROD_API_KEY;
     const afterShipApiKey =
-      process.env.NODE_ENV !== "production"
+      process.env.SANDBOX 
         ? process.env.AFTER_SHIP_TEST_API_KEY
         : process.env.AFTER_SHIP_PROD_API_KEY;
 

@@ -1,4 +1,8 @@
 exports.setEnv = (params = {}) => {
+  if (params.SANDBOX || process.env.SANDBOX) {
+    process.env.POSTMEN_SANDBOX_URL =
+      params.SANDBOX || process.env.SANDBOX;
+  }
   if (params.POSTMEN_SANDBOX_URL || process.env.POSTMEN_SANDBOX_URL) {
     process.env.POSTMEN_SANDBOX_URL =
       params.POSTMEN_SANDBOX_URL || process.env.POSTMEN_SANDBOX_URL;
