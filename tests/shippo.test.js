@@ -155,7 +155,8 @@ describe("Testing goshippo Resolvers", () => {
         const errorInArray = JSON.parse(error.message);
         expect(errorInArray.length).to.have.to.be.greaterThan(0);
         expect(errorInArray[0]).to.be.equal(
-          "Shippo: I require argument 'id', but I got: undefined"
+          // eslint-disable-next-line prettier/prettier
+          "Shippo: I require argument \"id\", but I got: undefined"
         );
       }
     });
