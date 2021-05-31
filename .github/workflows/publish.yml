@@ -1,0 +1,56 @@
+name: "Bump Version test, and publish"
+
+on:
+  push:
+    branches:
+      - "master"
+
+jobs:
+
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-node@v1
+        with:
+          node-version: 12
+      - run: npm ci
+      - run: echo ${{secrets.FUNCTION_ENV}} > .env.json
+      - run: npm test
+      - run: npm run buildwebpacktest
+
+  bump-version:
+    name: "Bump Version on master"
+    runs-on: ubuntu-latest
+    needs: test
+    steps:
+      - name: "Checkout source code"
+        uses: "actions/checkout@v2"
+        with:
+          ref: ${{ github.ref }}
+      - name: "cat package.json"
+        run: cat ./package.json
+      - name: "Setup Node.js"
+        uses: "actions/setup-node@v1"
+        with:
+          node-version: 12
+      - name: "Automated Version Bump"
+        uses: "phips28/gh-action-bump-version@master"
+        with:
+          tag-prefix: ''
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: "cat package.json"
+        run: cat ./package.json
+  publish:
+    needs: bump-version
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-node@v1
+        with:
+          node-version: 12
+          registry-url: https://npm.pkg.github.com/
+      - run: npm publish
+        env:
+          NODE_AUTH_TOKEN: ${{secrets.GITHUB_TOKEN}}

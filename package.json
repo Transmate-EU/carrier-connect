@@ -1,6 +1,10 @@
 {
-  "name": "carrier-connect",
-  "version": "1.0.0",
+
+  "name": "@transmate-eu/carrier-connect",
+  "publishConfig": {
+    "registry": "https://npm.pkg.github.com"
+  },
+  "version": "1.0.1",
   "description": "module to connect to carriers",
   "main": "index.js",
   "scripts": {
