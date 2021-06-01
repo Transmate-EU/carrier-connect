@@ -3,16 +3,19 @@
 import { setEnv } from "./setEnv";
 import Shipment from "../controller/shipment";
 
+const debug = require("debug")("restEndpoint");
+
 async function rest(params) {
   let result;
   let statusCode;
   let warnings;
-
+  debug("rest call with params %o ", params);
   setEnv(params);
 
   const { type, request } = params;
 
   try {
+    if (typeof request !== "object") throw Error("missing request obj!");
     switch (true) {
       case type === "rates":
         var rates = await new Shipment().getRates(
@@ -187,4 +190,4 @@ async function rest(params) {
 
 
 
-export {rest} ;
+export { rest };
