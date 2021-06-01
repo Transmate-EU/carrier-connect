@@ -4,7 +4,7 @@ const debug = require("debug")("restEndpoint");
 
 async function rest(params) {
   let result;
-  let statusCode;
+  let statusCode = 400 ;
   let warnings;
   let response;
   debug("rest call with params %o ", params);
@@ -86,7 +86,7 @@ async function rest(params) {
         result = response.data.address;
         break;
       default:
-        statusCode = 500;
+        statusCode = 400;
         throw new Error("Unknown type used");
     }
     if (response.errors.length > 0) {

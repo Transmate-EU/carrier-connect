@@ -26,7 +26,19 @@ describe("Test shippo REST API", () => {
     let shippoLabel;
     let address;
     let shippoRate;
-
+    it("should error, no env", async () => {
+      const response = await api.rest({
+        type: "createShipment",
+        request: {
+          type: "shippo",
+          shipment: shippoShipmentTesting
+        }
+      });
+      debug("create shipment return %o", response);
+      shippoShipment = response.body.result;
+      expect(response.statusCode).to.be.equal(400);
+      expect(response.body.error.message).to.equal("check keys for shippo!");
+    });
     it("should create shipment", async () => {
       const response = await api.rest({
         ...envFile,
