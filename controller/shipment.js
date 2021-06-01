@@ -18,15 +18,18 @@ import {
 
 const debug = require("debug")("shipmentController");
 
+const POSTMEN_SANDBOX_URL = "https://sandbox-api.postmen.com/v3";
+const POSTMEN_PROD_URL = "https://prod-api.postmen.com/v3";
+const SHIPPO_URL = "https://api.goshippo.com/";
+const AFTER_SHIP_URL = "https://api.aftership.com/v4";
+
 class Shipment {
   constructor(service, context = process.env || {}) {
     debug("shipment constructor called %o", context);
     debug("SANDBOX? %o ", context.SANDBOX);
 
     const sandbox = context.SANDBOX === true || context.SANDBOX === "true";
-    this.postmenUrl = sandbox
-      ? context.POSTMEN_SANDBOX_URL
-      : context.POSTMEN_PROD_URL;
+    this.postmenUrl = sandbox ? POSTMEN_SANDBOX_URL : POSTMEN_PROD_URL;
 
     this.shippoApiKey = sandbox
       ? context.SHIPPO_TEST_API_KEY
@@ -39,14 +42,14 @@ class Shipment {
       : context.AFTER_SHIP_PROD_API_KEY;
 
     this.shippo = this.shippoApiKey ? shippoApi(this.shippoApiKey) : null;
-    this.shippoUrl = context.SHIPPO_URL;
+    this.shippoUrl = SHIPPO_URL;
     this.postmentCredentialHeaders = {
       headers: {
         "content-type": "application/json",
         "postmen-api-key": this.postmentApiKey
       }
     };
-    this.afterShipUrl = context.AFTER_SHIP_URL;
+    this.afterShipUrl = AFTER_SHIP_URL;
     this.afterShipHeaders = {
       headers: {
         "Content-Type": "application/json",
