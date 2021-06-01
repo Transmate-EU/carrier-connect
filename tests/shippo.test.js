@@ -69,13 +69,16 @@ describe("Testing goshippo Resolvers", () => {
 
   describe("Get goshippo labels", () => {
     it("should get labels", async () => {
-      shippoLabel = await resolvers.Mutation.createLabel(null, {
-        type: "shippo",
-        label: {
-          rate: shippoRate.id
+      shippoLabel = await resolvers.Mutation.createLabel(
+        null,
+        {
+          type: "shippo",
+          label: {
+            rate: shippoRate.id
+          }
         },
         envFile
-      });
+      );
       const shippoLabels = await resolvers.Query.labels(
         null,
         { type: "shippo" },

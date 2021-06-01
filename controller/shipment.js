@@ -1,3 +1,4 @@
+/* eslint-disable consistent-return */
 import axios from "axios";
 import shippoApi from "shippo";
 import {
@@ -18,37 +19,38 @@ import {
 const debug = require("debug")("shipmentController");
 
 class Shipment {
-  constructor(context = {}) {
-    debug("SANDBOX? %o ", process.env.SANDBOX);
+  constructor(service, context = process.env || {}) {
     debug("shipment constructor called %o", context);
-    const sandbox =
-      process.env.SANDBOX === true || process.env.SANDBOX === "true";
-    this.postmenURL = sandbox
-      ? process.env.POSTMEN_SANDBOX_URL
-      : process.env.POSTMEN_PROD_URL;
+    debug("SANDBOX? %o ", context.SANDBOX);
+
+    const sandbox = context.SANDBOX === true || context.SANDBOX === "true";
+    this.postmenUrl = sandbox
+      ? context.POSTMEN_SANDBOX_URL
+      : context.POSTMEN_PROD_URL;
 
     this.shippoApiKey = sandbox
-      ? process.env.SHIPPO_TEST_API_KEY
-      : process.env.SHIPPO_PROD_API_KEY;
-    const postmentApiKey = sandbox
-      ? process.env.POSTMEN_TEST_API_KEY
-      : process.env.POSTMENT_PROD_API_KEY;
-    const afterShipApiKey = sandbox
-      ? process.env.AFTER_SHIP_TEST_API_KEY
-      : process.env.AFTER_SHIP_PROD_API_KEY;
+      ? context.SHIPPO_TEST_API_KEY
+      : context.SHIPPO_PROD_API_KEY;
+    this.postmentApiKey = sandbox
+      ? context.POSTMEN_TEST_API_KEY
+      : context.POSTMENT_PROD_API_KEY;
+    this.afterShipApiKey = sandbox
+      ? context.AFTER_SHIP_TEST_API_KEY
+      : context.AFTER_SHIP_PROD_API_KEY;
 
     this.shippo = this.shippoApiKey ? shippoApi(this.shippoApiKey) : null;
+    this.shippoUrl = context.SHIPPO_URL;
     this.postmentCredentialHeaders = {
       headers: {
         "content-type": "application/json",
-        "postmen-api-key": postmentApiKey
+        "postmen-api-key": this.postmentApiKey
       }
     };
-
+    this.afterShipUrl = context.AFTER_SHIP_URL;
     this.afterShipHeaders = {
       headers: {
         "Content-Type": "application/json",
-        "aftership-api-key": afterShipApiKey
+        "aftership-api-key": this.afterShipApiKey
       }
     };
 
@@ -57,17 +59,29 @@ class Shipment {
         Authorization: `ShippoToken ${this.shippoApiKey}`
       }
     };
+    this.service = (service || "").toLowerCase();
+    if (!["shippo", "postmen"].includes(this.service))
+      throw Error("you must select a service (postmen or goshippo)");
+    if (this.service === "shippo" && !this.shippo)
+      throw Error("check keys for shippo!");
+
+    if (this.service === "postmen" && !this.postmenUrl.length > 5)
+      throw Error("check keys for postmen!");
   }
 
-  async createShipment(service, requestObject) {
-    debug("call shipment create  %o , with obj %o", service, requestObject);
+  async createShipment(requestObject) {
+    debug(
+      "call shipment create  %o , with obj %o",
+      this.service,
+      requestObject
+    );
     /* 
             To create shippo shipment, we need to provide a body
             with the following properties(address_from, address_to,
             parcels)
         */
     try {
-      if (service === "shippo") {
+      if (this.service === "shippo") {
         const formatedObject = {
           parcels: requestObject.parcels.map(parcel => ({
             width: parcel.width,
@@ -201,8 +215,6 @@ class Shipment {
           errors: []
         };
       }
-
-      throw Error(service, " : not a valid service type!");
     } catch (error) {
       if (error.response) {
         return {
@@ -220,9 +232,9 @@ class Shipment {
     }
   }
 
-  async createCarrierAccount(service, requestObject) {
+  async createCarrierAccount(requestObject) {
     try {
-      if (service === "shippo") {
+      if (this.service === "shippo") {
         const errors = validateSchema(
           requestObject,
           shippoCarrierAccountSchema
@@ -246,7 +258,7 @@ class Shipment {
         };
       }
 
-      if (service === "postmen") {
+      if (this.service === "postmen") {
         const errors = validateSchema(
           requestObject,
           postmenCreateShipperAccount
@@ -262,7 +274,7 @@ class Shipment {
 
         const data = await axios({
           method: "post",
-          url: `${this.postmenURL}/shipper-accounts`,
+          url: `${this.postmenUrl}/shipper-accounts`,
           data: requestObject,
           headers: {
             ...this.postmentCredentialHeaders.headers
@@ -274,7 +286,6 @@ class Shipment {
           errors: []
         };
       }
-      throw Error(service, " : not a valid service type!");
     } catch (error) {
       if (error.response) {
         return {
@@ -292,9 +303,9 @@ class Shipment {
     }
   }
 
-  async createManifest(service, manifest) {
+  async createManifest(manifest) {
     try {
-      if (service === "shippo") {
+      if (this.service === "shippo") {
         const formatedManifest = {
           shipment_date: manifest.shipmentDate,
           transactions: manifest.transactions,
@@ -336,7 +347,7 @@ class Shipment {
         };
       }
 
-      if (service === "postmen") {
+      if (this.service === "postmen") {
         const formatedManifest = {
           shipper_account: {
             ...manifest.shipperAccount
@@ -358,7 +369,7 @@ class Shipment {
 
         const data = await axios({
           method: "post",
-          url: `${this.postmenURL}/manifests`,
+          url: `${this.postmenUrl}/manifests`,
           data: formatedManifest,
           headers: {
             ...this.postmentCredentialHeaders.headers
@@ -395,7 +406,6 @@ class Shipment {
           errors: []
         };
       }
-      throw Error(service, " : not a valid service type!");
     } catch (error) {
       if (error.response) {
         return {
@@ -411,7 +421,7 @@ class Shipment {
     }
   }
 
-  async getRates(service, shipment) {
+  async getRates(shipment) {
     /* 
             To get shippo rates, we need to first create a shipment see #createShipment
             then we supply a shipment id.
@@ -420,7 +430,7 @@ class Shipment {
             a shipper account(can be created) using #createCarrierAccount(postment, requestBody).
         */
     try {
-      if (service === "shippo") {
+      if (this.service === "shippo") {
         if (!shipment.shipmentId || shipment.shipmentId === "") {
           return {
             data: {},
@@ -461,7 +471,7 @@ class Shipment {
         };
       }
 
-      if (service === "postmen") {
+      if (this.service === "postmen") {
         const formatedShipment = {
           is_document: shipment.isDocument,
           shipment: {
@@ -515,7 +525,7 @@ class Shipment {
 
         const data = await axios({
           method: "post",
-          url: `${this.postmenURL}/rates`,
+          url: `${this.postmenUrl}/rates`,
           data: formatedShipment,
           headers: {
             ...this.postmentCredentialHeaders.headers
@@ -553,7 +563,6 @@ class Shipment {
           errors: []
         };
       }
-      throw Error(service, " : not a valid service type!");
     } catch (error) {
       if (error.detail) {
         return {
@@ -579,9 +588,9 @@ class Shipment {
     }
   }
 
-  async createAddress(service, address) {
+  async createAddress(address) {
     try {
-      if (service === "shippo") {
+      if (this.service === "shippo") {
         const formatedAddress = {
           name: address.contactName,
           company: address.companyName,
@@ -631,7 +640,6 @@ class Shipment {
           errors: []
         };
       }
-      throw Error(service, " : not a valid service type!");
     } catch (error) {
       if (error.response) {
         return {
@@ -649,7 +657,7 @@ class Shipment {
     }
   }
 
-  async validateAddress(service, address) {
+  async validateAddress(address) {
     /* 
             To validate shippo address, we need to first create the address and 
             then verify it and as for postmen, we just provide an address body that has
@@ -657,7 +665,7 @@ class Shipment {
             see this test in the test files
         */
     try {
-      if (service === "shippo") {
+      if (this.service === "shippo") {
         const resultObject = await this.shippo.address.validate(address.id);
         return {
           data: {
@@ -681,7 +689,7 @@ class Shipment {
         };
       }
 
-      if (service === "postmen") {
+      if (this.service === "postmen") {
         const formatedAddress = {
           country: address.country,
           contact_name: address.contactName,
@@ -714,7 +722,7 @@ class Shipment {
 
         const data = await axios({
           method: "post",
-          url: `${this.postmenURL}/address-validations`,
+          url: `${this.postmenUrl}/address-validations`,
           data: { address: formatedAddress },
           headers: {
             ...this.postmentCredentialHeaders.headers
@@ -756,7 +764,6 @@ class Shipment {
           errors: []
         };
       }
-      throw Error(service, " : not a valid service type!");
     } catch (error) {
       if (error.response) {
         return {
@@ -774,9 +781,9 @@ class Shipment {
     }
   }
 
-  async createLabel(service, label) {
+  async createLabel(label) {
     try {
-      if (service === "shippo") {
+      if (this.service === "shippo") {
         const labelFormatedObj = {
           rate: label.rate,
           label_file_type: "PDF"
@@ -796,7 +803,7 @@ class Shipment {
 
         const data = await axios({
           method: "post",
-          url: `${process.env.SHIPPO_URL}/transactions`,
+          url: `${this.shippoUrl}/transactions`,
           data: labelFormatedObj,
           headers: {
             ...this.shippoCredentialHeaders.headers
@@ -823,7 +830,7 @@ class Shipment {
         };
       }
 
-      if (service === "postmen") {
+      if (this.service === "postmen") {
         const formatedLabel = {
           is_document: label.isDocument,
           service_type: label.serviceType,
@@ -884,7 +891,7 @@ class Shipment {
 
         const data = await axios({
           method: "post",
-          url: `${this.postmenURL}/labels`,
+          url: `${this.postmenUrl}/labels`,
           data: formatedLabel,
           headers: {
             ...this.postmentCredentialHeaders.headers
@@ -942,7 +949,6 @@ class Shipment {
           errors: []
         };
       }
-      throw Error(service, " : not a valid service type!");
     } catch (error) {
       if (error.response) {
         return {
@@ -960,13 +966,13 @@ class Shipment {
     }
   }
 
-  async getLabels(service) {
+  async getLabels() {
     /* 
             To get shippo and postmen labels, we need to first create a lable using the label method,
             of this class.
         */
     try {
-      if (service === "shippo") {
+      if (this.service === "shippo") {
         const resultObject = await this.shippo.transaction.list();
         return {
           data: {
@@ -992,9 +998,9 @@ class Shipment {
         };
       }
 
-      if (service === "postmen") {
+      if (this.service === "postmen") {
         const data = await axios.get(
-          `${this.postmenURL}/labels`,
+          `${this.postmenUrl}/labels`,
           this.postmentCredentialHeaders
         );
 
@@ -1051,7 +1057,6 @@ class Shipment {
           errors: []
         };
       }
-      throw Error(service, " : not a valid service type!");
     } catch (error) {
       if (error.response) {
         return {
@@ -1069,7 +1074,7 @@ class Shipment {
     }
   }
 
-  async getAllManifests(service) {
+  async getAllManifests() {
     /* 
             To get shippo manifests, we need to first create the manifest using
            the createManifest method of this class and as for postmen, we also
@@ -1077,10 +1082,10 @@ class Shipment {
            is found
         */
     try {
-      if (service === "shippo") {
+      if (this.service === "shippo") {
         const data = await axios({
           method: "get",
-          url: `${process.env.SHIPPO_URL}/manifests`,
+          url: `${this.shippoUrl}/manifests`,
           headers: {
             ...this.shippoCredentialHeaders.headers
           }
@@ -1106,10 +1111,10 @@ class Shipment {
         };
       }
 
-      if (service === "postmen") {
+      if (this.service === "postmen") {
         const data = await axios({
           method: "get",
-          url: `${this.postmenURL}/manifests`,
+          url: `${this.postmenUrl}/manifests`,
           headers: {
             ...this.postmentCredentialHeaders.headers
           }
@@ -1147,7 +1152,6 @@ class Shipment {
           errors: []
         };
       }
-      throw Error(service, " : not a valid service type!");
     } catch (error) {
       if (error.response) {
         return {
@@ -1163,14 +1167,14 @@ class Shipment {
     }
   }
 
-  async getManifest(service, manifestId) {
+  async getManifest(manifestId) {
     /* 
             To get shippo/postmen manifest, we need to provide a manifest id,
             manifests can be created using the method createManifest,
             see tests for body definition
         */
     try {
-      if (service === "shippo") {
+      if (this.service === "shippo") {
         const manifest = await this.shippo.manifest.retrieve(manifestId);
         return {
           data: {
@@ -1191,9 +1195,9 @@ class Shipment {
         };
       }
 
-      if (service === "postmen") {
+      if (this.service === "postmen") {
         const data = await axios.get(
-          `${this.postmenURL}/manifests/${manifestId}`,
+          `${this.postmenUrl}/manifests/${manifestId}`,
           this.postmentCredentialHeaders
         );
 
@@ -1236,7 +1240,6 @@ class Shipment {
           errors: []
         };
       }
-      throw Error(service, " : not a valid service type!");
     } catch (error) {
       if (error.response) {
         return {
@@ -1254,13 +1257,13 @@ class Shipment {
     }
   }
 
-  async createTracking(service, trackingObj) {
+  async createTracking(trackingObj) {
     /* 
             To create a tracking, we need to provide a body with the 
             following properties
         */
     try {
-      if (service === "postmen") {
+      if (this.service === "postmen") {
         const formatedObj = {
           tracking_number: trackingObj.trackingNumber,
           slug: trackingObj.slug,
@@ -1281,7 +1284,7 @@ class Shipment {
 
         const data = await axios({
           method: "post",
-          url: `${process.env.AFTER_SHIP_URL}/trackings`,
+          url: `${this.afterShipUrl}/trackings`,
           data: { tracking: formatedObj },
           headers: {
             ...this.afterShipHeaders.headers
@@ -1359,7 +1362,6 @@ class Shipment {
           errors: []
         };
       }
-      throw Error(service, " : not a valid service type!");
     } catch (error) {
       if (error.response) {
         return {
@@ -1377,11 +1379,11 @@ class Shipment {
     }
   }
 
-  async getTrackings(service) {
+  async getTrackings() {
     try {
-      if (service === "postmen") {
+      if (this.service === "postmen") {
         const data = await axios.get(
-          `${process.env.AFTER_SHIP_URL}/trackings`,
+          `${this.afterShipUrl}/trackings`,
           this.afterShipHeaders
         );
 
@@ -1446,7 +1448,6 @@ class Shipment {
           errors: []
         };
       }
-      throw Error(service, " : not a valid service type!");
     } catch (error) {
       if (error.response) {
         return {
@@ -1464,12 +1465,12 @@ class Shipment {
     }
   }
 
-  async getShipments(service) {
+  async getShipments() {
     try {
-      if (service === "shippo") {
+      if (this.service === "shippo") {
         const data = await axios({
           method: "get",
-          url: `${process.env.SHIPPO_URL}/shipments`,
+          url: `${this.shippoUrl}/shipments`,
           headers: {
             ...this.shippoCredentialHeaders.headers
           }
@@ -1560,7 +1561,6 @@ class Shipment {
           errors: []
         };
       }
-      throw Error(service, " : not a valid service type!");
     } catch (error) {
       if (error.response) {
         return {
@@ -1578,16 +1578,16 @@ class Shipment {
     }
   }
 
-  async getTracking(service, trackingObj) {
+  async getTracking(trackingObj) {
     /* 
             To get shippo tracking status, we need to provide a tracking carrier and number and 
             as for postmen we need to provide a slug(courier e.g fedex) and an id,
             tracking can be create using the createTracking method
         */
     try {
-      if (service === "shippo") {
+      if (this.service === "shippo") {
         const data = await axios.get(
-          `${process.env.SHIPPO_URL}/tracks/${trackingObj.trackingSlug}/${trackingObj.trackingNumber}`,
+          `${this.shippoUrl}/tracks/${trackingObj.trackingSlug}/${trackingObj.trackingNumber}`,
           this.shippoCredentialHeaders
         );
         return {
@@ -1637,7 +1637,7 @@ class Shipment {
         };
       }
 
-      if (service === "postmen") {
+      if (this.service === "postmen") {
         const errors = validateSchema(trackingObj, postmenGetTrackingSchema);
 
         if (errors) {
@@ -1648,7 +1648,7 @@ class Shipment {
           };
         }
 
-        const URL = `${process.env.AFTER_SHIP_URL}/trackings/${trackingObj.trackingSlug}/${trackingObj.trackingNumber}`;
+        const URL = `${this.afterShipUrl}/trackings/${trackingObj.trackingSlug}/${trackingObj.trackingNumber}`;
         const data = await axios.get(URL, this.afterShipHeaders);
 
         if (data.data.meta.code === 4104) {
@@ -1722,7 +1722,6 @@ class Shipment {
           errors: []
         };
       }
-      throw Error(service, " : not a valid service type!");
     } catch (error) {
       if (error.response) {
         return {
@@ -1740,13 +1739,13 @@ class Shipment {
     }
   }
 
-  async deleteLabel(service, labelId) {
+  async deleteLabel(labelId) {
     /* 
             To cancel postmen label, we need to provide the label id
             this can be got using getLabels
         */
     try {
-      if (service === "shippo") {
+      if (this.service === "shippo") {
         const data = await this.shippo.refund.create({
           transaction: labelId
         });
@@ -1765,10 +1764,10 @@ class Shipment {
         };
       }
 
-      if (service === "postmen") {
+      if (this.service === "postmen") {
         const data = await axios({
           method: "post",
-          url: `${this.postmenURL}/cancel-labels`,
+          url: `${this.postmenUrl}/cancel-labels`,
           data: {
             label: { id: labelId },
             async: false
@@ -1803,7 +1802,6 @@ class Shipment {
           errors: []
         };
       }
-      throw Error(service, " : not a valid service type!");
     } catch (error) {
       if (error.detail) {
         return {

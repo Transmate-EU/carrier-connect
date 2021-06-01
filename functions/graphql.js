@@ -34,6 +34,4 @@ async function gqlResolve(args) {
     });
 }
 
-
-
-export {gqlResolve} ;
+export { gqlResolve };

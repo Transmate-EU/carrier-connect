@@ -1,7 +1,4 @@
-/* eslint-disable no-var */
-/* eslint-disable vars-on-top */
-import { setEnv } from "./setEnv";
-import Shipment from "../controller/shipment";
+import Call from "../controller/shipment";
 
 const debug = require("debug")("restEndpoint");
 
@@ -9,159 +6,92 @@ async function rest(params) {
   let result;
   let statusCode;
   let warnings;
+  let response;
   debug("rest call with params %o ", params);
-  setEnv(params);
 
   const { type, request } = params;
 
   try {
     if (typeof request !== "object") throw Error("missing request obj!");
+    const apiCall = new Call(request.type, params);
     switch (true) {
       case type === "rates":
-        var rates = await new Shipment().getRates(
-          request.type,
-          request.shipment
-        );
-        if (rates.errors.length > 0) {
-          statusCode = 500;
-          throw new Error(JSON.stringify(rates.errors));
-        }
-        result = rates.data.rates;
+        response = await apiCall.getRates(request.shipment);
+
+        result = response.data.rates;
         break;
       case type === "labels":
-        var labels = await new Shipment().getLabels(request.type);
-        if (labels.errors.length > 0) {
-          statusCode = 500;
-          throw new Error(JSON.stringify(labels.errors));
-        }
-        result = labels.data.labels;
+        response = await apiCall.getLabels();
+
+        result = response.data.labels;
         break;
       case type === "manifests":
-        var manifests = await new Shipment().getAllManifests(request.type);
-        if (manifests.errors.length > 0) {
-          statusCode = 500;
-          throw new Error(JSON.stringify(manifests.errors));
-        }
-        result = manifests.data.manifests;
+        response = await apiCall.getAllManifests();
+
+        result = response.data.manifests;
         break;
       case type === "manifest":
-        var manifest = await new Shipment().getManifest(
-          request.type,
-          request.manifestId
-        );
-        if (manifest.errors.length > 0) {
-          statusCode = 500;
-          throw new Error(JSON.stringify(manifest.errors));
-        }
-        result = manifest.data;
+        response = await apiCall.getManifest(request.manifestId);
+
+        result = response.data;
         break;
       case type === "trackings":
-        var trackings = await new Shipment().getTrackings(request.type);
-        if (trackings.errors.length > 0) {
-          statusCode = 500;
-          throw new Error(JSON.stringify(trackings.errors));
-        }
-        result = trackings.data.trackings;
+        response = await apiCall.getTrackings();
+
+        result = response.data.trackings;
         break;
       case type === "trackingStatus":
-        var tracking = await new Shipment().getTracking(
-          request.type,
-          request.tracking
-        );
-        if (tracking.errors.length > 0) {
-          statusCode = 500;
-          throw new Error(JSON.stringify(tracking.errors));
-        }
-        result = tracking.data.tracking;
+        response = await apiCall.getTracking(request.tracking);
+
+        result = response.data.tracking;
         break;
       case type === "shipments":
-        var shipments = await new Shipment().getShipments(request.type);
-        if (shipments.errors.length > 0) {
-          statusCode = 500;
-          throw new Error(JSON.stringify(shipments.errors));
-        }
-        result = shipments.data.shipments;
+        response = await apiCall.getShipments();
+
+        result = response.data.shipments;
         break;
       case type === "createShipment":
-        var shipment = await new Shipment().createShipment(
-          request.type,
-          request.shipment
-        );
-        if (shipment.errors.length > 0) {
-          statusCode = 500;
-          throw new Error(JSON.stringify(shipment.errors));
-        }
-        result = shipment.data.shipment;
+        response = await apiCall.createShipment(request.shipment);
+
+        result = response.data.shipment;
         break;
       case type === "validateAddress":
-        var address = await new Shipment().validateAddress(
-          request.type,
-          request.address
-        );
-        if (address.errors.length > 0) {
-          statusCode = 500;
-          throw new Error(JSON.stringify(address.errors));
-        }
-        result = address.data;
+        response = await apiCall.validateAddress(request.address);
+
+        result = response.data;
         break;
       case type === "createLabel":
-        var label = await new Shipment().createLabel(
-          request.type,
-          request.label
-        );
-        if (label.errors.length > 0) {
-          statusCode = 500;
-          throw new Error(JSON.stringify(label.errors));
-        }
-        result = label.data;
+        response = await apiCall.createLabel(request.label);
+
+        result = response.data;
         break;
       case type === "createManifest":
-        var manifest = await new Shipment().createManifest(
-          request.type,
-          request.manifest
-        );
-        if (manifest.errors.length > 0) {
-          statusCode = 500;
-          throw new Error(JSON.stringify(manifest.errors));
-        }
-        result = manifest.data;
+        response = await apiCall.createManifest(request.manifest);
+
+        result = response.data;
         break;
       case type === "createTracking":
-        var tracking = await new Shipment().createTracking(
-          request.type,
-          request.tracking
-        );
-        if (tracking.errors.length > 0) {
-          statusCode = 500;
-          throw new Error(JSON.stringify(tracking.errors));
-        }
-        result = tracking.data.tracking;
+        response = await apiCall.createTracking(request.tracking);
+
+        result = response.data.tracking;
         break;
       case type === "cancelOrDeleteLabel":
-        var label = await new Shipment().deleteLabel(
-          request.type,
-          request.labelId
-        );
-        if (label.errors.length > 0) {
-          statusCode = 500;
-          throw new Error(JSON.stringify(label.errors));
-        }
-        result = label.data;
+        response = await apiCall.deleteLabel(request.labelId);
+
+        result = response.data;
         break;
       case type === "createAddress":
-        var address = await new Shipment().createAddress(
-          request.type,
-          request.address
-        );
-        if (address.errors.length > 0) {
-          statusCode = 500;
-          throw new Error(JSON.stringify(address.errors));
-        }
-        result = address.data.address;
+        response = await apiCall.createAddress(request.address);
+
+        result = response.data.address;
         break;
       default:
         statusCode = 500;
         throw new Error("Unknown type used");
+    }
+    if (response.errors.length > 0) {
+      statusCode = 500;
+      throw new Error(JSON.stringify(response.errors));
     }
   } catch (error) {
     return {
@@ -187,7 +117,5 @@ async function rest(params) {
     headers: { "Content-Type": "application/json" }
   };
 }
-
-
 
 export { rest };

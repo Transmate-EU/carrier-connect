@@ -109,7 +109,7 @@ describe("Test postmen REST API", () => {
 
       expect(response.body.result[0]).to.have.property("chargeWeight");
       expect(response.body.result[0]).to.have.property("totalCharge");
-     // expect(response.body.result[0].totalCharge).to.have.property("amount");
+      // expect(response.body.result[0].totalCharge).to.have.property("amount");
       expect(response.statusCode).to.be.equal(200);
     });
 

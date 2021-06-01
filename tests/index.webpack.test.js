@@ -6,7 +6,6 @@ const debug = require("debug")("test:rest");
 
 let api;
 
-
 if (process.env.WEBPACK_TEST) {
   api = require("../dist/index-local.js");
   debug("webpack test index", "api", api);
