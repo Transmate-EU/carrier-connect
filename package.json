@@ -3,7 +3,7 @@
   "publishConfig": {
     "registry": "https://npm.pkg.github.com"
   },
-  "version": "1.0.4",
+  "version": "1.0.5",
   "description": "module to connect to carriers",
   "main": "dist/index-local.js",
   "files": [
