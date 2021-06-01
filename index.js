@@ -5,4 +5,7 @@ import { shippoShipmentTesting } from "./data/shippo";
 const { rest } = require("./functions/rest");
 const { gqlResolve } = require("./functions/graphql");
 
-export { Shipment, rest, gqlResolve, shippoShipmentTesting };
+exports.Shipment = Shipment;
+exports.gqlResolve = gqlResolve;
+exports.shippoShipmentTesting = shippoShipmentTesting;
+exports.rest = rest;
