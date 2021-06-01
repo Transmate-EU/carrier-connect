@@ -39,7 +39,7 @@ module.exports = {
     path: path.resolve(__dirname, "dist"),
     filename: `[name]${isProduction ? "" : "-local"}.js`
   },
-  mode: isProduction ? "production" : "development", //= node env
+  mode: "production", //= node env, must be production for index-local to work
   module: {
     rules: [
       {
