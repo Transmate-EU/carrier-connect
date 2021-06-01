@@ -37,7 +37,8 @@ module.exports = {
   plugins,
   output: {
     path: path.resolve(__dirname, "dist"),
-    filename: `[name]${isProduction ? "" : "-local"}.js`
+    filename: `[name]${isProduction ? "" : "-local"}.js`,
+    libraryTarget: "umd"
   },
   mode: "production", //= node env, must be production for index-local to work
   module: {
@@ -48,6 +49,7 @@ module.exports = {
         use: {
           loader: "babel-loader",
           options: {
+            plugins: ["@babel/plugin-transform-runtime"],
             presets: [
               [
                 "@babel/preset-env",

@@ -34,6 +34,6 @@ async function gqlResolve(args) {
     });
 }
 
-global.main = gqlResolve;
 
-exports.gqlResolve = gqlResolve;
+
+export {gqlResolve} ;

@@ -185,6 +185,6 @@ async function rest(params) {
   };
 }
 
-global.main = rest;
 
-exports.rest = rest;
+
+export {rest} ;

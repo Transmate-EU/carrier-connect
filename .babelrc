@@ -1,4 +1,5 @@
 {
+  "sourceType": "unambiguous",
   "presets": [
     ["@babel/preset-env",
       {
@@ -9,7 +10,7 @@
     ]
   ],
   "plugins": [
-    "@babel/plugin-syntax-dynamic-import","import-graphql"
+    "@babel/plugin-transform-runtime","@babel/plugin-syntax-dynamic-import","import-graphql"
   ]
 
 }
