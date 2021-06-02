@@ -494,6 +494,7 @@ type ShipmentOutput {
 enum ServiceTypes {
   shippo
   postmen
+  dhlexpress
 }
 
 type Query {

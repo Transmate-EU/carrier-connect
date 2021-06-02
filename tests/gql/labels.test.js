@@ -1,9 +1,11 @@
 /* eslint-disable mocha/no-mocha-arrows */
 /* eslint-disable global-require */
-import chai from "chai";
-import { setEnv } from "../../functions/setEnv";
+import { expect } from "chai";
 
-const { expect } = chai;
+const debug = require("debug")("test:gql");
+
+const envFile = require("../../.env.json");
+
 
 let api;
 
@@ -25,15 +27,16 @@ describe("Testing serverless graphql", () => {
             id
           }
         }`,
-        context: () => {
-          setEnv(process.env);
-          return true;
-        }
+        context: { ...envFile, SANDBOX: true }
       });
 
       expect(result.data).to.have.property("labels");
+      expect(result.data.labels).to.be.an("array");
+      debug("labels %o", result.data.labels);
+      expect(result.data.labels[0].id).to.be.an("string");
+
     } catch (error) {
-      console.log("error message", error.message);
+      console.error("error message", error.message);
     }
   });
 });
