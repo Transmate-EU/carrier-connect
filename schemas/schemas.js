@@ -1,12 +1,20 @@
 import Ajv from "ajv";
 
 const ajv = new Ajv();
+const debug = require("debug")("schema");
 
 const validateSchema = (object, schema) => {
   const validate = ajv.compile(schema);
   const valid = validate(object);
 
   if (!valid) {
+    debug(
+      "ERROR validation %o, schema %o, errors %o",
+      object,
+      schema,
+      validate.errors
+    );
+
     return validate.errors;
   }
 

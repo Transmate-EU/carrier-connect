@@ -1,12 +1,11 @@
 /* eslint-disable mocha/no-mocha-arrows */
-import chai from "chai";
+import { expect } from "chai";
 
-import { shippoAddress, shippoShipmentTesting } from "../data/shippo";
-import resolvers from "../resolvers/resolvers";
+import { shippoAddress, shippoShipmentTesting } from "../../data/shippo";
+import resolvers from "../../resolvers/resolvers";
 
-const envFile = require("../.env.json");
+const envFile = require("../../.env.json");
 
-const { expect } = chai;
 
 describe("Testing goshippo Resolvers", () => {
   let shippoRate;

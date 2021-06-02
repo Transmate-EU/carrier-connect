@@ -1,17 +1,16 @@
 /* eslint-disable mocha/no-mocha-arrows */
-import chai from "chai";
+import  { expect } from "chai";
 
 import {
   postmenAddress,
   postmenCalculateRate,
   postmenCreateLabel,
   postmenManifestReq
-} from "../data/postmen";
-import resolvers from "../resolvers/resolvers";
+} from "../../data/postmen";
+import resolvers from "../../resolvers/resolvers";
 
-const envFile = require("../.env.json");
+const envFile = require("../../.env.json");
 
-const { expect } = chai;
 
 describe("Testing postmen Resolvers", () => {
   describe("Get postmen rates", () => {

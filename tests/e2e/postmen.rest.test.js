@@ -1,29 +1,29 @@
 /* eslint-disable global-require */
 /* eslint-disable mocha/no-mocha-arrows */
 
-import chai from "chai";
+import { expect } from "chai";
 
 import {
   postmenAddress,
   postmenCalculateRate,
   postmenCreateLabel,
   postmenManifestReq
-} from "../data/postmen";
+} from "../../data/postmen";
+
+const debug = require("debug")("test:postment:rest");
 
 let api;
 
 console.log("test api rest");
 if (process.env.WEBPACK_TEST) {
-  api = require("../dist/rest-local.js");
+  api = require("../../dist/rest-local.js");
   console.log("webpack test", "api", api);
 } else {
-  api = require("../functions/rest.js");
+  api = require("../../functions/rest.js");
   console.log("normal test", "api", api);
 }
 
-const envFile = require("../.env.json");
-
-const { expect } = chai;
+const envFile = require("../../.env.json");
 
 describe("Test postmen REST API", () => {
   describe("should test(labels, rates, manifest and shipments)", () => {
@@ -57,6 +57,7 @@ describe("Test postmen REST API", () => {
       });
 
       postmenLabels = response.body.result;
+      debug("postmenLabels %o", postmenLabels);
       expect(postmenLabels[0]).to.have.property("id");
       expect(postmenLabels[0]).to.have.property("status");
       expect(postmenLabels[0]).to.have.property("rate");
@@ -106,7 +107,7 @@ describe("Test postmen REST API", () => {
           shipment: postmenCalculateRate
         }
       });
-
+      debug("rates %o", response);
       expect(response.body.result[0]).to.have.property("chargeWeight");
       expect(response.body.result[0]).to.have.property("totalCharge");
       // expect(response.body.result[0].totalCharge).to.have.property("amount");

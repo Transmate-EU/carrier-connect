@@ -1,7 +1,7 @@
 /* eslint-disable global-require */
 /* eslint-disable mocha/no-mocha-arrows */
 import chai from "chai";
-import { shippoAddress, shippoShipmentTesting } from "../data/shippo";
+import { shippoAddress, shippoShipmentTesting } from "../../data/shippo";
 
 const debug = require("debug")("test:rest");
 
@@ -9,14 +9,14 @@ let api;
 
 console.log("test api rest");
 if (process.env.WEBPACK_TEST) {
-  api = require("../dist/rest-local.js");
+  api = require("../../dist/rest-local.js");
   console.log("webpack test", "api", api);
 } else {
-  api = require("../functions/rest.js");
+  api = require("../../functions/rest.js");
   console.log("normal test", "api", api);
 }
 
-const envFile = require("../.env.json");
+const envFile = require("../../.env.json");
 
 const { expect } = chai;
 
