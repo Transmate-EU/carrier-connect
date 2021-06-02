@@ -2,6 +2,14 @@
 import axios from "axios";
 import shippoApi from "shippo";
 import {
+  getMessageReference,
+  getIsoDateTimeGmt,
+  rateRequest,
+  getIsoDateTime,
+  shipmentRequest,
+  trackingRequest
+} from "dhl-node";
+import {
   postmenAddressReqSchema,
   postmenCalculateSchema,
   postmenCreateLabelSchema,
@@ -26,6 +34,7 @@ const AFTER_SHIP_URL = "https://api.aftership.com/v4";
 function errorObj(error) {
   debug("error", error);
   if (Array.isArray(error)) {
+    console.log("reached here");
     // validations errors
     return {
       data: {},
@@ -97,7 +106,7 @@ class Shipment {
       }
     };
     this.service = (service || "").toLowerCase();
-    if (!["shippo", "postmen"].includes(this.service))
+    if (!["shippo", "postmen", "dhl"].includes(this.service))
       throw Error("you must select a service (postmen or goshippo)");
     if (this.service === "shippo" && !this.shippo)
       throw Error("check keys for shippo!");
@@ -241,6 +250,119 @@ class Shipment {
                 durationTerms: rate.duration_terms,
                 updatedAt: rate.object_updated
               }))
+            }
+          },
+          warnings: [],
+          errors: []
+        };
+      }
+
+      if (this.service === "dhl") {
+        const formattedObject = {
+          RequestedShipment: {
+            ShipmentInfo: {
+              DropOffType: requestObject.dropOffType,
+              ServiceType: requestObject.serviceType,
+              Account: requestObject.shipperAccount.accountNumber,
+              Currency: requestObject.currency,
+              UnitOfMeasurement: requestObject.parcels[0].massUnit,
+              PackagesCount: 1,
+              LabelType: requestObject.labelType,
+              LabelTemplate: requestObject.labelTemplate
+            },
+            ShipTimestamp: getIsoDateTimeGmt(requestObject.timeStamp),
+            PickupLocationCloseTime: requestObject.pickupLocationCloseTime,
+            SpecialPickupInstruction: requestObject.specialPickupInstruction,
+            PickupLocation: requestObject.pickupLocation,
+            PaymentInfo: requestObject.paymentInfo,
+            InternationalDetail: {
+              Commodities: {
+                NumberOfPieces:
+                  requestObject.internationalDetail.commodities.numberOfPieces,
+                Description:
+                  requestObject.internationalDetail.commodities.description,
+                CountryOfManufacture:
+                  requestObject.internationalDetail.commodities
+                    .countryOfManufacture,
+                Quantity:
+                  requestObject.internationalDetail.commodities.quantity,
+                UnitPrice:
+                  requestObject.internationalDetail.commodities.unitPrice,
+                CustomsValue:
+                  requestObject.internationalDetail.commodities.customsValue
+              },
+              Content: requestObject.internationalDetail.content
+            },
+            Ship: {
+              Shipper: {
+                Contact: {
+                  PersonName: requestObject.shipFrom.contactName,
+                  CompanyName: requestObject.shipFrom.companyName,
+                  PhoneNumber: requestObject.shipFrom.phone,
+                  EmailAddress: requestObject.shipFrom.email
+                },
+                Address: {
+                  StreetLines: requestObject.shipFrom.street1,
+                  City: requestObject.shipFrom.city,
+                  PostalCode: requestObject.shipFrom.postalCode,
+                  CountryCode: requestObject.shipFrom.countryCode
+                }
+              },
+              Recipient: {
+                Contact: {
+                  PersonName: requestObject.shipTo.contactName,
+                  CompanyName: requestObject.shipTo.companyName,
+                  PhoneNumber: requestObject.shipTo.phone,
+                  EmailAddress: requestObject.shipTo.email
+                },
+                Address: {
+                  StreetLines: requestObject.shipTo.street1,
+                  City: requestObject.shipTo.city,
+                  PostalCode: requestObject.shipTo.postalCode,
+                  CountryCode: requestObject.shipTo.countryCode
+                }
+              }
+            },
+            Packages: {
+              RequestedPackages: {
+                attributes: {
+                  number: 1
+                },
+                Weight: requestObject.parcels[0].weight.value,
+                Dimensions: {
+                  Length: requestObject.parcels[0].dimension.length,
+                  Width: requestObject.parcels[0].dimension.width,
+                  Height: requestObject.parcels[0].dimension.height
+                },
+                CustomerReferences: "TEST CZ-IT"
+              }
+            }
+          }
+        };
+
+        const data = await shipmentRequest(
+          requestObject.shipperAccount,
+          formattedObject
+        );
+
+        if (data.response.Notification.length > 0) {
+          return errorObj(data.response.Notification);
+        }
+
+        const returnedJSON = JSON.stringify(data.response, null, 4);
+        const parsedObject = JSON.parse(returnedJSON);
+
+        return {
+          data: {
+            shipment: {
+              shipmentIdentificationNumber:
+                parsedObject.ShipmentIdentificationNumber,
+              dispatchConfirmationNumber:
+                parsedObject.DispatchConfirmationNumber,
+              labelImageFormat: parsedObject.LabelImage.LabelImageFormat,
+              graphicImage: parsedObject.LabelImage.GraphicImage,
+              trackingNumber:
+                parsedObject.PackagesResult.PackageResult.TrackingNumber
             }
           },
           warnings: [],
@@ -526,6 +648,87 @@ class Shipment {
                 id: rate.shipper_account.id
               },
               detailedCharges: [...rate.detailed_charges]
+            }))
+          },
+          warnings: [],
+          errors: []
+        };
+      }
+
+      if (this.service === "dhl") {
+        const formattedObject = {
+          ClientDetail: {},
+          RequestedShipment: {
+            DropOffType: "REQUEST_COURIER",
+            Ship: {
+              Shipper: {
+                StreetLines: shipment.shipFrom.street1,
+                City: shipment.shipFrom.city,
+                PostalCode: shipment.shipFrom.postalCode,
+                CountryCode: shipment.shipFrom.countryCode
+              },
+              Recipient: {
+                StreetLines: shipment.shipTo.street1,
+                City: shipment.shipTo.city,
+                PostalCode: shipment.shipTo.postalCode,
+                CountryCode: shipment.shipTo.countryCode
+              }
+            },
+            Packages: {
+              RequestedPackages: {
+                attributes: {
+                  number: 1
+                },
+                Weight: {
+                  Value: shipment.parcels[0].weight.value
+                },
+                Dimensions: {
+                  Length: shipment.parcels[0].dimension.length,
+                  Width: shipment.parcels[0].dimension.width,
+                  Height: shipment.parcels[0].dimension.height
+                }
+              }
+            },
+            ShipTimestamp: getIsoDateTimeGmt(shipment.timeStamp),
+            UnitOfMeasurement: shipment.parcels[0].massUnit,
+            Content: shipment.content,
+            DeclaredValue: shipment.declaredValue,
+            DeclaredValueCurrecyCode: shipment.declaredValueCurrecyCode,
+            PaymentInfo: shipment.paymentInfo,
+            Account: Number(shipment.shipperAccount.accountNumber)
+          }
+        };
+
+        const data = await rateRequest(
+          shipment.shipperAccount,
+          formattedObject
+        );
+
+        const returnedJSON = JSON.stringify(data.response, null, 4);
+        const parsedObject = JSON.parse(returnedJSON);
+
+        if (data.response.Notification) {
+          return errorObj(
+            data.response.Notification
+              ? data.response.Notification
+              : parsedObject.Provider.Notification
+          );
+        }
+
+        return {
+          data: {
+            rates: parsedObject?.Provider?.Service.map(rate => ({
+              serviceName: "dhl",
+              totalCharge: {
+                amount: rate.TotalNet.Amount,
+                currency: rate.TotalNet.Currency
+              },
+              localTotalCharge: {
+                amount: rate.TotalNet.Amount,
+                currency: rate.TotalNet.Currency
+              },
+              deliveryDate: rate.DeliveryTime,
+              cutOffTime: rate.CutoffTime
             }))
           },
           warnings: [],
@@ -845,6 +1048,112 @@ class Shipment {
             },
             createdAt: data.data.data.created_at,
             updatedAt: data.data.data.updated_at
+          },
+          warnings: [],
+          errors: []
+        };
+      }
+
+      if (this.service === "dhl") {
+        const formattedObject = {
+          RequestedShipment: {
+            ShipmentInfo: {
+              DropOffType: label.dropOffType,
+              ServiceType: label.serviceType,
+              Account: label.shipperAccount.accountNumber,
+              Currency: label.currency,
+              UnitOfMeasurement: label.parcels[0].massUnit,
+              PackagesCount: 1,
+              LabelType: label.labelType,
+              LabelTemplate: label.labelTemplate
+            },
+            ShipTimestamp: getIsoDateTimeGmt(label.timeStamp),
+            PickupLocationCloseTime: label.pickupLocationCloseTime,
+            SpecialPickupInstruction: label.specialPickupInstruction,
+            PickupLocation: label.pickupLocation,
+            PaymentInfo: label.paymentInfo,
+            InternationalDetail: {
+              Commodities: {
+                NumberOfPieces:
+                  label.internationalDetail.commodities.numberOfPieces,
+                Description: label.internationalDetail.commodities.description,
+                CountryOfManufacture:
+                  label.internationalDetail.commodities.countryOfManufacture,
+                Quantity: label.internationalDetail.commodities.quantity,
+                UnitPrice: label.internationalDetail.commodities.unitPrice,
+                CustomsValue: label.internationalDetail.commodities.customsValue
+              },
+              Content: label.internationalDetail.content
+            },
+            Ship: {
+              Shipper: {
+                Contact: {
+                  PersonName: label.shipFrom.contactName,
+                  CompanyName: label.shipFrom.companyName,
+                  PhoneNumber: label.shipFrom.phone,
+                  EmailAddress: label.shipFrom.email
+                },
+                Address: {
+                  StreetLines: label.shipFrom.street1,
+                  City: label.shipFrom.city,
+                  PostalCode: label.shipFrom.postalCode,
+                  CountryCode: label.shipFrom.countryCode
+                }
+              },
+              Recipient: {
+                Contact: {
+                  PersonName: label.shipTo.contactName,
+                  CompanyName: label.shipTo.companyName,
+                  PhoneNumber: label.shipTo.phone,
+                  EmailAddress: label.shipTo.email
+                },
+                Address: {
+                  StreetLines: label.shipTo.street1,
+                  City: label.shipTo.city,
+                  PostalCode: label.shipTo.postalCode,
+                  CountryCode: label.shipTo.countryCode
+                }
+              }
+            },
+            Packages: {
+              RequestedPackages: {
+                attributes: {
+                  number: 1
+                },
+                Weight: label.parcels[0].weight.value,
+                Dimensions: {
+                  Length: label.parcels[0].dimension.length,
+                  Width: label.parcels[0].dimension.width,
+                  Height: label.parcels[0].dimension.height
+                },
+                CustomerReferences: "TEST CZ-IT"
+              }
+            }
+          }
+        };
+
+        const data = await shipmentRequest(
+          label.shipperAccount,
+          formattedObject
+        );
+
+        if (data.response.Notification.length > 0) {
+          return errorObj(data.response.Notification);
+        }
+
+        const returnedJSON = JSON.stringify(data.response, null, 4);
+        const parsedObject = JSON.parse(returnedJSON);
+
+        return {
+          data: {
+            shipmentIdentificationNumber:
+              parsedObject.ShipmentIdentificationNumber,
+            dispatchConfirmationNumber: parsedObject.DispatchConfirmationNumber,
+            labelImageFormat: parsedObject.LabelImage.LabelImageFormat,
+            labelUrl: parsedObject.LabelImage.GraphicImage,
+            trackingNumbers: [
+              parsedObject.PackagesResult.PackageResult.TrackingNumber
+            ]
           },
           warnings: [],
           errors: []
@@ -1217,6 +1526,89 @@ class Shipment {
           errors: []
         };
       }
+
+      if (this.service === "dhl") {
+        const formattedObj = {
+          trackingRequest: {
+            TrackingRequest: {
+              Request: {
+                ServiceHeader: {
+                  MessageTime: getIsoDateTime(),
+                  MessageReference: getMessageReference()
+                }
+              },
+              AWBNumber: {
+                ArrayOfAWBNumberItem: [trackingObj.trackingNumber]
+              },
+              LevelOfDetails: "ALL_CHECK_POINTS",
+              PiecesEnabled: "B"
+            }
+          }
+        };
+
+        const data = await trackingRequest(
+          trackingObj.shipperAccount,
+          formattedObj
+        );
+
+        if (
+          data.response.Notification &&
+          data.response.Notification.length > 0
+        ) {
+          return errorObj(data.response.Notification);
+        }
+
+        const shipment = data.response.trackingResponse.TrackingResponse;
+        const parcel =
+          data.response.trackingResponse.TrackingResponse.AWBInfo
+            .ArrayOfAWBInfoItem.Pieces.PieceInfo.ArrayOfPieceInfoItem
+            .PieceDetails;
+
+        return {
+          data: {
+            tracking: {
+              parcels: [
+                {
+                  height: parcel.Height,
+                  width: parcel.Width,
+                  depth: parcel.Depth,
+                  weight: {
+                    value: Number(parcel.Weight),
+                    unit: parcel.WeightUnit
+                  }
+                }
+              ],
+              trackingNumber: trackingObj.trackingNumber,
+              consigneeName:
+                shipment.AWBInfo.ArrayOfAWBInfoItem.ShipmentInfo.ConsigneeName,
+              shipmentWeight:
+                shipment.AWBInfo.ArrayOfAWBInfoItem.ShipmentInfo.Weight,
+              shipmentDeliveryDate:
+                shipment.AWBInfo.ArrayOfAWBInfoItem.ShipmentInfo.ShipmentDate,
+              shipmentWeightUnit:
+                shipment.AWBInfo.ArrayOfAWBInfoItem.ShipmentInfo.WeightUnit,
+              shipmentPackageCount:
+                shipment.AWBInfo.ArrayOfAWBInfoItem.ShipmentInfo.Pieces,
+              messageTime: shipment.Response.ServiceHeader.MessageTime,
+              messageReference:
+                shipment.Response.ServiceHeader.MessageReference,
+              destinationServiceArea: {
+                ServiceAreaCode:
+                  shipment.AWBInfo.ArrayOfAWBInfoItem.ShipmentInfo
+                    .DestinationServiceArea.ServiceAreaCode,
+                Description:
+                  shipment.AWBInfo.ArrayOfAWBInfoItem.ShipmentInfo
+                    .DestinationServiceArea.Description,
+                FacilityCode:
+                  shipment.AWBInfo.ArrayOfAWBInfoItem.ShipmentInfo
+                    .DestinationServiceArea.FacilityCode
+              }
+            }
+          },
+          warnings: [],
+          errors: []
+        };
+      }
     } catch (error) {
       return errorObj(error);
     }
@@ -1535,7 +1927,90 @@ class Shipment {
           errors: []
         };
       }
+
+      if (this.service === "dhl") {
+        const formattedObj = {
+          trackingRequest: {
+            TrackingRequest: {
+              Request: {
+                ServiceHeader: {
+                  MessageTime: getIsoDateTime(),
+                  MessageReference: getMessageReference()
+                }
+              },
+              AWBNumber: {
+                ArrayOfAWBNumberItem: [trackingObj.trackingNumber]
+              },
+              LevelOfDetails: "ALL_CHECK_POINTS",
+              PiecesEnabled: "B"
+            }
+          }
+        };
+
+        const data = await trackingRequest(
+          trackingObj.shipperAccount,
+          formattedObj
+        );
+
+        if (
+          data.response.Notification &&
+          data.response.Notification.length > 0
+        ) {
+          return errorObj(data.response.Notification);
+        }
+
+        const shipment = data.response.trackingResponse.TrackingResponse;
+        const parcel =
+          data?.response?.trackingResponse?.TrackingResponse?.AWBInfo
+            ?.ArrayOfAWBInfoItem?.Pieces?.PieceInfo?.ArrayOfPieceInfoItem
+            ?.PieceDetails;
+        return {
+          data: {
+            tracking: {
+              parcels: [
+                {
+                  height: parcel.Height,
+                  width: parcel.Width,
+                  depth: parcel.Depth,
+                  weight: {
+                    value: Number(parcel.Weight),
+                    unit: parcel.WeightUnit
+                  }
+                }
+              ],
+              trackingNumber: trackingObj.trackingNumber,
+              consigneeName:
+                shipment.AWBInfo.ArrayOfAWBInfoItem.ShipmentInfo.ConsigneeName,
+              shipmentWeight:
+                shipment.AWBInfo.ArrayOfAWBInfoItem.ShipmentInfo.Weight,
+              shipmentDeliveryDate:
+                shipment.AWBInfo.ArrayOfAWBInfoItem.ShipmentInfo.ShipmentDate,
+              shipmentWeightUnit:
+                shipment.AWBInfo.ArrayOfAWBInfoItem.ShipmentInfo.WeightUnit,
+              shipmentPackageCount:
+                shipment.AWBInfo.ArrayOfAWBInfoItem.ShipmentInfo.Pieces,
+              messageTime: shipment.Response.ServiceHeader.MessageTime,
+              messageReference:
+                shipment.Response.ServiceHeader.MessageReference,
+              destinationServiceArea: {
+                ServiceAreaCode:
+                  shipment.AWBInfo.ArrayOfAWBInfoItem.ShipmentInfo
+                    .DestinationServiceArea.ServiceAreaCode,
+                Description:
+                  shipment.AWBInfo.ArrayOfAWBInfoItem.ShipmentInfo
+                    .DestinationServiceArea.Description,
+                FacilityCode:
+                  shipment.AWBInfo.ArrayOfAWBInfoItem.ShipmentInfo
+                    .DestinationServiceArea.FacilityCode
+              }
+            }
+          },
+          warnings: [],
+          errors: []
+        };
+      }
     } catch (error) {
+      console.log("error", error);
       return errorObj(error);
     }
   }

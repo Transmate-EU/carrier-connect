@@ -43,7 +43,6 @@ async function rest(params) {
         break;
       case "trackingstatus":
         response = await apiCall.getTracking(request.tracking);
-
         result = response.data.tracking;
         break;
       case "shipments":
@@ -53,7 +52,6 @@ async function rest(params) {
         break;
       case "createshipment":
         response = await apiCall.createShipment(request.shipment);
-
         result = response.data.shipment;
         break;
       case "validateaddress":

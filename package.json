@@ -22,7 +22,7 @@
     "start-prod": "node dist/graphql-local.js",
     "deploy": "ibmcloud fn action update dev dist/rest-local.js --web true",
     "deploy-graphql": "ibmcloud fn action update graphql dist/graphql-local.js --web true",
-    "start": "nodemon ./index.js --exec babel-node",
+    "start": "nodemon ./indexV2.js --exec babel-node",
     "buildwebpacktest": "npm run build-test && npm run test-webpack"
   },
   "repository": {
@@ -45,6 +45,8 @@
     "ajv": "^6.12.6",
     "axios": "^0.21.1",
     "debug": "^4.3.1",
+    "dhl-node": "^1.0.0",
+    "dotenv": "^10.0.0",
     "graphql": "^15.5.0",
     "graphql-tools": "^7.0.5",
     "lodash.get": "^4.4.2",

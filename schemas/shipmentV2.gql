@@ -23,6 +23,7 @@ input AddressInput {
     zip: String
     isResidential: Boolean
     metadata: String
+    countryCode: String
 }
 
 type AddressType {
@@ -142,12 +143,16 @@ type ParcelType {
     weight: WeightType
     height: String
     massUnit: String
+    depth: String
     dimension: DimensionType
     items: [ItemType]
 }
 
 input ShipperAccount {
     id: String
+    username: String
+    password: String
+    accountNumber: String
 }
 
 type ShipperAccountType {
@@ -190,6 +195,7 @@ type RateOutput {
     createdAt: String
     updatedAt: String
     detailedCharges: [DetailedChargesType]
+    cutOffTime: String
 }
 
 input CalculateRate {
@@ -199,10 +205,17 @@ input CalculateRate {
     shipperAccounts: [ShipperAccount]
 }
 
+
 input ShipmentInput {
     parcels: [ParcelInput!]!
     shipFrom: AddressInput!
     shipTo: AddressInput!
+    shipperAccount: ShipperAccount
+    content: String
+    declaredValue: Float
+    declaredValueCurrecyCode: String
+    paymentInfo: String
+    dropOffType: String
 }
 
 type FileLabel {
@@ -355,6 +368,12 @@ type TrackingStatusType {
     updatedAt: String
 }
 
+type DestinationServiceAreaType {
+    serviceAreaCode: String
+    description: String
+    facilityCode: String
+}
+
 type TrackingOutput {
     id: String
     slug: String
@@ -382,6 +401,10 @@ type TrackingOutput {
     shipmentPackageCount: Int
     shipmentPickupDate: String
     shipmentDeliveryDate: String
+    messageTime: String
+    messageReference: String
+    consigneeName: String
+    destinationServiceArea: DestinationServiceAreaType
     shipmentType: String
     shipmentWeight: Int
     shipmentWeightUnit: String
@@ -419,6 +442,7 @@ type TrackingOutput {
     trackingStatus: TrackingStatusType
     trackingHistory: [TrackingStatusType]
     transaction: String
+    parcels: [ParcelType]
 }
 
 
@@ -481,10 +505,15 @@ type ShipmentOutput {
     updatedAt: String
     objectOwner: String
     addressReturn: AddressType
-    carrierAccounts: [String]
+    trackingNumber: String
+    shipperAccounts: [String]
     messages: [String]
     status: String
     shipmentDate: String
+    shipmentIdentificationNumber: String
+    dispatchConfirmationNumber: String
+    labelImageFormat: String
+    graphicImage: String
     shipFrom: AddressType
     parcels: ParcelType
     shipTo: AddressType

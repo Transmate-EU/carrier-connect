@@ -1,5 +1,4 @@
 import Shipment from "./controller/shipment";
-// testing data
 import { shippoShipmentTesting } from "./data/shippo";
 
 import { rest } from "./functions/rest";
