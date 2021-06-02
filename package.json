@@ -14,7 +14,7 @@
     "prepublishOnly": "npm install && npm run build-test",
     "build-test": "export NODE_ENV=testing WEBPACK_TEST=yes && webpack --config webpack.config.js",
     "test": "SANDBOX=true mocha --require @babel/register ./tests/**/**.test.js --timeout 30000 --exit",
-    "test-webpack": "SANDBOX=true DEBUG='-babel*,-nodemon*,-mocha*,-follow-redirects*'  WEBPACK_TEST=yes mocha --require @babel/register ./tests --timeout 30000 --exit",
+    "test-webpack": "SANDBOX=true DEBUG='-babel*,-nodemon*,-mocha*,-follow-redirects*'  WEBPACK_TEST=yes mocha --require @babel/register ./tests/unit/**.test.js --timeout 30000 --exit",
     "start-gql-server": "export DEBUG='*,-babel*,-nodemon*,-express*' && nodemon ./server.js --exec babel-node",
     "gql-function": "export DEBUG='*,-babel*,-nodemon*' && nodemon ./functions/graphql.js --exec babel-node",
     "gql-test": "mocha --require @babel/register ./tests/gql/**.test.js --timeout 30000 --exit",
