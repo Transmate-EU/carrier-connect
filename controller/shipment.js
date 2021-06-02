@@ -23,6 +23,40 @@ const POSTMEN_PROD_URL = "https://prod-api.postmen.com/v3";
 const SHIPPO_URL = "https://api.goshippo.com/";
 const AFTER_SHIP_URL = "https://api.aftership.com/v4";
 
+function errorObj(error) {
+  debug("error", error);
+  if (Array.isArray(error)) {
+    // validations errors
+    return {
+      data: {},
+      warnings: [],
+      errors: error
+    };
+  }
+
+  if (error.detail) {
+    return {
+      data: {},
+      warnings: [],
+      errors: [error.detail]
+    };
+  }
+
+  if (error.response) {
+    return {
+      data: {},
+      warnings: [],
+      errors: [error.response.data]
+    };
+  }
+
+  return {
+    data: {},
+    warnings: [],
+    errors: [error.message]
+  };
+}
+
 class Shipment {
   constructor(service, context = process.env || {}) {
     debug("shipment constructor called %o", context);
@@ -123,13 +157,7 @@ class Shipment {
           shippoCreateShipmentSchema
         );
 
-        if (errors) {
-          return {
-            data: {},
-            warnings: [],
-            errors
-          };
-        }
+        if (errors) return errorObj(errors);
 
         const shipment = await this.shippo.shipment.create(formatedObject);
         debug("shippo return %o", shipment);
@@ -193,6 +221,7 @@ class Shipment {
               })),
               rates: shipment.rates.map(rate => ({
                 id: rate.object_id,
+
                 status: rate.status,
                 serviceType: rate.provider,
                 serviceName: rate.servicelevel.name,
@@ -219,19 +248,7 @@ class Shipment {
         };
       }
     } catch (error) {
-      if (error.response) {
-        return {
-          data: {},
-          warnings: [],
-          errors: [error.response.data]
-        };
-      }
-
-      return {
-        data: {},
-        warnings: [],
-        errors: [error.message]
-      };
+      return errorObj(error);
     }
   }
 
@@ -243,13 +260,7 @@ class Shipment {
           shippoCarrierAccountSchema
         );
 
-        if (errors) {
-          return {
-            data: {},
-            warnings: [],
-            errors
-          };
-        }
+        if (errors) return errorObj(errors);
 
         const resultObject = await this.shippo.carrieraccount.create(
           requestObject
@@ -267,13 +278,7 @@ class Shipment {
           postmenCreateShipperAccount
         );
 
-        if (errors) {
-          return {
-            data: {},
-            warnings: [],
-            errors
-          };
-        }
+        if (errors) return errorObj(errors);
 
         const data = await axios({
           method: "post",
@@ -290,19 +295,7 @@ class Shipment {
         };
       }
     } catch (error) {
-      if (error.response) {
-        return {
-          data: {},
-          warnings: [],
-          errors: [error.response.data]
-        };
-      }
-
-      return {
-        data: {},
-        warnings: [],
-        errors: [error.message]
-      };
+      return errorObj(error);
     }
   }
 
@@ -321,13 +314,7 @@ class Shipment {
           shippoCreateManifestSchema
         );
 
-        if (errors) {
-          return {
-            data: {},
-            warnings: [],
-            errors
-          };
-        }
+        if (errors) return errorObj(errors);
 
         const resultObject = await this.shippo.manifest.create(
           formatedManifest
@@ -362,13 +349,7 @@ class Shipment {
           postmenManifestReqSchema
         );
 
-        if (errors) {
-          return {
-            data: {},
-            warnings: [],
-            errors
-          };
-        }
+        if (errors) return errorObj(errors);
 
         const data = await axios({
           method: "post",
@@ -410,17 +391,7 @@ class Shipment {
         };
       }
     } catch (error) {
-      if (error.response) {
-        return {
-          errors: [error.response.data]
-        };
-      }
-
-      return {
-        data: {},
-        warnings: [],
-        errors: [error.message]
-      };
+      return errorObj(error);
     }
   }
 
@@ -518,13 +489,7 @@ class Shipment {
 
         const errors = validateSchema(formatedShipment, postmenCalculateSchema);
 
-        if (errors) {
-          return {
-            data: {},
-            warnings: [],
-            errors
-          };
-        }
+        if (errors) return errorObj(errors);
 
         const data = await axios({
           method: "post",
@@ -546,6 +511,7 @@ class Shipment {
         return {
           data: {
             rates: data.data.data.rates.map(rate => ({
+              id: rate.service_type,
               status: "calculated",
               chargeWeight: {
                 ...rate.charge_weight
@@ -567,27 +533,7 @@ class Shipment {
         };
       }
     } catch (error) {
-      if (error.detail) {
-        return {
-          data: {},
-          warnings: [],
-          errors: [error.detail]
-        };
-      }
-
-      if (error.response) {
-        return {
-          data: {},
-          warnings: [],
-          errors: [error.response.data]
-        };
-      }
-
-      return {
-        data: {},
-        warnings: [],
-        errors: [error.message]
-      };
+      return errorObj(error);
     }
   }
 
@@ -613,13 +559,7 @@ class Shipment {
           shippoAddressCreationSchema
         );
 
-        if (errors) {
-          return {
-            data: {},
-            warnings: [],
-            errors
-          };
-        }
+        if (errors) return errorObj(errors);
 
         const resultObject = await this.shippo.address.create(formatedAddress);
 
@@ -644,19 +584,7 @@ class Shipment {
         };
       }
     } catch (error) {
-      if (error.response) {
-        return {
-          data: {},
-          warnings: [],
-          errors: [error.response.data]
-        };
-      }
-
-      return {
-        data: {},
-        warnings: [],
-        errors: [error.message]
-      };
+      return errorObj(error);
     }
   }
 
@@ -715,13 +643,7 @@ class Shipment {
           postmenAddressReqSchema
         );
 
-        if (errors) {
-          return {
-            data: {},
-            warnings: [],
-            errors
-          };
-        }
+        if (errors) return errorObj(errors);
 
         const data = await axios({
           method: "post",
@@ -768,19 +690,7 @@ class Shipment {
         };
       }
     } catch (error) {
-      if (error.response) {
-        return {
-          data: {},
-          warnings: [],
-          errors: [error.response.data]
-        };
-      }
-
-      return {
-        data: {},
-        warnings: [],
-        errors: [error.message]
-      };
+      return errorObj(error);
     }
   }
 
@@ -796,13 +706,7 @@ class Shipment {
           shippoCreateLabelSchema
         );
 
-        if (errors) {
-          return {
-            data: {},
-            warnings: [],
-            errors
-          };
-        }
+        if (errors) return errorObj(errors);
 
         const data = await axios({
           method: "post",
@@ -884,13 +788,7 @@ class Shipment {
 
         const errors = validateSchema(formatedLabel, postmenCreateLabelSchema);
 
-        if (errors) {
-          return {
-            data: {},
-            warnings: [],
-            errors
-          };
-        }
+        if (errors) return errorObj(errors);
 
         const data = await axios({
           method: "post",
@@ -953,19 +851,7 @@ class Shipment {
         };
       }
     } catch (error) {
-      if (error.response) {
-        return {
-          data: {},
-          warnings: [],
-          errors: [error.response.data]
-        };
-      }
-
-      return {
-        data: {},
-        warnings: [],
-        errors: [error.detail ? error.detail : error.message]
-      };
+      return errorObj(error);
     }
   }
 
@@ -1061,19 +947,7 @@ class Shipment {
         };
       }
     } catch (error) {
-      if (error.response) {
-        return {
-          data: {},
-          warnings: [],
-          errors: [error.response.data]
-        };
-      }
-
-      return {
-        data: {},
-        warnings: [],
-        errors: [error.message]
-      };
+      return errorObj(error);
     }
   }
 
@@ -1156,17 +1030,7 @@ class Shipment {
         };
       }
     } catch (error) {
-      if (error.response) {
-        return {
-          errors: [error.response.data]
-        };
-      }
-
-      return {
-        data: {},
-        warnings: [],
-        errors: [error.message]
-      };
+      return errorObj(error);
     }
   }
 
@@ -1244,19 +1108,7 @@ class Shipment {
         };
       }
     } catch (error) {
-      if (error.response) {
-        return {
-          data: {},
-          warnings: [],
-          errors: [error.response.data]
-        };
-      }
-
-      return {
-        data: {},
-        warnings: [],
-        errors: [error.message]
-      };
+      return errorObj(error);
     }
   }
 
@@ -1366,19 +1218,7 @@ class Shipment {
         };
       }
     } catch (error) {
-      if (error.response) {
-        return {
-          data: {},
-          warnings: [],
-          errors: [error.response.data]
-        };
-      }
-
-      return {
-        data: {},
-        warnings: [],
-        errors: [error.message]
-      };
+      return errorObj(error);
     }
   }
 
@@ -1452,19 +1292,7 @@ class Shipment {
         };
       }
     } catch (error) {
-      if (error.response) {
-        return {
-          data: {},
-          warnings: [],
-          errors: [error.response.data]
-        };
-      }
-
-      return {
-        data: {},
-        warnings: [],
-        errors: [error.message]
-      };
+      return errorObj(error);
     }
   }
 
@@ -1565,19 +1393,7 @@ class Shipment {
         };
       }
     } catch (error) {
-      if (error.response) {
-        return {
-          data: {},
-          warnings: [],
-          errors: [error.response.data]
-        };
-      }
-
-      return {
-        data: {},
-        warnings: [],
-        errors: [error.message]
-      };
+      return errorObj(error);
     }
   }
 
@@ -1643,13 +1459,7 @@ class Shipment {
       if (this.service === "postmen") {
         const errors = validateSchema(trackingObj, postmenGetTrackingSchema);
 
-        if (errors) {
-          return {
-            data: {},
-            warnings: [],
-            errors
-          };
-        }
+        if (errors) return errorObj(errors);
 
         const URL = `${this.afterShipUrl}/trackings/${trackingObj.trackingSlug}/${trackingObj.trackingNumber}`;
         const data = await axios.get(URL, this.afterShipHeaders);
@@ -1726,19 +1536,7 @@ class Shipment {
         };
       }
     } catch (error) {
-      if (error.response) {
-        return {
-          data: {},
-          warnings: [],
-          errors: [error.response.data]
-        };
-      }
-
-      return {
-        data: {},
-        warnings: [],
-        errors: [error.message]
-      };
+      return errorObj(error);
     }
   }
 
@@ -1806,29 +1604,8 @@ class Shipment {
         };
       }
     } catch (error) {
-      if (error.detail) {
-        return {
-          data: {},
-          warnings: [],
-          errors: [error.detail]
-        };
-      }
-
-      if (error.response) {
-        return {
-          data: {},
-          warnings: [],
-          errors: [error.response.data]
-        };
-      }
-
-      return {
-        data: {},
-        warnings: [],
-        errors: [error.message]
-      };
+      return errorObj(error);
     }
   }
 }
-
 export default Shipment;
