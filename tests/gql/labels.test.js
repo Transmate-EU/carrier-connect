@@ -1,11 +1,9 @@
-/* eslint-disable import/extensions */
 /* eslint-disable mocha/no-mocha-arrows */
 /* eslint-disable global-require */
+import { expect } from "chai";
+import { envFile } from "../data/test.data";
 
 const debug = require("debug")("test:gql");
-
-const { expect } = require("chai");
-const envFile = require("../../.env.json");
 
 let api;
 

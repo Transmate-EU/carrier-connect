@@ -13,7 +13,6 @@ import {
   testRateRequest,
   testShipmentRequest
 } from "./dhl-node";
-
 import {
   postmenAddressReqSchema,
   postmenCalculateSchema,
@@ -264,7 +263,6 @@ class Shipment {
                 : "ECOM26_84_001"
             },
             ShipTimestamp: getIsoDateTimeGmt(shipmentDate),
-
             PickupLocationCloseTime: shipmentMetadata
               ? shipmentMetadata.pickupLocationCloseTime
               : "23:59",
@@ -367,7 +365,6 @@ class Shipment {
         }
 
         const ratesData = await this.getRates(requestObject);
-
         return {
           data: {
             shipment: {
@@ -879,8 +876,8 @@ class Shipment {
               serviceType: rate.attributes.type,
               status: "calculated",
               totalCharge: {
-                amount: rate.TotalNet[0].Amount,
-                currency: rate.TotalNet[0].Currency
+                amount: rate.TotalNet.Amount,
+                currency: rate.TotalNet.Currency
               },
               deliveryDate: rate.DeliveryTime
             }))
@@ -1982,10 +1979,10 @@ class Shipment {
           return errorObj(data.response.Notification);
         }
 
-        const shipment = data?.response?.trackingResponse?.TrackingResponse;
+        const shipment = data.response.trackingResponse.TrackingResponse;
         const parcel =
-          shipment?.AWBInfo?.ArrayOfAWBInfoItem?.Pieces?.PieceInfo
-            ?.ArrayOfPieceInfoItem?.PieceDetails;
+          shipment.AWBInfo.ArrayOfAWBInfoItem.Pieces.PieceInfo
+            .ArrayOfPieceInfoItem.PieceDetails;
         if (!parcel)
           throw Error(
             `no tracking details for DHL AWB ${trackingObj.trackingNumber}`
