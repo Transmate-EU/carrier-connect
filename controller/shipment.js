@@ -7,12 +7,15 @@ import {
   rateRequest,
   getIsoDateTime,
   shipmentRequest,
-  trackingRequest
+  trackingRequest,
+  testTrackingRequest,
+  testRateRequest,
+  testShipmentRequest
 } from "dhl-node";
+import isoCountries from "i18n-iso-countries";
 import {
   postmenAddressReqSchema,
   postmenCalculateSchema,
-  postmenCreateLabelSchema,
   postmenCreateShipperAccount,
   postmenGetTrackingSchema,
   postmenManifestReqSchema,
@@ -34,7 +37,6 @@ const AFTER_SHIP_URL = "https://api.aftership.com/v4";
 function errorObj(error) {
   debug("error", error);
   if (Array.isArray(error)) {
-    console.log("reached here");
     // validations errors
     return {
       data: {},
@@ -73,18 +75,25 @@ class Shipment {
 
     const sandbox = context.SANDBOX === true || context.SANDBOX === "true";
     this.postmenUrl = sandbox ? POSTMEN_SANDBOX_URL : POSTMEN_PROD_URL;
-
+    this.testEnv = sandbox;
+    this.shipperManifestAccount = context.SHIPPER_MANIFEST_TEST_ID;
     this.shippoApiKey = sandbox
       ? context.SHIPPO_TEST_API_KEY
       : context.SHIPPO_PROD_API_KEY;
     this.postmentApiKey = sandbox
       ? context.POSTMEN_TEST_API_KEY
-      : context.POSTMENT_PROD_API_KEY;
+      : context.POSTMEN_PROD_API_KEY;
     this.afterShipApiKey = sandbox
       ? context.AFTER_SHIP_TEST_API_KEY
       : context.AFTER_SHIP_PROD_API_KEY;
 
     this.shippo = this.shippoApiKey ? shippoApi(this.shippoApiKey) : null;
+    this.shipperAccount = {
+      id: context.SHIPPER_ACCOUNT_ID,
+      username: context.SHIPPER_ACCOUNT_USERNAME,
+      password: context.SHIPPER_ACCOUNT_PASSWORD,
+      accountNumber: context.SHIPPER_ACCOUNT_ACC_NUMBER
+    };
     this.shippoUrl = SHIPPO_URL;
     this.postmentCredentialHeaders = {
       headers: {
@@ -127,9 +136,23 @@ class Shipment {
             parcels)
         */
     try {
+      const { shipmentMetadata } = requestObject;
+      const { shipmentDate } = requestObject;
+      const { getLabel } = requestObject;
+      const { serviceType } = requestObject;
+      const { shipFrom } = requestObject.shipment;
+      const { shipTo } = requestObject.shipment;
+      const { parcels } = requestObject.shipment;
+
+      if (!shipFrom || !shipTo || !parcels || !shipmentDate) {
+        return errorObj(
+          "Shipper, recipient, parcels and shipment date are required"
+        );
+      }
+
       if (this.service === "shippo") {
         const formatedObject = {
-          parcels: requestObject.parcels.map(parcel => ({
+          parcels: parcels.map(parcel => ({
             width: parcel.width,
             length: parcel.length,
             height: parcel.height,
@@ -138,29 +161,28 @@ class Shipment {
             weight: parcel.weight.value.toString()
           })),
           address_from: {
-            name: requestObject.shipFrom.contactName,
-            street1: requestObject.shipFrom.street1,
-            city: requestObject.shipFrom.city,
-            state: requestObject.shipFrom.state,
-            zip: requestObject.shipFrom.zip,
-            country: requestObject.shipFrom.country,
-            phone: requestObject.shipFrom.phone,
-            email: requestObject.shipFrom.email,
-            company: requestObject.shipFrom.companyName
+            name: shipFrom.contactName,
+            street1: shipFrom.street1,
+            city: shipFrom.city,
+            state: shipFrom.state,
+            zip: shipFrom.postalCode,
+            country: shipFrom.countryCode,
+            phone: shipFrom.phone,
+            email: shipFrom.email,
+            company: shipFrom.companyName
           },
           address_to: {
-            name: requestObject.shipTo.contactName,
-            street1: requestObject.shipTo.street1,
-            city: requestObject.shipTo.city,
-            state: requestObject.shipTo.state,
-            zip: requestObject.shipTo.zip,
-            country: requestObject.shipTo.country,
-            phone: requestObject.shipTo.phone,
-            email: requestObject.shipTo.email,
-            company: requestObject.shipFrom.companyName
+            name: shipTo.contactName,
+            street1: shipTo.street1,
+            city: shipTo.city,
+            state: shipTo.state,
+            zip: shipTo.postalCode,
+            country: shipTo.countryCode,
+            phone: shipTo.phone,
+            email: shipTo.email,
+            company: shipTo.companyName
           }
         };
-
         const errors = validateSchema(
           formatedObject,
           shippoCreateShipmentSchema
@@ -168,91 +190,58 @@ class Shipment {
 
         if (errors) return errorObj(errors);
 
-        const shipment = await this.shippo.shipment.create(formatedObject);
-        debug("shippo return %o", shipment);
+        const shipmentObj = await this.shippo.shipment.create(formatedObject);
+
+        let label;
+
+        // fetch label if getLabel and serviceType
+        if (getLabel && serviceType) {
+          const labelData = await this.createLabel({
+            rate: shipmentObj.rates[0].object_id
+          });
+          label = labelData.data;
+        }
+        debug("shippo return %o", shipmentObj);
         return {
           data: {
             shipment: {
-              id: shipment.object_id,
-              createdAt: shipment.object_created,
-              updatedAt: shipment.object_updated,
-              objectOwner: shipment.object_owner,
-              shipFrom: {
-                id: shipment.address_from.object_id,
-                isComplete: shipment.address_from.is_complete,
-                contactName: shipment.address_from.name,
-                street1: shipment.address_from.street1,
-                city: shipment.address_from.city,
-                state: shipment.address_from.state,
-                zip: shipment.address_from.zip,
-                country: shipment.address_from.country,
-                phone: shipment.address_from.phone,
-                email: shipment.address_from.email,
-                validationResults: shipment.address_from.validation_results
-              },
-              shipTo: {
-                id: shipment.address_to.object_id,
-                isComplete: shipment.address_to.is_complete,
-                contactName: shipment.address_to.name,
-                street1: shipment.address_to.street1,
-                city: shipment.address_to.city,
-                state: shipment.address_to.state,
-                zip: shipment.address_to.zip,
-                country: shipment.address_to.country,
-                phone: shipment.address_to.phone,
-                email: shipment.address_to.email,
-                validationResults: shipment.address_to.validation_results
-              },
-              addressReturn: {
-                id: shipment.address_return.object_id,
-                isComplete: shipment.address_return.is_complete,
-                contactName: shipment.address_return.name,
-                street1: shipment.address_return.street1,
-                city: shipment.address_return.city,
-                state: shipment.address_return.state,
-                zip: shipment.address_return.zip,
-                country: shipment.address_return.country,
-                phone: shipment.address_return.phone,
-                email: shipment.address_return.email,
-                validationResults: shipment.address_return.validation_results
-              },
-              status: shipment.status,
-              parcels: shipment.parcels.map(parcel => ({
-                id: parcel.object_id,
-                length: parcel.length,
-                width: parcel.width,
-                height: parcel.height,
-                distanceUnit: parcel.distance_unit,
-                weight: {
-                  value: parcel.weight,
-                  unit: parcel.mass_unit
-                }
-              })),
-              rates: shipment.rates.map(rate => ({
+              id: shipmentObj.object_id,
+              trackingNumber: "",
+              shipmentDate,
+              createdAt: shipmentObj.object_created,
+              rates: shipmentObj.rates.map(rate => ({
                 id: rate.object_id,
-
-                status: rate.status,
+                status: "calculated",
                 serviceType: rate.provider,
-                serviceName: rate.servicelevel.name,
-                serviceToken: rate.servicelevel.token,
-                shipperAccount: {
-                  id: rate.carrier_account
-                },
-                createdAt: rate.object_created,
+                deliveryDate: rate.arrivesBy,
                 totalCharge: {
                   amount: rate.amount,
                   currency: rate.currency
                 },
-                localTotalCharge: {
-                  amountLocal: rate.amount_local,
-                  currencyLocal: rate.currency_local
-                },
-                durationTerms: rate.duration_terms,
-                updatedAt: rate.object_updated
-              }))
+                metadata: {
+                  createdAt: rate.object_created,
+                  serviceName: rate.servicelevel.name,
+                  serviceToken: rate.servicelevel.token,
+                  shipperAccount: {
+                    id: rate.carrier_account
+                  },
+                  localTotalCharge: {
+                    amountLocal: rate.amount_local,
+                    currencyLocal: rate.currency_local
+                  },
+                  durationTerms: rate.duration_terms,
+                  updatedAt: rate.object_updated
+                }
+              })),
+              label: {
+                id: label.id,
+                createdAt: label.createdAt,
+                labelUrl: label.labelUrl,
+                trackingNumbers: label.trackingNumbers
+              }
             }
           },
-          warnings: [],
+          warnings: shipmentObj.messages,
           errors: []
         };
       }
@@ -261,65 +250,75 @@ class Shipment {
         const formattedObject = {
           RequestedShipment: {
             ShipmentInfo: {
-              DropOffType: requestObject.dropOffType,
-              ServiceType: requestObject.serviceType,
-              Account: requestObject.shipperAccount.accountNumber,
-              Currency: requestObject.currency,
-              UnitOfMeasurement: requestObject.parcels[0].massUnit,
-              PackagesCount: 1,
-              LabelType: requestObject.labelType,
-              LabelTemplate: requestObject.labelTemplate
+              DropOffType: "REQUEST_COURIER",
+              ServiceType: "P",
+              Account: this.shipperAccount.accountNumber,
+              Currency: parcels[0].items[0].price.currency,
+              UnitOfMeasurement: parcels[0].massUnit === "lb" ? "SI" : "SU",
+              PackagesCount: parcels.length,
+              LabelType: shipmentMetadata ? shipmentMetadata.labelType : "PDF",
+              RequestAdditionalInformation: "Y",
+              LabelTemplate: shipmentMetadata
+                ? shipmentMetadata.labelTemplate
+                : "ECOM26_84_001"
             },
-            ShipTimestamp: getIsoDateTimeGmt(requestObject.timeStamp),
-            PickupLocationCloseTime: requestObject.pickupLocationCloseTime,
-            SpecialPickupInstruction: requestObject.specialPickupInstruction,
-            PickupLocation: requestObject.pickupLocation,
-            PaymentInfo: requestObject.paymentInfo,
+            ShipTimestamp: getIsoDateTimeGmt(shipmentDate),
+            PickupLocationCloseTime: shipmentMetadata
+              ? shipmentMetadata.pickupLocationCloseTime
+              : "23:59",
+            SpecialPickupInstruction: shipmentMetadata
+              ? shipmentMetadata.specialPickupInstruction
+              : "",
+            PickupLocation: shipmentMetadata
+              ? shipmentMetadata.pickupLocation
+              : "",
+            PaymentInfo: shipmentMetadata
+              ? shipmentMetadata.paymentInfo
+              : "DDP",
+            GetRateEstimates: "Y",
             InternationalDetail: {
               Commodities: {
-                NumberOfPieces:
-                  requestObject.internationalDetail.commodities.numberOfPieces,
-                Description:
-                  requestObject.internationalDetail.commodities.description,
-                CountryOfManufacture:
-                  requestObject.internationalDetail.commodities
-                    .countryOfManufacture,
-                Quantity:
-                  requestObject.internationalDetail.commodities.quantity,
-                UnitPrice:
-                  requestObject.internationalDetail.commodities.unitPrice,
-                CustomsValue:
-                  requestObject.internationalDetail.commodities.customsValue
+                NumberOfPieces: parcels.length,
+                Description: parcels[0].description,
+                CountryOfManufacture: shipFrom.countryCode,
+                Quantity: parcels.length,
+                UnitPrice: 10,
+                CustomsValue: shipmentMetadata
+                  ? shipmentMetadata.internationalDetail.customs
+                  : 1
               },
-              Content: requestObject.internationalDetail.content
+              Content:
+                shipmentMetadata && shipmentMetadata.internationalDetail
+                  ? shipmentMetadata.internationalDetail.content
+                  : "NON_DOCUMENTS"
             },
             Ship: {
               Shipper: {
                 Contact: {
-                  PersonName: requestObject.shipFrom.contactName,
-                  CompanyName: requestObject.shipFrom.companyName,
-                  PhoneNumber: requestObject.shipFrom.phone,
-                  EmailAddress: requestObject.shipFrom.email
+                  PersonName: shipFrom.contactName,
+                  CompanyName: shipFrom.companyName,
+                  PhoneNumber: shipFrom.phone,
+                  EmailAddress: shipFrom.email
                 },
                 Address: {
-                  StreetLines: requestObject.shipFrom.street1,
-                  City: requestObject.shipFrom.city,
-                  PostalCode: requestObject.shipFrom.postalCode,
-                  CountryCode: requestObject.shipFrom.countryCode
+                  StreetLines: shipFrom.street1,
+                  City: shipFrom.city,
+                  PostalCode: shipFrom.postalCode,
+                  CountryCode: shipFrom.countryCode
                 }
               },
               Recipient: {
                 Contact: {
-                  PersonName: requestObject.shipTo.contactName,
-                  CompanyName: requestObject.shipTo.companyName,
-                  PhoneNumber: requestObject.shipTo.phone,
-                  EmailAddress: requestObject.shipTo.email
+                  PersonName: shipTo.contactName,
+                  CompanyName: shipTo.companyName,
+                  PhoneNumber: shipTo.phone,
+                  EmailAddress: shipTo.email
                 },
                 Address: {
-                  StreetLines: requestObject.shipTo.street1,
-                  City: requestObject.shipTo.city,
-                  PostalCode: requestObject.shipTo.postalCode,
-                  CountryCode: requestObject.shipTo.countryCode
+                  StreetLines: shipTo.street1,
+                  City: shipTo.city,
+                  PostalCode: shipTo.postalCode,
+                  CountryCode: shipTo.countryCode
                 }
               }
             },
@@ -328,41 +327,180 @@ class Shipment {
                 attributes: {
                   number: 1
                 },
-                Weight: requestObject.parcels[0].weight.value,
+                Weight: parcels[0].weight.value,
                 Dimensions: {
-                  Length: requestObject.parcels[0].dimension.length,
-                  Width: requestObject.parcels[0].dimension.width,
-                  Height: requestObject.parcels[0].dimension.height
+                  Length: parcels[0].dimension.length,
+                  Width: parcels[0].dimension.width,
+                  Height: parcels[0].dimension.height
                 },
-                CustomerReferences: "TEST CZ-IT"
+                CustomerReferences: shipmentMetadata
+                  ? shipmentMetadata.customersReference
+                  : parcels[0].description
               }
             }
           }
         };
 
-        const data = await shipmentRequest(
-          requestObject.shipperAccount,
-          formattedObject
-        );
+        let data;
 
-        if (data.response.Notification.length > 0) {
-          return errorObj(data.response.Notification);
+        if (this.testEnv) {
+          data = await testShipmentRequest(
+            this.shipperAccount,
+            formattedObject
+          );
+        }
+
+        if (!this.testEnv) {
+          data = await shipmentRequest(this.shipperAccount, formattedObject);
         }
 
         const returnedJSON = JSON.stringify(data.response, null, 4);
         const parsedObject = JSON.parse(returnedJSON);
 
+        if (
+          data.response.Notification &&
+          !parsedObject.ShipmentIdentificationNumber
+        ) {
+          return errorObj(data.response.Notification);
+        }
+
+        const ratesData = await this.getRates(requestObject);
+
         return {
           data: {
             shipment: {
-              shipmentIdentificationNumber:
-                parsedObject.ShipmentIdentificationNumber,
-              dispatchConfirmationNumber:
-                parsedObject.DispatchConfirmationNumber,
-              labelImageFormat: parsedObject.LabelImage.LabelImageFormat,
-              graphicImage: parsedObject.LabelImage.GraphicImage,
+              id: parsedObject.ShipmentIdentificationNumber,
+              shipmentDate,
               trackingNumber:
-                parsedObject.PackagesResult.PackageResult.TrackingNumber
+                parsedObject.PackagesResult.PackageResult.TrackingNumber,
+              rates: ratesData.data.rates,
+              createdAt: new Date().toString(),
+              label:
+                getLabel && serviceType
+                  ? {
+                      id: parsedObject.ShipmentIdentificationNumber,
+                      labelUrl: parsedObject.LabelImage.GraphicImage,
+                      trackingNumbers: [
+                        parsedObject.ShipmentIdentificationNumber
+                      ],
+                      status: "created",
+                      createdAt: new Date().toString()
+                    }
+                  : null
+            }
+          },
+          warnings: [],
+          errors: []
+        };
+      }
+
+      if (this.service === "postmen") {
+        const shipFromCC = isoCountries.alpha2ToAlpha3(
+          shipFrom.countryCode,
+          "en",
+          { select: "official" }
+        );
+        const shipToCC = isoCountries.alpha2ToAlpha3(shipTo.countryCode, "en", {
+          select: "official"
+        });
+        const formatedShipment = {
+          shipment: {
+            ship_from: {
+              contact_name: shipFrom.contactName,
+              street1: shipFrom.street1,
+              city: shipFrom.city,
+              state: shipFrom.state,
+              country: shipFromCC,
+              phone: shipFrom.phone,
+              email: shipFrom.email,
+              postal_code: shipFrom.postalCode
+            },
+            ship_to: {
+              contact_name: shipTo.contactName,
+              street1: shipTo.street1,
+              city: shipTo.city,
+              state: shipTo.state,
+              country: shipToCC,
+              phone: shipTo.phone,
+              email: shipTo.email,
+              postal_code: shipTo.postalCode
+            },
+            parcels: parcels.map(parcel => ({
+              box_type: parcel.boxType,
+              description: parcel.description,
+              weight: parcel.weight,
+              dimension: {
+                width: parcel.dimension.width,
+                height: parcel.dimension.height,
+                depth: parcel.dimension.depth,
+                unit: parcel.dimension.unit
+              },
+              items: parcel.items.map(item => ({
+                description: item.description,
+                origin_country: shipFromCC,
+                quantity: item.quantity,
+                price: item.price,
+                weight: item.weight,
+                sku: item.sku
+              }))
+            }))
+          },
+          shipper_accounts: [{ id: this.shipperAccount.id }]
+        };
+
+        const errors = validateSchema(formatedShipment, postmenCalculateSchema);
+
+        if (errors) return errorObj(errors);
+
+        const data = await axios({
+          method: "post",
+          url: `${this.postmenUrl}/rates`,
+          data: formatedShipment,
+          headers: {
+            ...this.postmentCredentialHeaders.headers
+          }
+        });
+
+        if (data.data.meta.code === 4104) {
+          return {
+            data: {},
+            warnings: [],
+            errors: [...data.data.meta.details]
+          };
+        }
+
+        let label;
+
+        if (serviceType && getLabel) {
+          const labelData = await this.createLabel({
+            ...formatedShipment,
+            service_type: serviceType
+          });
+          label = labelData.data;
+        }
+
+        return {
+          data: {
+            shipment: {
+              id: data.data.data.id,
+              trackingNumber: "",
+              createdAt: data.data.data.created_at,
+              rates: data.data.data.rates.map(rate => ({
+                id: data.data.data.id,
+                status: "calculated",
+                serviceType: rate.shipper_account.slug,
+                deliveryDate: rate.delivery_date,
+                totalCharge: {
+                  ...rate.total_charge
+                }
+              })),
+              label: {
+                id: label.id,
+                status: "created",
+                labelUrl: label.labelUrl,
+                createdAt: label.createdAt,
+                trackingNumbers: label.trackingNumbers
+              }
             }
           },
           warnings: [],
@@ -427,7 +565,7 @@ class Shipment {
         const formatedManifest = {
           shipment_date: manifest.shipmentDate,
           transactions: manifest.transactions,
-          carrier_account: manifest.shipperAccount.id,
+          carrier_account: this.shipperAccount.id,
           address_from: manifest.shipFromId
         };
 
@@ -450,7 +588,7 @@ class Shipment {
             updatedAt: resultObject.object_updated,
             shipFromId: resultObject.address_from,
             shipperAccount: {
-              id: resultObject.carrier_account
+              id: this.shipperAccount.id
             },
             transactions: resultObject.transactions
           },
@@ -462,7 +600,9 @@ class Shipment {
       if (this.service === "postmen") {
         const formatedManifest = {
           shipper_account: {
-            ...manifest.shipperAccount
+            id: this.testEnv
+              ? this.shipperManifestAccount
+              : this.shipperAccount.id
           }
         };
 
@@ -526,6 +666,9 @@ class Shipment {
             a shipper account(can be created) using #createCarrierAccount(postment, requestBody).
         */
     try {
+      const { shipmentMetadata } = shipment;
+      const { shipFrom, shipTo, parcels } = shipment.shipment;
+
       if (this.service === "shippo") {
         if (!shipment.shipmentId || shipment.shipmentId === "") {
           return {
@@ -534,6 +677,8 @@ class Shipment {
             errors: ["Please provide shipment id"]
           };
         }
+
+        // const shipmentObj = await this.createShipment(shipment);
 
         const resultObject = await this.shippo.shipment.rates(
           shipment.shipmentId
@@ -595,7 +740,12 @@ class Shipment {
               box_type: parcel.boxType,
               description: parcel.description,
               weight: parcel.weight,
-              dimension: parcel.dimension,
+              dimension: {
+                width: parcel.dimension.width,
+                height: parcel.dimension.height,
+                depth: parcel.dimension.depth,
+                unit: parcel.dimension.unit
+              },
               items: parcel.items.map(item => ({
                 description: item.description,
                 origin_country: item.originCountry,
@@ -606,7 +756,7 @@ class Shipment {
               }))
             }))
           },
-          shipper_accounts: shipment.shipperAccounts
+          shipper_accounts: [{ id: this.shipperAccount.id }]
         };
 
         const errors = validateSchema(formatedShipment, postmenCalculateSchema);
@@ -662,16 +812,16 @@ class Shipment {
             DropOffType: "REQUEST_COURIER",
             Ship: {
               Shipper: {
-                StreetLines: shipment.shipFrom.street1,
-                City: shipment.shipFrom.city,
-                PostalCode: shipment.shipFrom.postalCode,
-                CountryCode: shipment.shipFrom.countryCode
+                StreetLines: shipFrom.street1,
+                City: shipFrom.city,
+                PostalCode: shipFrom.postalCode,
+                CountryCode: shipFrom.countryCode
               },
               Recipient: {
-                StreetLines: shipment.shipTo.street1,
-                City: shipment.shipTo.city,
-                PostalCode: shipment.shipTo.postalCode,
-                CountryCode: shipment.shipTo.countryCode
+                StreetLines: shipTo.street1,
+                City: shipTo.city,
+                PostalCode: shipTo.postalCode,
+                CountryCode: shipTo.countryCode
               }
             },
             Packages: {
@@ -680,55 +830,57 @@ class Shipment {
                   number: 1
                 },
                 Weight: {
-                  Value: shipment.parcels[0].weight.value
+                  Value: parcels[0].weight.value
                 },
                 Dimensions: {
-                  Length: shipment.parcels[0].dimension.length,
-                  Width: shipment.parcels[0].dimension.width,
-                  Height: shipment.parcels[0].dimension.height
+                  Length: parcels[0].dimension.length,
+                  Width: parcels[0].dimension.width,
+                  Height: parcels[0].dimension.height
                 }
               }
             },
-            ShipTimestamp: getIsoDateTimeGmt(shipment.timeStamp),
-            UnitOfMeasurement: shipment.parcels[0].massUnit,
-            Content: shipment.content,
-            DeclaredValue: shipment.declaredValue,
-            DeclaredValueCurrecyCode: shipment.declaredValueCurrecyCode,
-            PaymentInfo: shipment.paymentInfo,
-            Account: Number(shipment.shipperAccount.accountNumber)
+            ShipTimestamp: getIsoDateTimeGmt(shipment.shipmentDate),
+            UnitOfMeasurement: parcels[0].massUnit === "lb" ? "SI" : "SU",
+            Content:
+              shipmentMetadata && shipmentMetadata.internationalDetail
+                ? shipmentMetadata.internationalDetail.content
+                : "NON_DOCUMENTS",
+            PaymentInfo: "DDP",
+            Account: Number(this.shipperAccount.accountNumber)
           }
         };
 
-        const data = await rateRequest(
-          shipment.shipperAccount,
-          formattedObject
-        );
+        let data;
+
+        if (this.testEnv) {
+          data = await testRateRequest(this.shipperAccount, formattedObject);
+        }
+
+        if (!this.testEnv) {
+          data = await rateRequest(this.shipperAccount, formattedObject);
+        }
 
         const returnedJSON = JSON.stringify(data.response, null, 4);
         const parsedObject = JSON.parse(returnedJSON);
 
-        if (data.response.Notification) {
-          return errorObj(
-            data.response.Notification
-              ? data.response.Notification
-              : parsedObject.Provider.Notification
-          );
+        if (
+          parsedObject.Provider.Notification &&
+          !parsedObject.Provider.Service
+        ) {
+          return errorObj(parsedObject.Provider.Notification);
         }
 
         return {
           data: {
-            rates: parsedObject?.Provider?.Service.map(rate => ({
-              serviceName: "dhl",
+            rates: parsedObject?.Provider?.Service.map((rate, index) => ({
+              id: `${new Date(shipment.shipmentDate).getTime()}-${index}`,
+              serviceType: "dhl",
+              status: "calculated",
               totalCharge: {
                 amount: rate.TotalNet.Amount,
                 currency: rate.TotalNet.Currency
               },
-              localTotalCharge: {
-                amount: rate.TotalNet.Amount,
-                currency: rate.TotalNet.Currency
-              },
-              deliveryDate: rate.DeliveryTime,
-              cutOffTime: rate.CutoffTime
+              deliveryDate: rate.DeliveryTime
             }))
           },
           warnings: [],
@@ -749,11 +901,11 @@ class Shipment {
           street1: address.street1,
           city: address.city,
           state: address.state,
-          zip: address.zip,
-          country: address.country,
+          zip: address.postalCode,
+          country: address.countryCode,
           phone: address.phone,
           email: address.email,
-          is_residential: address.is_residential,
+          is_residential: address.isResidential,
           metadata: address.metadata
         };
 
@@ -824,8 +976,13 @@ class Shipment {
       }
 
       if (this.service === "postmen") {
+        const countryCode = isoCountries.alpha2ToAlpha3(
+          address.countryCode,
+          "en",
+          { select: "official" }
+        );
         const formatedAddress = {
-          country: address.country,
+          country: countryCode,
           contact_name: address.contactName,
           phone: address.phone,
           fax: address.fax,
@@ -926,14 +1083,10 @@ class Shipment {
           data: {
             id: resultObject.object_id,
             status: resultObject.status,
-            objectOwner: resultObject.object_owner,
             createdAt: resultObject.object_created,
             updatedAt: resultObject.object_updated,
-            rate: {
-              id: resultObject.rate
-            },
-            trackingStatus: resultObject.tracking_status,
-            trackingNumber: resultObject.tracking_number
+            labelUrl: resultObject.label_url,
+            trackingNumbers: [resultObject.tracking_number]
           },
           warnings: [],
           errors: []
@@ -941,62 +1094,30 @@ class Shipment {
       }
 
       if (this.service === "postmen") {
-        const formatedLabel = {
-          is_document: label.isDocument,
-          service_type: label.serviceType,
+        const formattedObj = {
+          shipment: label.shipment,
+          service_type: label.service_type,
+          shipper_account: {
+            id: this.shipperAccount.id
+          },
+          billing: {
+            paid_by: "shipper"
+          },
           customs: {
             billing: {
-              paid_by: label.customs?.billing?.paidBy
+              paid_by: "recipient"
             },
-            purpose: label.customs?.purpose
+            purpose: "gift"
           },
-          shipment: {
-            ship_from: {
-              contact_name: label.shipment.shipFrom.contactName,
-              street1: label.shipment.shipFrom.street1,
-              city: label.shipment.shipFrom.city,
-              state: label.shipment.shipFrom.state,
-              country: label.shipment.shipFrom.country,
-              phone: label.shipment.shipFrom.phone,
-              email: label.shipment.shipFrom.email,
-              postal_code: label.shipment.shipFrom.postalCode
-            },
-            ship_to: {
-              contact_name: label.shipment.shipTo.contactName,
-              street1: label.shipment.shipTo.street1,
-              city: label.shipment.shipTo.city,
-              state: label.shipment.shipTo.state,
-              country: label.shipment.shipTo.country,
-              phone: label.shipment.shipTo.phone,
-              email: label.shipment.shipTo.email,
-              postal_code: label.shipment.shipTo.postalCode
-            },
-            parcels: label.shipment.parcels.map(parcel => ({
-              box_type: parcel.boxType,
-              description: parcel.description,
-              weight: parcel.weight,
-              dimension: parcel.dimension,
-              items: parcel.items.map(item => ({
-                description: item.description,
-                origin_country: item.originCountry,
-                quantity: item.quantity,
-                price: item.price,
-                weight: item.weight,
-                sku: item.sku
-              }))
-            }))
-          },
-          shipper_account: label.shipperAccount
+          return_shipment: false,
+          is_document: false,
+          paper_size: "4x6"
         };
-
-        const errors = validateSchema(formatedLabel, postmenCreateLabelSchema);
-
-        if (errors) return errorObj(errors);
 
         const data = await axios({
           method: "post",
           url: `${this.postmenUrl}/labels`,
-          data: formatedLabel,
+          data: formattedObj,
           headers: {
             ...this.postmentCredentialHeaders.headers
           }
@@ -1048,112 +1169,6 @@ class Shipment {
             },
             createdAt: data.data.data.created_at,
             updatedAt: data.data.data.updated_at
-          },
-          warnings: [],
-          errors: []
-        };
-      }
-
-      if (this.service === "dhl") {
-        const formattedObject = {
-          RequestedShipment: {
-            ShipmentInfo: {
-              DropOffType: label.dropOffType,
-              ServiceType: label.serviceType,
-              Account: label.shipperAccount.accountNumber,
-              Currency: label.currency,
-              UnitOfMeasurement: label.parcels[0].massUnit,
-              PackagesCount: 1,
-              LabelType: label.labelType,
-              LabelTemplate: label.labelTemplate
-            },
-            ShipTimestamp: getIsoDateTimeGmt(label.timeStamp),
-            PickupLocationCloseTime: label.pickupLocationCloseTime,
-            SpecialPickupInstruction: label.specialPickupInstruction,
-            PickupLocation: label.pickupLocation,
-            PaymentInfo: label.paymentInfo,
-            InternationalDetail: {
-              Commodities: {
-                NumberOfPieces:
-                  label.internationalDetail.commodities.numberOfPieces,
-                Description: label.internationalDetail.commodities.description,
-                CountryOfManufacture:
-                  label.internationalDetail.commodities.countryOfManufacture,
-                Quantity: label.internationalDetail.commodities.quantity,
-                UnitPrice: label.internationalDetail.commodities.unitPrice,
-                CustomsValue: label.internationalDetail.commodities.customsValue
-              },
-              Content: label.internationalDetail.content
-            },
-            Ship: {
-              Shipper: {
-                Contact: {
-                  PersonName: label.shipFrom.contactName,
-                  CompanyName: label.shipFrom.companyName,
-                  PhoneNumber: label.shipFrom.phone,
-                  EmailAddress: label.shipFrom.email
-                },
-                Address: {
-                  StreetLines: label.shipFrom.street1,
-                  City: label.shipFrom.city,
-                  PostalCode: label.shipFrom.postalCode,
-                  CountryCode: label.shipFrom.countryCode
-                }
-              },
-              Recipient: {
-                Contact: {
-                  PersonName: label.shipTo.contactName,
-                  CompanyName: label.shipTo.companyName,
-                  PhoneNumber: label.shipTo.phone,
-                  EmailAddress: label.shipTo.email
-                },
-                Address: {
-                  StreetLines: label.shipTo.street1,
-                  City: label.shipTo.city,
-                  PostalCode: label.shipTo.postalCode,
-                  CountryCode: label.shipTo.countryCode
-                }
-              }
-            },
-            Packages: {
-              RequestedPackages: {
-                attributes: {
-                  number: 1
-                },
-                Weight: label.parcels[0].weight.value,
-                Dimensions: {
-                  Length: label.parcels[0].dimension.length,
-                  Width: label.parcels[0].dimension.width,
-                  Height: label.parcels[0].dimension.height
-                },
-                CustomerReferences: "TEST CZ-IT"
-              }
-            }
-          }
-        };
-
-        const data = await shipmentRequest(
-          label.shipperAccount,
-          formattedObject
-        );
-
-        if (data.response.Notification.length > 0) {
-          return errorObj(data.response.Notification);
-        }
-
-        const returnedJSON = JSON.stringify(data.response, null, 4);
-        const parsedObject = JSON.parse(returnedJSON);
-
-        return {
-          data: {
-            shipmentIdentificationNumber:
-              parsedObject.ShipmentIdentificationNumber,
-            dispatchConfirmationNumber: parsedObject.DispatchConfirmationNumber,
-            labelImageFormat: parsedObject.LabelImage.LabelImageFormat,
-            labelUrl: parsedObject.LabelImage.GraphicImage,
-            trackingNumbers: [
-              parsedObject.PackagesResult.PackageResult.TrackingNumber
-            ]
           },
           warnings: [],
           errors: []
@@ -1216,12 +1231,12 @@ class Shipment {
               id: label.id,
               status: label.status,
               trackingNumbers: label.tracking_numbers,
-              labelUrl: label.files.label.url,
+              labelUrl: label?.files?.label?.url,
               files: {
                 label: {
-                  paperSize: label.files.label.paper_size,
-                  url: label.files.label.url,
-                  fileType: label.files.label.fileType
+                  paperSize: label?.files?.label?.paper_size,
+                  url: label?.files?.label?.url,
+                  fileType: label?.files?.label?.fileType
                 },
                 invoice: {
                   paperSize: label.files?.invoice?.paper_size,
@@ -1232,20 +1247,11 @@ class Shipment {
                 manifest: label.files?.manifest
               },
               rate: {
-                chargeWeight: {
-                  ...label.rate.charge_weight
-                },
                 totalCharge: {
-                  ...label.rate.total_charge
+                  ...label?.rate?.total_charge
                 },
-                serviceName: label.rate.service_name,
-                serviceToken: label.rate.service_type,
-                serviceType: label.rate.shipper_account.slug,
-                shipperAccount: {
-                  ...label.rate.shipper_account
-                },
-                deliveryDate: label.rate.delivery_date,
-                detailedCharges: [...label.rate.detailed_charges]
+                serviceType: label?.rate?.shipper_account?.slug,
+                deliveryDate: label?.rate?.delivery_date
               },
               createdAt: label.created_at,
               updatedAt: label.updated_at
@@ -1417,6 +1423,7 @@ class Shipment {
         };
       }
     } catch (error) {
+      console.log("error", error);
       return errorObj(error);
     }
   }
@@ -1546,10 +1553,15 @@ class Shipment {
           }
         };
 
-        const data = await trackingRequest(
-          trackingObj.shipperAccount,
-          formattedObj
-        );
+        let data;
+
+        if (this.testEnv) {
+          data = await testTrackingRequest(this.shipperAccount, formattedObj);
+        }
+
+        if (!this.testEnv) {
+          data = await trackingRequest(this.shipperAccount, formattedObj);
+        }
 
         if (
           data.response.Notification &&
@@ -1947,10 +1959,15 @@ class Shipment {
           }
         };
 
-        const data = await trackingRequest(
-          trackingObj.shipperAccount,
-          formattedObj
-        );
+        let data;
+
+        if (this.testEnv) {
+          data = await testTrackingRequest(this.shipperAccount, formattedObj);
+        }
+
+        if (!this.testEnv) {
+          data = await trackingRequest(this.shipperAccount, formattedObj);
+        }
 
         if (
           data.response.Notification &&
@@ -2010,7 +2027,6 @@ class Shipment {
         };
       }
     } catch (error) {
-      console.log("error", error);
       return errorObj(error);
     }
   }
