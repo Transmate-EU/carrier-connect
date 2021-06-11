@@ -1,0 +1,204 @@
+{
+	"accountId": "S65957",
+	"userId": "jsBor6o3uRBTFoRQY",
+	"item": {
+		"__is_new": false,
+		"id": "cGfgDwT4PXpxX6rE5",
+		"_id": "cGfgDwT4PXpxX6rE5",
+		"calcSettings": {
+			"itemize": false,
+			"costRelevant": true
+		},
+		"type": "HU",
+		"itemType": "pal",
+		"created": {
+			"by": "server",
+			"at": "2020-08-19T19:00:00.421Z",
+			"atms": 1597863600421
+		},
+		"description": "Pallet",
+		"level": 1,
+		"references": {},
+		"DG": false,
+		"deleted": false,
+		"material": {
+			"description": "Full cream milk powder 26%, Regular",
+			"id": "FCMP 26% - Regular"
+		},
+		"quantity": {
+			"code": "BOX",
+			"amount": 1,
+			"description": "BOX"
+		},
+		"weight_unit": "kg",
+		"parentItemId": "ae5SCCi7kMfji7G89",
+		"shipmentId": "2jG2mZFcaFzqaThcr",
+		"weight_gross": 120,
+		"weight_net": 100,
+		"taxable": [{
+				"type": "kg",
+				"quantity": 21000
+			}
+		],
+		"updated": {
+			"shipment_items": "synced"
+		},
+		"isPicked": false,
+		"isPackingUnit": true
+	},
+	"shipment": {
+		"__is_new": false,
+		"id": "2jG2mZFcaFzqaThcr",
+		"_id": "2jG2mZFcaFzqaThcr",
+		"status": "draft",
+		"pickup": {
+			"location": {
+				"latLng": {
+					"lat": 50.8888189,
+					"lng": 4.458519900000056
+				},
+				"countryCode": "BE",
+				"zipCode": "1930",
+				"name": "Globex Belgium",
+				"addressId": "j958tYA872PAogTDq",
+				"address": {
+					"street": "Leonardo da Vincilaan",
+					"number": "7",
+					"city": "Zaventem",
+					"state": "Vlaanderen"
+				}
+			},
+			"date": "2017-10-18T00:00:00.000Z",
+			"datePlanned": "2017-10-18T00:00:00.000Z"
+		},
+		"priceRequestId": "zgSR5RRWJoHMDSEDy",
+		"delivery": {
+			"location": {
+				"latLng": {
+					"lat": 40.3061528,
+					"lng": -3.465709199999992
+				},
+				"countryCode": "ES",
+				"zipCode": "28500",
+				"name": "Globex Spain",
+				"addressId": "WJNLceXYjFBdYL4YQ",
+				"address": {
+					"street": "Avenida de Madrid",
+					"number": "43",
+					"city": "Arganda del Rey",
+					"state": "Comunidad de Madrid"
+				}
+			},
+			"date": "2017-10-19T00:00:00.000Z",
+			"datePlanned": "2017-10-19T00:00:00.000Z"
+		},
+		"shipperId": "S65957",
+		"accountId": "S65957",
+		"created": {
+			"by": "jsBor6o3uRBTFoRQY",
+			"at": "2017-10-18T08:57:51.701Z"
+		},
+		"shipmentProjectOutboundId": "RAx8FqXSqPr4uJppf",
+		"number": "Q7SQYEPY",
+		"updates": [{
+				"action": "created",
+				"userId": "jsBor6o3uRBTFoRQY",
+				"accountId": "S65957",
+				"ts": "2017-10-18T08:57:51.791Z"
+			}, {
+				"action": "planned",
+				"userId": "jsBor6o3uRBTFoRQY",
+				"accountId": "S65957",
+				"ts": "2017-10-18T08:59:44.792Z",
+				"data": {
+					"reason": "stages",
+					"action": "planned"
+				}
+			}
+		],
+		"type": "road",
+		"serviceLevel": "LTL",
+		"sphericalDistance": 1434671,
+		"stageIds": ["mTQmzoCfAiLbGFzo3"],
+		"drivingDistance": 0,
+		"drivingDuration": 0,
+		"priceListId": "Mo8X54TpZ8snqgR6Q",
+		"carrierIds": ["C75701"],
+		"costs": [{
+				"costId": "o6fLThAWhaWW3uDaj",
+				"source": "priceList",
+				"description": "Base Rate",
+				"amount": {
+					"value": 1100,
+					"currency": "EUR",
+					"rate": 1
+				},
+				"added": {
+					"by": "jsBor6o3uRBTFoRQY",
+					"at": "2017-10-18T08:59:15.904Z"
+				},
+				"accountId": "S65957",
+				"sellerId": "C75701"
+			}, {
+				"costId": "o7sz5GxWpMLQTojHu",
+				"description": "Order Cost",
+				"tooltip": "Some testing tooltip",
+				"source": "priceList",
+				"amount": {
+					"value": 25,
+					"currency": "EUR",
+					"rate": 1
+				},
+				"added": {
+					"by": "jsBor6o3uRBTFoRQY",
+					"at": "2017-10-18T08:59:16.079Z"
+				},
+				"accountId": "S65957",
+				"sellerId": "C75701"
+			}, {
+				"amount": {
+					"value": 33.36,
+					"currency": "EUR",
+					"rate": 1
+				},
+				"description": "Manual cost",
+				"costId": "JpKrR3PggDfp8dnNP",
+				"id": "OPC7CD",
+				"source": "input",
+				"accountId": "S65957",
+				"sellerId": "C11051",
+				"added": {
+					"by": "W3WguXKt2cLu2h8LM",
+					"at": "2019-04-25T12:11:53.007Z",
+					"atms": 1556194313007
+				},
+				"forApproval": true
+			}
+		],
+		"updated": {
+			"by": "server",
+			"at": "2021-05-23T01:19:26.740Z"
+		},
+		"references": {
+			"number": "shipper reference #"
+		},
+		"notes": {
+			"BookingNotes": "Some note text here, this is not slate yet."
+		},
+		"tags": ["fixture shipment", "testing", "Globex"],
+		"errors": [{
+				"type": "numidia-edi-connection",
+				"data": {},
+				"message": "EDI connection was not establisehd",
+				"dt": "2017-10-18T08:59:44.792Z"
+			}
+		],
+		"access": [{
+				"accountId": "C11051",
+				"action": "priceRequest",
+				"id": "zgSR5RRWJoHMDSEDy"
+			}
+		],
+		"deleted": false
+	}
+}
