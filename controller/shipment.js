@@ -1980,7 +1980,7 @@ class Shipment {
         const parcel =
           data?.response?.trackingResponse?.TrackingResponse?.AWBInfo
             ?.ArrayOfAWBInfoItem?.Pieces?.PieceInfo?.ArrayOfPieceInfoItem
-            ?.PieceDetails;
+            ?.PieceDetails || {};
         return {
           data: {
             tracking: {

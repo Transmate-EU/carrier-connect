@@ -5,6 +5,7 @@ import { expect } from "chai";
 import { envFile } from "../data/test.data";
 import { shipmentTesting } from "../../data/data";
 
+const debug = require("debug")("test:rest:dhl");
 let api;
 
 console.log("test api rest");
@@ -16,7 +17,7 @@ if (process.env.WEBPACK_TEST) {
   console.log("normal test", "api", api);
 }
 
-describe("Test DHL REST API", () => {
+describe.only("Test DHL REST API", () => {
   describe("should test(labels, rates, and trackings)", () => {
     let dhlShipment;
     let dhlTrackingNumber;
@@ -55,6 +56,7 @@ describe("Test DHL REST API", () => {
       dhlShipment = response.body.result;
       dhlTrackingNumber = dhlShipment.id;
       expect(dhlShipment).to.have.property("id");
+      expect(dhlShipment.id).to.be.a("string");
       expect(dhlShipment).to.have.property("rates");
       expect(dhlShipment).to.have.property("label");
       expect(dhlShipment.rates[0]).to.have.property("totalCharge");
@@ -74,6 +76,7 @@ describe("Test DHL REST API", () => {
           }
         }
       });
+      debug("tracking %o", response);
       const tracking = response.body.result;
       expect(tracking).to.have.property("shipmentWeight");
       expect(tracking).to.have.property("shipmentWeightUnit");
