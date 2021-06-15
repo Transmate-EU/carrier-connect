@@ -15,7 +15,7 @@ jobs:
         with:
           node-version: 12
       - run: npm ci
-      - run: echo ${{secrets.FUNCTION_ENV}} > .env.json
+      - run: echo '${{secrets.FUNCTION_ENV}}' > .env.json
       - run: npm test
       - run: npm run buildwebpacktest
 

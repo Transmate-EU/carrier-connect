@@ -24,6 +24,6 @@ jobs:
       uses: actions/setup-node@v2
       with: 
         node-version: 12
-    - run: echo ${{secrets.FUNCTION_ENV}} > .env.json
+    - run: echo '${{secrets.FUNCTION_ENV}}' > .env.json
     - run: npm install
     - run: npm test
