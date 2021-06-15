@@ -6,6 +6,7 @@ import { envFile } from "../data/test.data";
 import { shipmentTesting } from "../../data/data";
 
 const debug = require("debug")("test:rest:dhl");
+
 let api;
 
 console.log("test api rest");
