@@ -13,7 +13,7 @@
     "build": "export NODE_ENV=production && webpack --config webpack.config.js",
     "prepublishOnly": "npm install && npm run build-test",
     "build-test": "export NODE_ENV=testing WEBPACK_TEST=yes && webpack --config webpack.config.js",
-    "test": "SANDBOX=true mocha --require @babel/register ./tests/**/**.test.js --timeout 30000 --exit",
+    "test": "SANDBOX=true mocha --require @babel/register ./tests/**/*.js --timeout 30000 --exit",
     "test-webpack": "SANDBOX=true DEBUG='-babel*,-nodemon*,-mocha*,-follow-redirects*'  WEBPACK_TEST=yes mocha --require @babel/register ./tests/unit/**.test.js --timeout 30000 --exit",
     "start-gql-server": "export DEBUG='*,-babel*,-nodemon*,-express*' && nodemon ./server.js --exec babel-node",
     "gql-function": "export DEBUG='*,-babel*,-nodemon*' && nodemon ./functions/graphql.js --exec babel-node",
@@ -22,7 +22,7 @@
     "start-prod": "node dist/graphql-local.js",
     "deploy": "ibmcloud fn action update dev dist/rest-local.js --web true",
     "deploy-graphql": "ibmcloud fn action update graphql dist/graphql-local.js --web true",
-    "start": "nodemon ./index.js --exec babel-node",
+    "start": "nodemon ./indexV2.js --exec babel-node",
     "buildwebpacktest": "npm run build-test && npm run test-webpack"
   },
   "repository": {
@@ -44,9 +44,12 @@
     "@graphql-tools/schema": "^7.1.5",
     "ajv": "^6.12.6",
     "axios": "^0.21.1",
+    "country-data": "^0.0.31",
     "debug": "^4.3.1",
+    "dot-object": "^2.1.4",
     "graphql": "^15.5.0",
     "graphql-tools": "^7.0.5",
+    "i18n-iso-countries": "^6.7.0",
     "lodash.get": "^4.4.2",
     "moment": "^2.29.1",
     "nodemon": "^2.0.7",
@@ -54,7 +57,9 @@
     "pg": "^8.5.1",
     "postmen": "^1.0.4",
     "shippo": "^1.6.0",
-    "uuid": "^8.3.2"
+    "soap": "^0.39.0",
+    "uuid": "^8.3.2",
+    "xml-formatter": "^2.4.0"
   },
   "devDependencies": {
     "@babel/core": "^7.14.3",

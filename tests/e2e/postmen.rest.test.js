@@ -2,13 +2,8 @@
 /* eslint-disable mocha/no-mocha-arrows */
 
 import { expect } from "chai";
-
-import {
-  postmenAddress,
-  postmenCalculateRate,
-  postmenCreateLabel,
-  postmenManifestReq
-} from "../../data/postmen";
+import { shipmentAddress, shipmentTesting } from "../../data/data";
+import { envFile } from "../data/test.data";
 
 const debug = require("debug")("test:postment:rest");
 
@@ -23,27 +18,49 @@ if (process.env.WEBPACK_TEST) {
   console.log("normal test", "api", api);
 }
 
-const envFile = require("../../.env.json");
-
 describe("Test postmen REST API", () => {
   describe("should test(labels, rates, manifest and shipments)", () => {
     let postmenLabel;
     let postmenLabels;
     let postmenManifest;
 
-    it("should create label", async () => {
+    it("should create shipment, calculate rates and get a label given a shipment", async () => {
       const response = await api.rest({
         ...envFile,
-        type: "createLabel",
+        type: "createshipment",
         request: {
           type: "postmen",
-          label: postmenCreateLabel
+          shipment: {
+            ...shipmentTesting,
+            shipment: {
+              ...shipmentTesting.shipment,
+              shipFrom: {
+                ...shipmentTesting.shipment.shipFrom,
+                street1: "5/F Hull Lane",
+                city: "Sham Shui Po",
+                postalCode: null,
+                countryCode: "HK"
+              },
+              shipTo: {
+                ...shipmentTesting.shipment.shipTo,
+                street1: "28292 Daugherty Orchard",
+                city: "Sacramento",
+                postalCode: "94209",
+                countryCode: "US",
+                state: "CA"
+              }
+            },
+            getLabel: true,
+            serviceType: "fedex_international_priority"
+          }
         }
       });
-      postmenLabel = response.body.result;
-      expect(postmenLabel).to.have.property("id");
-      expect(postmenLabel).to.have.property("status");
-      expect(postmenLabel.status).to.be.equal("created");
+      debug("rates %o", response);
+      postmenLabel = response.body.result.label;
+      expect(response.body.result).to.have.property("label");
+      expect(response.body.result).to.have.property("rates");
+      expect(response.body.result.label).to.have.property("id");
+      expect(response.body.result.rates[0]).to.have.property("totalCharge");
       expect(response.statusCode).to.be.equal(200);
     });
 
@@ -55,7 +72,6 @@ describe("Test postmen REST API", () => {
           type: "postmen"
         }
       });
-
       postmenLabels = response.body.result;
       debug("postmenLabels %o", postmenLabels);
       expect(postmenLabels[0]).to.have.property("id");
@@ -68,13 +84,12 @@ describe("Test postmen REST API", () => {
     it("should validate address", async () => {
       const response = await api.rest({
         ...envFile,
-        type: "validateAddress",
+        type: "validateaddress",
         request: {
           type: "postmen",
-          address: postmenAddress
+          address: shipmentAddress
         }
       });
-
       expect(response.body.result).to.have.property("id");
       expect(response.body.result).to.have.property("status");
       expect(response.body.result.status).to.have.be.equal("valid");
@@ -85,32 +100,14 @@ describe("Test postmen REST API", () => {
     it("should cancel label", async () => {
       const response = await api.rest({
         ...envFile,
-        type: "cancelOrDeleteLabel",
+        type: "cancelordeleteLabel",
         request: {
           type: "postmen",
           labelId: postmenLabel.id
         }
       });
-
       expect(response.body.result).to.have.property("id");
       expect(response.body.result).to.have.property("status");
-      expect(response.body.result.status).to.be.equal("cancelled");
-      expect(response.statusCode).to.be.equal(200);
-    });
-
-    it("should calculate rates given a shipment", async () => {
-      const response = await api.rest({
-        ...envFile,
-        type: "rates",
-        request: {
-          type: "postmen",
-          shipment: postmenCalculateRate
-        }
-      });
-      debug("rates %o", response);
-      expect(response.body.result[0]).to.have.property("chargeWeight");
-      expect(response.body.result[0]).to.have.property("totalCharge");
-      // expect(response.body.result[0].totalCharge).to.have.property("amount");
       expect(response.statusCode).to.be.equal(200);
     });
 
@@ -119,11 +116,9 @@ describe("Test postmen REST API", () => {
         ...envFile,
         type: "createManifest",
         request: {
-          type: "postmen",
-          manifest: postmenManifestReq
+          type: "postmen"
         }
       });
-
       postmenManifest = response.body.result;
       expect(postmenManifest).to.have.property("id");
       expect(postmenManifest).to.have.property("status");
@@ -140,7 +135,6 @@ describe("Test postmen REST API", () => {
           manifestId: postmenManifest.id
         }
       });
-
       expect(response.body.result).to.have.property("id");
       expect(response.body.result).to.have.property("status");
       expect(response.body.result).to.have.property("createdAt");

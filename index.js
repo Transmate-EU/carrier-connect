@@ -1,8 +1,7 @@
 import Shipment from "./controller/shipment";
-// testing data
-import { shippoShipmentTesting } from "./data/shippo";
+import testingData from "./data/data";
 
 import { rest } from "./functions/rest";
 import { gqlResolve } from "./functions/graphql";
 
-export { shippoShipmentTesting, Shipment, rest, gqlResolve };
+export { testingData, Shipment, rest, gqlResolve };

@@ -18,72 +18,58 @@ async function rest(params) {
     switch ((type || "").toLowerCase()) {
       case "rates":
         response = await apiCall.getRates(request.shipment);
-
         result = response.data.rates;
         break;
       case "labels":
         response = await apiCall.getLabels();
-
         result = response.data.labels;
         break;
       case "manifests":
         response = await apiCall.getAllManifests();
-
         result = response.data.manifests;
         break;
       case "manifest":
         response = await apiCall.getManifest(request.manifestId);
-
         result = response.data;
         break;
       case "trackings":
         response = await apiCall.getTrackings();
-
         result = response.data.trackings;
         break;
       case "trackingstatus":
         response = await apiCall.getTracking(request.tracking);
-
         result = response.data.tracking;
         break;
       case "shipments":
         response = await apiCall.getShipments();
-
         result = response.data.shipments;
         break;
       case "createshipment":
         response = await apiCall.createShipment(request.shipment);
-
         result = response.data.shipment;
         break;
       case "validateaddress":
         response = await apiCall.validateAddress(request.address);
-
         result = response.data;
         break;
       case "createlabel":
         response = await apiCall.createLabel(request.label);
-
         result = response.data;
         break;
       case "createmanifest":
         response = await apiCall.createManifest(request.manifest);
-
         result = response.data;
         break;
       case "createtracking":
         response = await apiCall.createTracking(request.tracking);
-
         result = response.data.tracking;
         break;
       case "cancelordeletelabel":
         response = await apiCall.deleteLabel(request.labelId);
-
         result = response.data;
         break;
       case "createaddress":
         response = await apiCall.createAddress(request.address);
-
         result = response.data.address;
         break;
       default:

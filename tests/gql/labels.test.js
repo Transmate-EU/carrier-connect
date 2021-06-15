@@ -1,11 +1,9 @@
 /* eslint-disable mocha/no-mocha-arrows */
 /* eslint-disable global-require */
 import { expect } from "chai";
+import { envFile } from "../data/test.data";
 
 const debug = require("debug")("test:gql");
-
-const envFile = require("../../.env.json");
-
 
 let api;
 
@@ -34,7 +32,6 @@ describe("Testing serverless graphql", () => {
       expect(result.data.labels).to.be.an("array");
       debug("labels %o", result.data.labels);
       expect(result.data.labels[0].id).to.be.an("string");
-
     } catch (error) {
       console.error("error message", error.message);
     }

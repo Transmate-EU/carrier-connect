@@ -1,7 +1,8 @@
 /* eslint-disable global-require */
 /* eslint-disable mocha/no-mocha-arrows */
 import chai from "chai";
-import { shippoAddress, shippoShipmentTesting } from "../../data/shippo";
+import { envFile } from "../data/test.data";
+import { shipmentAddress, shipmentTesting } from "../../data/data";
 
 const debug = require("debug")("test:rest");
 
@@ -16,8 +17,6 @@ if (process.env.WEBPACK_TEST) {
   console.log("normal test", "api", api);
 }
 
-const envFile = require("../../.env.json");
-
 const { expect } = chai;
 
 describe("Test shippo REST API", () => {
@@ -25,13 +24,13 @@ describe("Test shippo REST API", () => {
     let shippoShipment;
     let shippoLabel;
     let address;
-    let shippoRate;
+
     it("should error, no env", async () => {
       const response = await api.rest({
         type: "createShipment",
         request: {
           type: "shippo",
-          shipment: shippoShipmentTesting
+          shipment: shipmentTesting
         }
       });
       debug("create shipment return %o", response);
@@ -39,56 +38,20 @@ describe("Test shippo REST API", () => {
       expect(response.statusCode).to.be.equal(400);
       expect(response.body.error.message).to.equal("check keys for shippo!");
     });
-    it("should create shipment", async () => {
+    it("should create and get shipment, rates and label", async () => {
       const response = await api.rest({
         ...envFile,
-        type: "createShipment",
+        type: "createshipment",
         request: {
           type: "shippo",
-          shipment: shippoShipmentTesting
+          shipment: { ...shipmentTesting, getLabel: true }
         }
       });
       debug("create shipment return %o", response);
       shippoShipment = response.body.result;
+      shippoLabel = response.body.result.label;
       expect(shippoShipment).to.have.property("id");
-      expect(shippoShipment).to.have.property("status");
-      // expect(shippoShipment.status).to.be.equal("QUEUED");
-      expect(response.statusCode).to.be.equal(200);
-    });
-
-    it("should calculate rate", async () => {
-      const response = await api.rest({
-        ...envFile,
-        type: "rates",
-        request: {
-          type: "shippo",
-          shipment: { shipmentId: shippoShipment.id }
-        }
-      });
-
-      [shippoRate] = response.body.result;
-      expect(response.body.result[0]).to.have.property("id");
-      expect(response.body.result[0]).to.have.property("serviceType");
-      expect(response.body.result[0]).to.have.property("serviceName");
-      expect(response.statusCode).to.be.equal(200);
-    });
-
-    it("should create label", async () => {
-      const response = await api.rest({
-        ...envFile,
-        type: "createLabel",
-        request: {
-          type: "shippo",
-          label: {
-            rate: shippoRate.id
-          }
-        }
-      });
-
-      shippoLabel = response.body.result;
-      expect(shippoLabel).to.have.property("id");
-      expect(shippoLabel).to.have.property("status");
-      expect(shippoLabel).to.have.property("rate");
+      expect(shippoShipment).to.have.property("rates");
       expect(response.statusCode).to.be.equal(200);
     });
 
@@ -98,12 +61,10 @@ describe("Test shippo REST API", () => {
         type: "createAddress",
         request: {
           type: "shippo",
-          address: shippoAddress
+          address: shipmentAddress
         }
       });
-
       address = response.body.result;
-
       expect(address).to.have.property("id");
       expect(address).to.have.property("isComplete");
       expect(response.statusCode).to.be.equal(200);
@@ -118,7 +79,6 @@ describe("Test shippo REST API", () => {
           address: { id: address.id }
         }
       });
-
       expect(response.body.result).to.have.property("id");
       expect(response.body.result).to.have.property("isComplete");
       expect(response.body.result.validationResults.isValid).to.be.equal(true);
@@ -133,7 +93,6 @@ describe("Test shippo REST API", () => {
           labelId: shippoLabel.id
         }
       });
-
       expect(response.body.result).to.have.property("id");
       expect(response.body.result).to.have.property("status");
       expect(response.body.result).to.have.property("transaction");
@@ -151,7 +110,6 @@ describe("Test shippo REST API", () => {
           }
         }
       });
-
       expect(response.body.result).to.have.property("deliveryType");
       expect(response.body.result).to.have.property("serviceToken");
       expect(response.body.result).to.have.property("serviceType");

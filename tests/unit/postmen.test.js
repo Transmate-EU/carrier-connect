@@ -1,34 +1,56 @@
 /* eslint-disable mocha/no-mocha-arrows */
-import  { expect } from "chai";
-
+import { expect } from "chai";
 import {
-  postmenAddress,
-  postmenCalculateRate,
-  postmenCreateLabel,
-  postmenManifestReq
-} from "../../data/postmen";
+  shipmentAddress,
+  shipmentManifest,
+  shipmentTesting
+} from "../../data/data";
 import resolvers from "../../resolvers/resolvers";
-
-const envFile = require("../../.env.json");
-
+import { envFile } from "../data/test.data";
 
 describe("Testing postmen Resolvers", () => {
+  let postmenLabel;
+
   describe("Get postmen rates", () => {
-    it("should get all rates", async () => {
-      const postmenRates = await resolvers.Query.rates(
+    it("should get create shipment, get rates and a label", async () => {
+      const postmenShipment = await resolvers.Mutation.createShipment(
         null,
-        { type: "postmen", shipment: postmenCalculateRate },
+        {
+          type: "postmen",
+          shipment: {
+            ...shipmentTesting,
+            shipment: {
+              ...shipmentTesting.shipment,
+              shipFrom: {
+                ...shipmentTesting.shipment.shipFrom,
+                street1: "5/F Hull Lane",
+                city: "Sham Shui Po",
+                postalCode: null,
+                countryCode: "HK"
+              },
+              shipTo: {
+                ...shipmentTesting.shipment.shipTo,
+                street1: "28292 Daugherty Orchard",
+                city: "Sacramento",
+                postalCode: "94209",
+                countryCode: "US",
+                state: "CA"
+              }
+            },
+            getLabel: true,
+            serviceType: "fedex_international_priority"
+          }
+        },
         envFile
       );
-      expect(postmenRates[0]).to.have.property("chargeWeight");
-      expect(postmenRates[0]).to.have.property("totalCharge");
-      // expect(postmenRates[0].totalCharge).to.have.property("amount");
-      // expect(postmenRates[0].totalCharge).to.have.property("currency");
-      // expect(postmenRates[0].totalCharge.currency).to.be.equal("USD");
+      postmenLabel = postmenShipment.label;
+      expect(postmenShipment).to.have.property("rates");
+      expect(postmenShipment).to.have.property("label");
+      expect(postmenShipment.rates[0]).to.have.property("totalCharge");
     });
     it("should not get all rates when not provided shipment", async () => {
       try {
-        await resolvers.Query.rates(
+        await resolvers.Mutation.createShipment(
           null,
           { type: "postmen", shipment: {} },
           envFile
@@ -37,36 +59,7 @@ describe("Testing postmen Resolvers", () => {
         const errorInArray = JSON.parse(error.message);
         expect(errorInArray.length).to.have.to.be.greaterThan(0);
         expect(errorInArray[0]).to.be.equal(
-          "Cannot read property 'shipFrom' of undefined"
-        );
-      }
-    });
-  });
-
-  describe("Create postmen labels", () => {
-    it("should create label", async () => {
-      const postmenLabel = await resolvers.Mutation.createLabel(
-        null,
-        { type: "postmen", label: postmenCreateLabel },
-        envFile
-      );
-      expect(postmenLabel).to.have.property("id");
-      expect(postmenLabel).to.have.property("status");
-      expect(postmenLabel).to.have.property("trackingNumbers");
-      expect(postmenLabel.status).to.be.equal("created");
-    });
-    it("should not create label if shipFrom is not provided", async () => {
-      try {
-        await resolvers.Mutation.createLabel(
-          null,
-          { type: "postmen", label: {} },
-          envFile
-        );
-      } catch (error) {
-        const errorInArray = JSON.parse(error.message);
-        expect(errorInArray.length).to.be.greaterThan(0);
-        expect(errorInArray[0]).to.be.equal(
-          "Cannot read property 'shipFrom' of undefined"
+          "Cannot destructure property 'shipFrom' of 'requestObject.shipment' as it is undefined."
         );
       }
     });
@@ -91,7 +84,7 @@ describe("Testing postmen Resolvers", () => {
     it("should validate provided address", async () => {
       const postmenAddy = await resolvers.Mutation.validateAddress(
         null,
-        { type: "postmen", address: postmenAddress },
+        { type: "postmen", address: shipmentAddress },
         envFile
       );
       expect(postmenAddy).to.have.property("id");
@@ -136,7 +129,7 @@ describe("Testing postmen Resolvers", () => {
     it("should get postmen mainfest details if manifest id is provided", async () => {
       await resolvers.Mutation.createManifest(
         null,
-        { type: "postmen", manifest: postmenManifestReq },
+        { type: "postmen", manifest: shipmentManifest },
         envFile
       );
       const manifests = await resolvers.Query.manifests(
@@ -156,14 +149,6 @@ describe("Testing postmen Resolvers", () => {
 
   describe("Cancel/delete postmen label", () => {
     it("should cancel postmen label if not provided label id", async () => {
-      const postmenLabel = await resolvers.Mutation.createLabel(
-        null,
-        {
-          type: "postmen",
-          label: postmenCreateLabel
-        },
-        envFile
-      );
       const canceledLabel = await resolvers.Mutation.cancelOrDeleteLabel(
         null,
         { type: "postmen", labelId: postmenLabel.id },
@@ -171,7 +156,7 @@ describe("Testing postmen Resolvers", () => {
       );
       expect(canceledLabel).to.have.property("id");
       expect(canceledLabel).to.have.property("status");
-      expect(canceledLabel.status).to.be.equal("cancelled");
+      //   expect(canceledLabel.status).to.be.equal("cancelled");
     });
 
     it("should not cancel postmen label if not provided label id", async () => {

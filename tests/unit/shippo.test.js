@@ -1,91 +1,46 @@
 /* eslint-disable mocha/no-mocha-arrows */
 import { expect } from "chai";
-
-import { shippoAddress, shippoShipmentTesting } from "../../data/shippo";
+import { shipmentAddress, shipmentTesting } from "../../data/data";
 import resolvers from "../../resolvers/resolvers";
-
-const envFile = require("../../.env.json");
-
+import { envFile } from "../data/test.data";
 
 describe("Testing goshippo Resolvers", () => {
-  let shippoRate;
   let shippoLabel;
 
   describe("Get goshippo rates", () => {
-    it("should create shipment and get rates", async () => {
+    it("should create shipment, label and get rates", async () => {
       const shipmentObj = await resolvers.Mutation.createShipment(
         null,
         {
           type: "shippo",
-          shipment: shippoShipmentTesting
+          shipment: { ...shipmentTesting, getLabel: true }
         },
         envFile
       );
-      const shippoRates = await resolvers.Query.rates(
-        null,
-        { type: "shippo", shipment: { shipmentId: shipmentObj.id } },
-        envFile
-      );
-
-      [shippoRate] = shippoRates;
+      shippoLabel = shipmentObj.label;
       expect(shipmentObj).to.have.property("id");
       expect(shipmentObj).to.have.property("createdAt");
       expect(shipmentObj).to.have.property("rates");
-      expect(shippoRates[0]).to.have.property("totalCharge");
-      expect(shippoRates[0]).to.have.property("serviceType");
-      expect(shippoRates[0].totalCharge).to.have.property("currency");
-      expect(shippoRates[0].totalCharge).to.have.property("amount");
+      expect(shipmentObj).to.have.property("label");
+      expect(shipmentObj.rates[0]).to.have.property("totalCharge");
+      expect(shipmentObj.rates[0]).to.have.property("serviceType");
+      expect(shipmentObj.rates[0].totalCharge).to.have.property("currency");
+      expect(shipmentObj.rates[0].totalCharge).to.have.property("amount");
     });
-    it("should not get rates when a shipment id does not exist", async () => {
+    it("should not get rates when a shipment is not provided", async () => {
       try {
-        await resolvers.Query.rates(
+        await resolvers.Mutation.createShipment(
           null,
-          { type: "shippo", shipment: { shipmentId: "898999999989898980ok" } },
+          { type: "shippo", shipment: {} },
           envFile
         );
       } catch (error) {
         const errorInArray = JSON.parse(error.message);
         expect(error).to.have.property("message");
         expect(errorInArray[0]).to.be.equal(
-          "Invalid JSON received from the Shippo API"
+          "Cannot destructure property 'shipFrom' of 'requestObject.shipment' as it is undefined."
         );
       }
-    });
-    it("should not get rates when a shipment is not provided", async () => {
-      try {
-        await resolvers.Query.rates(
-          null,
-          { type: "shippo", shipment: { shipmentId: "" } },
-          envFile
-        );
-      } catch (error) {
-        const errorInArray = JSON.parse(error.message);
-        expect(error).to.have.property("message");
-        expect(errorInArray[0]).to.be.equal("Please provide shipment id");
-      }
-    });
-  });
-
-  describe("Get goshippo labels", () => {
-    it("should get labels", async () => {
-      shippoLabel = await resolvers.Mutation.createLabel(
-        null,
-        {
-          type: "shippo",
-          label: {
-            rate: shippoRate.id
-          }
-        },
-        envFile
-      );
-      const shippoLabels = await resolvers.Query.labels(
-        null,
-        { type: "shippo" },
-        envFile
-      );
-      expect(shippoLabels[0]).to.have.property("id");
-      expect(shippoLabels[0]).to.have.property("status");
-      expect(shippoLabels[0]).to.have.property("trackingNumbers");
     });
   });
 
@@ -93,7 +48,7 @@ describe("Testing goshippo Resolvers", () => {
     it("should create and  validate address", async () => {
       const address = await resolvers.Mutation.createAddress(
         null,
-        { type: "shippo", address: shippoAddress },
+        { type: "shippo", address: shipmentAddress },
         envFile
       );
       const shippoValidatedAddress = await resolvers.Mutation.validateAddress(
@@ -198,7 +153,7 @@ describe("Testing goshippo Resolvers", () => {
   });
 
   describe("Refund/Cancel label", () => {
-    it("should create and cancel label when provided label id", async () => {
+    it("should cancel label when provided label id", async () => {
       const canceledLabel = await resolvers.Mutation.cancelOrDeleteLabel(
         null,
         { type: "shippo", labelId: shippoLabel.id },
