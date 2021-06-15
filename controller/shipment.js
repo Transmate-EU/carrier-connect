@@ -1969,7 +1969,7 @@ class Shipment {
         if (!this.testEnv) {
           data = await trackingRequest(this.shipperAccount, formattedObj);
         }
-
+        debug("response DHL tracking %o", data.response);
         if (
           data.response.Notification &&
           data.response.Notification.length > 0
@@ -1977,11 +1977,15 @@ class Shipment {
           return errorObj(data.response.Notification);
         }
 
-        const shipment = data.response.trackingResponse.TrackingResponse;
+        const shipment = data?.response?.trackingResponse?.TrackingResponse;
         const parcel =
-          data?.response?.trackingResponse?.TrackingResponse?.AWBInfo
-            ?.ArrayOfAWBInfoItem?.Pieces?.PieceInfo?.ArrayOfPieceInfoItem
-            ?.PieceDetails || {};
+          shipment?.AWBInfo?.ArrayOfAWBInfoItem?.Pieces?.PieceInfo
+            ?.ArrayOfPieceInfoItem?.PieceDetails;
+        if (!parcel)
+          throw Error(
+            `no tracking details for DHL AWB ${trackingObj.trackingNumber}`
+          );
+        debug("shipment %j", shipment);
         return {
           data: {
             tracking: {

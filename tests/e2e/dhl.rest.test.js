@@ -57,7 +57,7 @@ describe("Test DHL REST API", () => {
       dhlShipment = response.body.result;
       dhlTrackingNumber = dhlShipment.id;
       expect(dhlShipment).to.have.property("id");
-      expect(dhlShipment.id).to.be.a("string");
+      expect(dhlShipment.id).to.be.a("string"); // tracking number
       expect(dhlShipment).to.have.property("rates");
       expect(dhlShipment).to.have.property("label");
       expect(dhlShipment.rates[0]).to.have.property("totalCharge");
@@ -67,6 +67,7 @@ describe("Test DHL REST API", () => {
     });
 
     it("should get tracking", async () => {
+      debug("get tracking for %s", dhlTrackingNumber);
       const response = await api.rest({
         ...envFile,
         type: "trackingstatus",
@@ -79,6 +80,7 @@ describe("Test DHL REST API", () => {
       });
       debug("tracking %o", response);
       const tracking = response.body.result;
+      expect(tracking).to.be.an("object");
       expect(tracking).to.have.property("shipmentWeight");
       expect(tracking).to.have.property("shipmentWeightUnit");
       expect(tracking).to.have.property("shipmentPackageCount");
