@@ -1,6 +1,7 @@
 /* eslint-disable consistent-return */
 import axios from "axios";
 import shippoApi from "shippo";
+import isoCountries from "i18n-iso-countries";
 import {
   getMessageReference,
   getIsoDateTimeGmt,
@@ -11,8 +12,8 @@ import {
   testTrackingRequest,
   testRateRequest,
   testShipmentRequest
-} from "dhl-node";
-import isoCountries from "i18n-iso-countries";
+} from "./dhl-node";
+
 import {
   postmenAddressReqSchema,
   postmenCalculateSchema,

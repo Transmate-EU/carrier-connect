@@ -11,14 +11,14 @@ let api;
 
 console.log("test api rest");
 if (process.env.WEBPACK_TEST) {
-  api = require("../../dist/rest-local.js");
+  api = require("../../dist/rest-local");
   console.log("webpack test", "api", api);
 } else {
-  api = require("../../functions/rest.js");
+  api = require("../../functions/rest");
   console.log("normal test", "api", api);
 }
 
-describe.only("Test DHL REST API", () => {
+describe("Test DHL REST API", () => {
   describe("should test(labels, rates, and trackings)", () => {
     let dhlShipment;
     let dhlTrackingNumber;

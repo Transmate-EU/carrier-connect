@@ -44,8 +44,8 @@
     "@graphql-tools/schema": "^7.1.5",
     "ajv": "^6.12.6",
     "axios": "^0.21.1",
+    "country-data": "^0.0.31",
     "debug": "^4.3.1",
-    "dhl-node": "^1.0.0",
     "dot-object": "^2.1.4",
     "graphql": "^15.5.0",
     "graphql-tools": "^7.0.5",
@@ -57,7 +57,9 @@
     "pg": "^8.5.1",
     "postmen": "^1.0.4",
     "shippo": "^1.6.0",
-    "uuid": "^8.3.2"
+    "soap": "^0.39.0",
+    "uuid": "^8.3.2",
+    "xml-formatter": "^2.4.0"
   },
   "devDependencies": {
     "@babel/core": "^7.14.3",
