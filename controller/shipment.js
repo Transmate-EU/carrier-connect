@@ -264,6 +264,7 @@ class Shipment {
                 : "ECOM26_84_001"
             },
             ShipTimestamp: getIsoDateTimeGmt(shipmentDate),
+
             PickupLocationCloseTime: shipmentMetadata
               ? shipmentMetadata.pickupLocationCloseTime
               : "23:59",
@@ -283,7 +284,7 @@ class Shipment {
                 Description: parcels[0].description,
                 CountryOfManufacture: shipFrom.countryCode,
                 Quantity: parcels.length,
-                UnitPrice: 10,
+                UnitPrice: 1,
                 CustomsValue: shipmentMetadata
                   ? shipmentMetadata.internationalDetail.customs
                   : 1
@@ -354,7 +355,7 @@ class Shipment {
         if (!this.testEnv) {
           data = await shipmentRequest(this.shipperAccount, formattedObject);
         }
-
+        debug("return dhl %o", data.response);
         const returnedJSON = JSON.stringify(data.response, null, 4);
         const parsedObject = JSON.parse(returnedJSON);
 
@@ -372,8 +373,7 @@ class Shipment {
             shipment: {
               id: parsedObject.ShipmentIdentificationNumber,
               shipmentDate,
-              trackingNumber:
-                parsedObject.PackagesResult.PackageResult.TrackingNumber,
+              trackingNumber: parsedObject.ShipmentIdentificationNumber,
               rates: ratesData.data.rates,
               createdAt: new Date().toString(),
               label:
@@ -810,7 +810,7 @@ class Shipment {
         const formattedObject = {
           ClientDetail: {},
           RequestedShipment: {
-            DropOffType: "REQUEST_COURIER",
+            DropOffType: "REGULAR_PICKUP",
             Ship: {
               Shipper: {
                 StreetLines: shipFrom.street1,
@@ -862,6 +862,7 @@ class Shipment {
         }
 
         const returnedJSON = JSON.stringify(data.response, null, 4);
+        debug("dhl rate return %j", data.response);
         const parsedObject = JSON.parse(returnedJSON);
 
         if (
@@ -870,16 +871,16 @@ class Shipment {
         ) {
           return errorObj(parsedObject.Provider.Notification);
         }
-
+        debug("rates return %j", parsedObject);
         return {
           data: {
-            rates: parsedObject?.Provider?.Service.map((rate, index) => ({
-              id: `${new Date(shipment.shipmentDate).getTime()}-${index}`,
-              serviceType: "dhl",
+            rates: parsedObject?.Provider?.Service.map(rate => ({
+              id: rate.attributes.type,
+              serviceType: rate.attributes.type,
               status: "calculated",
               totalCharge: {
-                amount: rate.TotalNet.Amount,
-                currency: rate.TotalNet.Currency
+                amount: rate.TotalNet[0].Amount,
+                currency: rate.TotalNet[0].Currency
               },
               deliveryDate: rate.DeliveryTime
             }))
@@ -1097,7 +1098,7 @@ class Shipment {
       if (this.service === "postmen") {
         const formattedObj = {
           shipment: label.shipment,
-          service_type: label.service_type,
+          service_type: label.service_type || label.serviceType,
           shipper_account: {
             id: this.shipperAccount.id
           },
@@ -1174,6 +1175,10 @@ class Shipment {
           warnings: [],
           errors: []
         };
+      }
+
+      if (this.service === "dhl") {
+        return this.createShipment({ ...label, getLabel: true });
       }
     } catch (error) {
       return errorObj(error);
@@ -1969,7 +1974,7 @@ class Shipment {
         if (!this.testEnv) {
           data = await trackingRequest(this.shipperAccount, formattedObj);
         }
-        debug("response DHL tracking %o", data.response);
+        debug("response DHL tracking %j", data.response);
         if (
           data.response.Notification &&
           data.response.Notification.length > 0

@@ -1,3 +1,8 @@
+const today = new Date();
+const tomorrow = new Date(today);
+tomorrow.setDate(tomorrow.getDate() + 1);
+tomorrow.setHours(12, 0, 0, 0);
+
 const shipmentAddress = {
   contactName: "testing",
   street1: "4901 N New Hope Rd Apt C1",
@@ -73,7 +78,7 @@ const shipmentTesting = {
       }
     ]
   },
-  shipmentDate: new Date("2021-06-16 14:00"),
+  shipmentDate: tomorrow,
   getLabel: false,
   serviceType: "dhl"
 };

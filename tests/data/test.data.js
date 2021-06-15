@@ -51,15 +51,15 @@ const ratesObject = {
   declaredValue: 200,
   declaredValueCurrecyCode: "USD",
   paymentInfo: "DDP",
-  timeStamp: new Date("2021-06-11 14:00")
+  timeStamp: new Date()
 };
 
 const shipmentObject = {
   dropOffType: "REQUEST_COURIER",
   serviceType: "P",
   currency: "EUR",
-  timeStamp: new Date("2021-06-11 14:00"),
-  pickupLocationCloseTime: "15:59",
+  timeStamp: new Date(),
+  pickupLocationCloseTime: "23:59",
   pickupLocation: "west wing 3rd Floor",
   shipFrom: {
     contactName: "John Smith",
