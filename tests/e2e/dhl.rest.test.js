@@ -143,7 +143,7 @@ describe("Test DHL REST API", () => {
       dhlTrackingNumber = response.body.result.shipment.trackingNumber;
     });
 
-    it("should get tracking", async () => {
+    it.skip("should get tracking", async () => {
       debug("get tracking for %s", dhlTrackingNumber);
       const response = await api.rest({
         ...envFile,
