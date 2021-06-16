@@ -107,7 +107,7 @@ describe("Test DHL REST API", () => {
         type: "createlabel",
         request: {
           type: "dhl",
-          serviceType: "8", //there is always a P option
+          serviceType: "8", // there is always a P option
           label: {
             ...shipmentTesting,
             shipment: {
@@ -132,12 +132,15 @@ describe("Test DHL REST API", () => {
       });
       debug("labels %o", response.body);
       expect(response.body.result.shipment.rates).to.be.an("array");
-      expect(response.body.result.shipment.rates[0].totalCharge).to.have.property("amount");
-      expect(response.body.result.shipment.rates[0].totalCharge.amount).to.be.a("string");
+      expect(
+        response.body.result.shipment.rates[0].totalCharge
+      ).to.have.property("amount");
+      expect(response.body.result.shipment.rates[0].totalCharge.amount).to.be.a(
+        "string"
+      );
       expect(response.body.result.shipment.label).to.be.a("object");
       expect(response.body.result.shipment.trackingNumber).to.be.a("string");
       dhlTrackingNumber = response.body.result.shipment.trackingNumber;
-
     });
 
     it("should get tracking", async () => {
