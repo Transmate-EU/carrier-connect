@@ -37,9 +37,7 @@ describe("Testing goshippo Resolvers", () => {
       } catch (error) {
         const errorInArray = JSON.parse(error.message);
         expect(error).to.have.property("message");
-        expect(errorInArray[0]).to.be.equal(
-          "Cannot destructure property 'shipFrom' of 'requestObject.shipment' as it is undefined."
-        );
+        expect(errorInArray[0]).to.be.contains("Cannot destructure property ");
       }
     });
   });

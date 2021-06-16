@@ -13,8 +13,9 @@ if (process.env.WEBPACK_TEST) {
   describe("should export keys", () => {
     it("check index-local", async () => {
       expect(api).to.have.property("rest");
-      expect(api).to.have.property("testingData");
-      expect(api.testingData).to.have.property("shipmentTesting");
+      expect(api).to.have.property("shipmentTesting");
+      expect(api.shipmentTesting).to.be.a("object");
+
       expect(api.rest).to.not.eql(undefined);
     });
   });

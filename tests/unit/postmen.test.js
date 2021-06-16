@@ -58,9 +58,7 @@ describe("Testing postmen Resolvers", () => {
       } catch (error) {
         const errorInArray = JSON.parse(error.message);
         expect(errorInArray.length).to.have.to.be.greaterThan(0);
-        expect(errorInArray[0]).to.be.equal(
-          "Cannot destructure property 'shipFrom' of 'requestObject.shipment' as it is undefined."
-        );
+        expect(errorInArray[0]).to.be.contains("Cannot destructure property");
       }
     });
   });
