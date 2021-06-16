@@ -33,6 +33,7 @@ describe("Testing serverless graphql", () => {
     } catch (error) {
       console.error("error message", error);
     }
+    expect(result).to.be.an("object");
     expect(result.data).to.have.property("labels");
     expect(result.data.labels).to.be.an("array");
     debug("labels %o", result.data.labels);
