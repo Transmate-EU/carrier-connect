@@ -19,58 +19,72 @@ async function rest(params) {
       case "rates":
         response = await apiCall.getRates(request.shipment);
         result = response.data.rates;
+        warnings = response.data.warnings;
         break;
       case "labels":
         response = await apiCall.getLabels();
         result = response.data.labels;
+        warnings = response.data.warnings;
         break;
       case "manifests":
         response = await apiCall.getAllManifests();
         result = response.data.manifests;
+        warnings = response.warnings;
         break;
       case "manifest":
         response = await apiCall.getManifest(request.manifestId);
-        result = response.data;
+        result = response.data.manifest;
+        warnings = response.warnings;
         break;
       case "trackings":
         response = await apiCall.getTrackings();
         result = response.data.trackings;
+        warnings = response.warnings;
         break;
       case "trackingstatus":
         response = await apiCall.getTracking(request.tracking);
         result = response.data.tracking;
+        warnings = response.warnings;
         break;
       case "shipments":
         response = await apiCall.getShipments();
         result = response.data.shipments;
+        warnings = response.warnings;
         break;
       case "createshipment":
         response = await apiCall.createShipment(request.shipment);
         result = response.data.shipment;
+        warnings = response.warnings;
         break;
       case "validateaddress":
         response = await apiCall.validateAddress(request.address);
-        result = response.data;
+        result = response.data.address;
+        warnings = response.warnings;
         break;
       case "createlabel":
-        response = await apiCall.createLabel(request.label);
-        result = response.data;
+        response = await apiCall.createLabel(request.shipment);
+        result = response.data.label;
+        warnings = response.warnings;
         break;
       case "createmanifest":
         response = await apiCall.createManifest(request.manifest);
-        result = response.data;
+        result = response.data.manifest;
+        warnings = response.warnings;
         break;
       case "createtracking":
         response = await apiCall.createTracking(request.tracking);
         result = response.data.tracking;
+        warnings = response.warnings;
         break;
       case "cancelordeletelabel":
         response = await apiCall.deleteLabel(request.labelId);
-        result = response.data;
+        result = response.data.label;
+        warnings = response.warnings;
         break;
       case "createaddress":
         response = await apiCall.createAddress(request.address);
         result = response.data.address;
+        warnings = response.warnings;
         break;
       default:
         statusCode = 400;

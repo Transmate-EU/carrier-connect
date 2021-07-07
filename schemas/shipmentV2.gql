@@ -83,6 +83,7 @@ type WeightType {
 input DimensionInput {
     width: Float
     height: Float
+    length: Float
     depth: Float
     unit: String
 }
@@ -109,7 +110,7 @@ input ItemInput {
     originCountry: String!
     quantity: Float!
     sku: String
-    weight: WeightInput
+    weight: WeightInput!
     price: Price!
 }
 
@@ -234,13 +235,17 @@ input ShipmentMetadataType {
     customersReference: String
 }
 
-input ShipmentInput {
+input ShipmentInputObject {
     parcels: [ParcelInput!]!
     shipFrom: AddressInput!
     shipTo: AddressInput!
+}
+
+input ShipmentInput {
+    shipment: ShipmentInputObject!
     shipmentDate: String!
     getLabel: Boolean
-    serviceType: String
+    serviceType: String!
     shipmentMetadata: ShipmentMetadataType
 }
 
@@ -550,7 +555,7 @@ type Mutation {
     createManifest(type: String!, manifest: ManifestCreationInput!): ManifestType!
     cancelOrDeleteLabel(type: String!, labelId: String!): CanceledLabel!
     createTracking(type: String!, tracking: CreateTrackingInput!): TrackingOutput!
-    createLabel(type: String!, label: LabelInput!): LabelOutput!
+    createLabel(type: String!, shipment: ShipmentInput!): LabelOutput!
     createShipment(type: String!, shipment: ShipmentInput!): ShipmentOutput!
     createAddress(type: String!, address: AddressInput!): AddressOutput!
 }

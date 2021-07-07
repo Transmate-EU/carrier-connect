@@ -23,28 +23,29 @@ async function start() {
 
   app.use(
     "/graphql",
-    graphqlHTTP({
+    graphqlHTTP(req => ({
       schema: schemaWithResolvers,
       graphiql: true,
-      context: ({ req }) => {
-        const env = {
-          SANDBOX: req.headers.sandbox,
-          POSTMEN_SANDBOX_URL: req.headers.postmen_sandbox_url,
-          POSTMEN_TEST_API_KEY: req.headers.postmen_test_api_key,
-          SHIPPO_TEST_API_KEY: req.headers.shippo_test_api_key,
-          POSTMEN_PROD_URL: req.headers.postmen_prod_url,
-          POSTMENT_PROD_API_KEY: req.headers.postmen_prod_api_key,
-          SHIPPO_URL: req.headers.shippo_url,
-          SHIPPO_PROD_API_KEY: req.headers.shippo_prod__api_key,
-          AFTER_SHIP_TEST_API_KEY: req.headers.after_ship_test_api_key,
-          AFTER_SHIP_PROD_API_KEY: req.headers.after_ship_prod_api_key,
-          AFTER_SHIP_URL: req.headers.after_ship_url,
-          SHIPPO_TEST_SHIPPER_ACCOUNT: req.headers.shippo_test_shipper_account
-        };
-        setEnv(env);
-        return env;
+      context: {
+        SANDBOX: req.headers.sandbox,
+        POSTMEN_SANDBOX_URL: req.headers.postmen_sandbox_url,
+        POSTMEN_TEST_API_KEY: req.headers.postmen_test_api_key,
+        SHIPPO_TEST_API_KEY: req.headers.shippo_test_api_key,
+        POSTMEN_PROD_URL: req.headers.postmen_prod_url,
+        POSTMENT_PROD_API_KEY: req.headers.postmen_prod_api_key,
+        SHIPPO_URL: req.headers.shippo_url,
+        SHIPPO_PROD_API_KEY: req.headers.shippo_prod__api_key,
+        AFTER_SHIP_TEST_API_KEY: req.headers.after_ship_test_api_key,
+        AFTER_SHIP_PROD_API_KEY: req.headers.after_ship_prod_api_key,
+        AFTER_SHIP_URL: req.headers.after_ship_url,
+        SHIPPO_TEST_SHIPPER_ACCOUNT: req.headers.shippo_test_shipper_account,
+        SHIPPER_ACCOUNT_ID: req.headers.shipper_account_id,
+        SHIPPER_ACCOUNT_USERNAME: req.headers.shipper_account_username,
+        SHIPPER_ACCOUNT_PASSWORD: req.headers.shipper_account_password,
+        SHIPPER_ACCOUNT_ACC_NUMBER: req.headers.shipper_account_number,
+        SHIPPER_MANIFEST_TEST_ID: req.headers.shipper_manifest_test_id
       }
-    })
+    }))
   );
 
   app.listen(4001);

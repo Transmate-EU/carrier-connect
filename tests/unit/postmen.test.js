@@ -156,7 +156,7 @@ describe("Testing postmen Resolvers", () => {
       );
       expect(canceledLabel).to.have.property("id");
       expect(canceledLabel).to.have.property("status");
-      //   expect(canceledLabel.status).to.be.equal("cancelled");
+      expect(canceledLabel.status).to.be.equal("cancelled");
     });
 
     it("should not cancel postmen label if not provided label id", async () => {
@@ -170,24 +170,6 @@ describe("Testing postmen Resolvers", () => {
         const errorInArray = JSON.parse(error.message);
         expect(errorInArray.length).to.be.greaterThan(0);
         expect(errorInArray[0]).to.be.equal("Item not found");
-      }
-    });
-  });
-
-  describe("Get postmen tracking status", () => {
-    it("should not get postmen tracking status when not provided with a slug/tracking id", async () => {
-      try {
-        await resolvers.Query.trackingStatus(
-          null,
-          { type: "postmen", tracking: {} },
-          envFile
-        );
-      } catch (error) {
-        const errorInArray = JSON.parse(error.message);
-        expect(errorInArray.length).to.be.greaterThan(0);
-        expect(errorInArray[0].message).to.be.equal(
-          "should have required property 'trackingNumber'"
-        );
       }
     });
   });

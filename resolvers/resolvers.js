@@ -9,6 +9,7 @@ function getContext(context) {
   }
 
   if (typeof context === "object") {
+    console.log("context is object");
     return context;
   }
   return null;
@@ -84,11 +85,11 @@ const resolvers = {
     },
     createLabel: async (parent, args, context) => {
       const apiCall = new Shipment(args.type, getContext(context));
-      const label = await apiCall.createLabel(args.label);
+      const label = await apiCall.createLabel(args.shipment);
       if (label.errors.length > 0) {
         throw new Error(JSON.stringify(label.errors));
       }
-      return label.data;
+      return label.data.label;
     },
     createManifest: async (parent, args, context) => {
       const apiCall = new Shipment(args.type, getContext(context));

@@ -30,7 +30,7 @@ describe("Test DHL REST API", () => {
           shipment: {
             ...shipmentTesting,
             getLabel: true,
-            serviceType: "dhl",
+            serviceType: "P",
             shipment: {
               ...shipmentTesting.shipment,
               shipFrom: {
@@ -53,8 +53,6 @@ describe("Test DHL REST API", () => {
       });
       dhlShipment = response.body.result;
       dhlTrackingNumber = dhlShipment.id;
-      console.log("dhlShipment", dhlShipment);
-      console.log(" dhlTrackingNumber", dhlTrackingNumber);
       expect(dhlShipment).to.have.property("id");
       expect(dhlShipment).to.have.property("rates");
       expect(dhlShipment).to.have.property("label");
@@ -73,7 +71,7 @@ describe("Test DHL REST API", () => {
           shipment: {
             ...shipmentTesting,
             getLabel: true,
-            serviceType: "dhl",
+            serviceType: "P",
             shipment: {
               ...shipmentTesting.shipment,
               shipFrom: {
@@ -112,7 +110,7 @@ describe("Test DHL REST API", () => {
           shipment: {
             ...shipmentTesting,
             getLabel: true,
-            serviceType: "dhl",
+            serviceType: "P",
             shipment: {
               ...shipmentTesting.shipment,
               shipFrom: {
@@ -133,8 +131,6 @@ describe("Test DHL REST API", () => {
           }
         }
       });
-
-      dhlShipment = response.body.result;
       expect(response.body.result).to.have.property("id");
       expect(response.body.result).to.have.property("rates");
       expect(response.body.result).to.have.property("label");
@@ -144,28 +140,206 @@ describe("Test DHL REST API", () => {
       expect(response.statusCode).to.be.equal(200);
     });
 
-    it("should get tracking", async () => {
-      try {
-        const response = await api.rest({
-          ...envFile,
-          type: "trackingstatus",
-          request: {
-            type: "dhl",
-            tracking: {
-              trackingNumber: dhlTrackingNumber
+    it("should not create shipment, get rates and label when given wrong service type", async () => {
+      const response = await api.rest({
+        ...envFile,
+        type: "createshipment",
+        request: {
+          type: "dhl",
+          shipment: {
+            ...shipmentTesting,
+            getLabel: true,
+            serviceType: "AB",
+            shipment: {
+              ...shipmentTesting.shipment,
+              shipFrom: {
+                ...shipmentTesting.shipment.shipFrom,
+                street1: "215 Clayton St.",
+                city: "Prague",
+                postalCode: "1100",
+                countryCode: "AT"
+              },
+              shipTo: {
+                ...shipmentTesting.shipment.shipTo,
+                street1: "Kampala street",
+                city: "Kampala",
+                postalCode: "0000",
+                countryCode: "UG"
+              }
             }
           }
-        });
-        const tracking = response.body.result;
-        expect(tracking).to.have.property("shipmentWeight");
-        expect(tracking).to.have.property("shipmentWeightUnit");
-        expect(tracking).to.have.property("shipmentPackageCount");
-        expect(tracking).to.have.property("messageReference");
-        expect(tracking.shipmentWeightUnit).to.be.equal("K");
-        expect(response.statusCode).to.be.equal(200);
-      } catch (error) {
-        console.log("error", error);
-      }
+        }
+      });
+      const errors = JSON.parse(response.body.error.message);
+      expect(errors[0]).to.be.equal(
+        "DHL service type can only be one of these K, T, Y, E, P, U, D, N, H, W"
+      );
+      expect(response.statusCode).to.be.equal(500);
+    });
+
+    it("should get rates when provided a shipment AT->UG", async () => {
+      const response = await api.rest({
+        ...envFile,
+        type: "rates",
+        request: {
+          type: "dhl",
+          shipment: {
+            ...shipmentTesting,
+            getLabel: true,
+            serviceType: "P",
+            shipment: {
+              ...shipmentTesting.shipment,
+              shipFrom: {
+                ...shipmentTesting.shipment.shipFrom,
+                street1: "215 Clayton St.",
+                city: "Prague",
+                postalCode: "1100",
+                countryCode: "AT"
+              },
+              shipTo: {
+                ...shipmentTesting.shipment.shipTo,
+                street1: "Kampala street",
+                city: "Kampala",
+                postalCode: "0000",
+                countryCode: "UG"
+              }
+            }
+          }
+        }
+      });
+      const rates = response.body.result;
+      expect(rates[0]).to.have.property("id");
+      expect(rates[0]).to.have.property("totalCharge");
+      expect(rates[0].status).to.be.equal("calculated");
+      expect(response.statusCode).to.be.equal(200);
+    });
+
+    it("should create and get back a created label AT -> UG", async () => {
+      const response = await api.rest({
+        ...envFile,
+        type: "createlabel",
+        request: {
+          type: "dhl",
+          shipment: {
+            ...shipmentTesting,
+            getLabel: true,
+            serviceType: "P",
+            shipment: {
+              ...shipmentTesting.shipment,
+              shipFrom: {
+                ...shipmentTesting.shipment.shipFrom,
+                street1: "215 Clayton St.",
+                city: "Prague",
+                postalCode: "1100",
+                countryCode: "AT"
+              },
+              shipTo: {
+                ...shipmentTesting.shipment.shipTo,
+                street1: "Kampala street",
+                city: "Kampala",
+                postalCode: "0000",
+                countryCode: "UG"
+              }
+            }
+          }
+        }
+      });
+      const label = response.body.result;
+      expect(label).to.have.property("labelUrl");
+      expect(label).to.have.property("trackingNumbers");
+      expect(response.statusCode).to.be.equal(200);
+    });
+
+    it("should create and get back a created label AT -> US", async () => {
+      const response = await api.rest({
+        ...envFile,
+        type: "createlabel",
+        request: {
+          type: "dhl",
+          shipment: {
+            ...shipmentTesting,
+            getLabel: true,
+            serviceType: "P",
+            shipment: {
+              ...shipmentTesting.shipment,
+              shipFrom: {
+                ...shipmentTesting.shipment.shipFrom,
+                street1: "215 Clayton St.",
+                city: "Prague",
+                postalCode: "1100",
+                countryCode: "AT"
+              },
+              shipTo: {
+                ...shipmentTesting.shipment.shipTo,
+                street1: "Oak street",
+                city: "San Francisco",
+                postalCode: "10007",
+                countryCode: "US"
+              }
+            }
+          }
+        }
+      });
+      const label = response.body.result;
+      expect(label).to.have.property("labelUrl");
+      expect(label).to.have.property("trackingNumbers");
+      expect(response.statusCode).to.be.equal(200);
+    });
+
+    it("should create and get back a created label AT -> IT", async () => {
+      const response = await api.rest({
+        ...envFile,
+        type: "createlabel",
+        request: {
+          type: "dhl",
+          shipment: {
+            ...shipmentTesting,
+            getLabel: true,
+            serviceType: "P",
+            shipment: {
+              ...shipmentTesting.shipment,
+              shipFrom: {
+                ...shipmentTesting.shipment.shipFrom,
+                street1: "215 Clayton St.",
+                city: "Prague",
+                postalCode: "1100",
+                countryCode: "AT"
+              },
+              shipTo: {
+                ...shipmentTesting.shipment.shipTo,
+                street1: "Broadway 1",
+                city: "New York",
+                postalCode: "50127",
+                countryCode: "IT"
+              }
+            }
+          }
+        }
+      });
+      const label = response.body.result;
+      expect(label).to.have.property("labelUrl");
+      expect(label).to.have.property("trackingNumbers");
+      expect(response.statusCode).to.be.equal(200);
+    });
+
+    it("should get tracking", async () => {
+      const response = await api.rest({
+        ...envFile,
+        type: "trackingstatus",
+        request: {
+          type: "dhl",
+          tracking: {
+            trackingNumber: dhlTrackingNumber
+          }
+        }
+      });
+      const tracking = response.body.result;
+      expect(tracking).to.have.property("shipmentWeight");
+      expect(tracking).to.have.property("shipmentWeightUnit");
+      expect(tracking).to.have.property("shipmentPackageCount");
+      expect(tracking).to.have.property("messageReference");
+      expect(tracking.shipmentWeightUnit).to.be.equal("K");
+      expect(response.statusCode).to.be.equal(200);
     });
   });
 });

@@ -12,8 +12,6 @@ async function gqlResolve(args) {
     typeDefs,
     resolvers
   });
-  // const schemaWithResolvers = addResolversToSchema({ schema, resolvers });
-
   debug("schema %o", schemaWithResolvers);
   // The resolver for this action
   debug("get graphql args %o", args);
@@ -30,6 +28,7 @@ async function gqlResolve(args) {
       return response;
     })
     .catch(error => {
+      console.log("error here", error);
       console.error(error);
     });
 }
