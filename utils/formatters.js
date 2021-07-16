@@ -26,7 +26,7 @@ const shipmentRequestFormatter = (returnType, objct) => {
             ? shipmentMetadata.labelTemplate
             : "ECOM26_84_001"
         },
-        ShipTimestamp: getIsoDateTimeGmt(shipmentDate),
+        ShipTimestamp: getIsoDateTimeGmt(new Date(shipmentDate)),
         PickupLocationCloseTime: shipmentMetadata
           ? shipmentMetadata.pickupLocationCloseTime
           : "23:59",

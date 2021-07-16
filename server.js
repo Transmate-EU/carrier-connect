@@ -7,7 +7,6 @@ const debug = require("debug")("graphql:server");
 const { loadSchema } = require("@graphql-tools/load");
 const { GraphQLFileLoader } = require("@graphql-tools/graphql-file-loader");
 const { default: resolvers } = require("./resolvers/resolvers");
-const { setEnv } = require("./functions/setEnv");
 
 async function start() {
   debug("start server");

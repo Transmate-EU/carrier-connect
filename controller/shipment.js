@@ -37,9 +37,62 @@ const POSTMEN_PROD_URL = "https://prod-api.postmen.com/v3";
 const SHIPPO_URL = "https://api.goshippo.com/";
 const AFTER_SHIP_URL = "https://api.aftership.com/v4";
 
-function errorObj(error) {
-  debug("error", error);
+function errorObj(error, type, validationErrors) {
+  debug("error on error object", error);
+  if (validationErrors) {
+    console.log("validation errors", validationErrors);
+    return {
+      data: {},
+      warnings: [],
+      errors: error.map(err => ({
+        type: "validation-errors",
+        info: err.message,
+        field: err.instancePath.split("/")[1]
+      }))
+    };
+  }
   if (Array.isArray(error)) {
+    if (type === "postmen") {
+      console.log("here here postmen");
+      return {
+        data: {},
+        warnings: [],
+        errors: error.map(err => ({
+          type,
+          info: err.info
+        }))
+      };
+    }
+
+    if (type === "shippo") {
+      console.log("error in shippo", error);
+      return {
+        data: {},
+        warnings: [],
+        errors: error
+      };
+      // return {
+      //   data: {},
+      //   warnings: [],
+      //   errors: error.map(err => ({
+      //     type,
+      //     info: err.info
+      //   }))
+      // };
+    }
+
+    if (type === "dhl") {
+      console.log("error dhl", error);
+      return {
+        data: {},
+        warnings: [],
+        errors: error.map(err => ({
+          type,
+          info: err.Message || err.info
+        }))
+      };
+    }
+
     // validations errors
     return {
       data: {},
@@ -49,6 +102,7 @@ function errorObj(error) {
   }
 
   if (error.detail) {
+    console.log("here here detail");
     return {
       data: {},
       warnings: [],
@@ -57,6 +111,17 @@ function errorObj(error) {
   }
 
   if (error.response) {
+    if (type === "shippo") {
+      const errorValue = Object.values(error.response.data);
+      return {
+        data: {},
+        warnings: [],
+        errors: errorValue.map(err => ({
+          type,
+          info: err[0]
+        }))
+      };
+    }
     return {
       data: {},
       warnings: [],
@@ -138,8 +203,17 @@ class Shipment {
             parcels)
         */
     try {
-      const errors = validateSchema(requestObject, shipmentSchema);
-      if (errors) return errorObj(errors);
+      const errors = validateSchema(
+        {
+          ...requestObject,
+          shipmentDate: requestObject.shipmentDate
+            ? new Date(requestObject.shipmentDate)
+            : ""
+        },
+        shipmentSchema
+      );
+      console.log("requestObject.shipmentDate", requestObject.shipmentDate);
+      if (errors) return errorObj(errors, this.service, true);
 
       const { shipmentDate } = requestObject;
       const { getLabel } = requestObject;
@@ -161,7 +235,7 @@ class Shipment {
         if (getLabel) {
           const labelData = await this.createLabel(requestObject);
           if (labelData.errors.length > 0) {
-            return errorObj(labelData.errors);
+            return errorObj(labelData.errors, this.service);
           }
           label = labelData.data.label;
         }
@@ -191,9 +265,15 @@ class Shipment {
         });
 
         if (!serviceTypes.includes(requestObject.serviceType)) {
-          return errorObj([
-            "DHL service type can only be one of these K, T, Y, E, P, U, D, N, H, W"
-          ]);
+          return errorObj(
+            [
+              {
+                Message:
+                  "DHL service type can only be one of these K, T, Y, E, P, U, D, N, H, W"
+              }
+            ],
+            this.service
+          );
         }
 
         let data;
@@ -217,7 +297,7 @@ class Shipment {
           data.response.Notification &&
           !parsedObject.ShipmentIdentificationNumber
         ) {
-          return errorObj(data.response.Notification);
+          return errorObj(data.response.Notification, this.service);
         }
 
         const ratesData = await this.getRates(requestObject);
@@ -293,7 +373,7 @@ class Shipment {
         };
       }
     } catch (error) {
-      return errorObj(error);
+      return errorObj(error, this.service);
     }
   }
 
@@ -326,14 +406,14 @@ class Shipment {
         };
       }
     } catch (error) {
-      return errorObj(error);
+      return errorObj(error, this.service);
     }
   }
 
   async createManifest(manifest) {
     try {
       const errors = validateSchema(manifest, manifestSchema);
-      if (errors) return errorObj(errors);
+      if (errors) return errorObj(errors, this.service);
 
       if (this.service === "shippo") {
         const formatedManifest = {
@@ -435,11 +515,12 @@ class Shipment {
       }
     } catch (error) {
       if (error.message.search("temporary error")) {
-        return errorObj([
-          "Manifestation of label ids has started/already in progress"
-        ]);
+        return errorObj(
+          ["Manifestation of label ids has started/already in progress"],
+          this.service
+        );
       }
-      return errorObj(error);
+      return errorObj(error, this.service);
     }
   }
 
@@ -455,7 +536,7 @@ class Shipment {
       if (this.service === "shippo" || this.service === "postmen") {
         const shipmentResp = await this.createShipment(shipment);
         if (shipmentResp.errors.length > 0) {
-          return errorObj(shipmentResp.errors);
+          return errorObj(shipmentResp.errors, this.service);
         }
         return {
           data: {
@@ -489,7 +570,7 @@ class Shipment {
           parsedObject.Provider.Notification &&
           !parsedObject.Provider.Service
         ) {
-          return errorObj(parsedObject.Provider.Notification);
+          return errorObj(parsedObject.Provider.Notification, this.service);
         }
         debug("rates return %j", parsedObject);
         const { rates } = ratesResponseFormatter(this.service, {
@@ -504,7 +585,7 @@ class Shipment {
         };
       }
     } catch (error) {
-      return errorObj(error);
+      return errorObj(error, this.service);
     }
   }
 
@@ -532,7 +613,7 @@ class Shipment {
         };
       }
     } catch (error) {
-      return errorObj(error);
+      return errorObj(error, this.service);
     }
   }
 
@@ -613,7 +694,7 @@ class Shipment {
         };
       }
     } catch (error) {
-      return errorObj(error);
+      return errorObj(error, this.service);
     }
   }
 
@@ -628,7 +709,9 @@ class Shipment {
         },
         shipmentSchema
       );
-      if (errors) return errorObj(errors);
+      if (errors) return errorObj(errors, this.service, true);
+
+      console.log("errors in create label", errors);
 
       if (this.service === "shippo") {
         const { formattedObject: shipmentObject } = labelRequestFormatter(
@@ -648,7 +731,7 @@ class Shipment {
         const resultObject = data.data;
 
         if (resultObject.status !== "SUCCESS") {
-          return errorObj(resultObject.messages);
+          return errorObj(resultObject.messages, this.service);
         }
 
         const { labels } = labelsResponseFormatter(this.service, {
@@ -680,22 +763,14 @@ class Shipment {
         });
 
         if (data.data.meta.code !== 200 && data.data.meta.details.length > 0) {
-          return {
-            data: {},
-            warnings: [],
-            errors: [...data.data.meta.details]
-          };
+          return errorObj([...data.data.meta.details], this.service);
         }
 
         if (
           data.data.meta.code !== 200 &&
           data.data.meta.details.length === 0
         ) {
-          return {
-            data: {},
-            warnings: [],
-            errors: [data.data.meta.message]
-          };
+          return errorObj([data.data.meta.message], this.service);
         }
 
         const { labels } = labelsResponseFormatter(this.service, {
@@ -712,7 +787,14 @@ class Shipment {
       }
 
       if (this.service === "dhl") {
-        const shipmentResp = await this.createShipment(shipment);
+        const shipmentResp = await this.createShipment({
+          ...shipment,
+          getLabel: true
+        });
+        if (shipmentResp.errors.length > 0) {
+          return errorObj(shipmentResp.errors);
+        }
+        console.log("shipmentResp", shipmentResp);
         return {
           data: {
             label: {
@@ -728,8 +810,8 @@ class Shipment {
         };
       }
     } catch (error) {
-      console.log("ERROR", error.message);
-      return errorObj(error);
+      console.log("ERROR", error);
+      return errorObj(error, this.service);
     }
   }
 
@@ -791,7 +873,7 @@ class Shipment {
         };
       }
     } catch (error) {
-      return errorObj(error);
+      return errorObj(error, this.service);
     }
   }
 
@@ -867,7 +949,7 @@ class Shipment {
         };
       }
     } catch (error) {
-      return errorObj(error);
+      return errorObj(error, this.service);
     }
   }
 
@@ -943,7 +1025,7 @@ class Shipment {
       }
     } catch (error) {
       console.log("error", error);
-      return errorObj(error);
+      return errorObj(error, this.service);
     }
   }
 
@@ -1034,14 +1116,15 @@ class Shipment {
           data.response.Notification &&
           data.response.Notification.length > 0
         ) {
-          return errorObj(data.response.Notification);
+          return errorObj(data.response.Notification, this.service);
         }
 
         const shipment = data.response.trackingResponse.TrackingResponse;
         if (!shipment.AWBInfo.ArrayOfAWBInfoItem) {
-          return errorObj([
-            `no tracking details for DHL AWB ${trackingObj.trackingNumber}`
-          ]);
+          return errorObj(
+            [`no tracking details for DHL AWB ${trackingObj.trackingNumber}`],
+            this.service
+          );
         }
         debug("shipment %j", shipment);
         const { tracking } = trackingResponseFormatter(this.service, {
@@ -1057,7 +1140,7 @@ class Shipment {
         };
       }
     } catch (error) {
-      return errorObj(error);
+      return errorObj(error, this.service);
     }
   }
 
@@ -1153,14 +1236,15 @@ class Shipment {
           data.response.Notification &&
           data.response.Notification.length > 0
         ) {
-          return errorObj(data.response.Notification);
+          return errorObj(data.response.Notification, this.service);
         }
 
         const shipment = data.response.trackingResponse.TrackingResponse;
         if (!shipment.AWBInfo.ArrayOfAWBInfoItem) {
-          return errorObj([
-            `no tracking details for DHL AWB ${trackingObj.trackingNumber}`
-          ]);
+          return errorObj(
+            [`no tracking details for DHL AWB ${trackingObj.trackingNumber}`],
+            this.service
+          );
         }
         debug("shipment %j", shipment);
         const { tracking } = trackingResponseFormatter(this.service, {
@@ -1176,7 +1260,7 @@ class Shipment {
         };
       }
     } catch (error) {
-      return errorObj(error);
+      return errorObj(error, this.service);
     }
   }
 
@@ -1187,7 +1271,10 @@ class Shipment {
         */
     try {
       if (!labelId) {
-        return errorObj(["A label id is required to cancel label"]);
+        return errorObj(
+          ["A label id is required to cancel label"],
+          this.service
+        );
       }
 
       if (this.service === "shippo") {
@@ -1253,7 +1340,7 @@ class Shipment {
         };
       }
     } catch (error) {
-      return errorObj(error);
+      return errorObj(error, this.service);
     }
   }
 }

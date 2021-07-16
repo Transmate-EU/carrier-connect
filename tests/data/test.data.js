@@ -1,5 +1,6 @@
 import env from "../../.env.json";
 import { shipmentTesting } from "../../data/data";
+import gqlast from "../../utils/gqlast";
 
 const envFile = {
   SANDBOX: true,
@@ -22,76 +23,14 @@ const envFile = {
   SHIPPER_MANIFEST_TEST_ID: env.SHIPPER_MANIFEST_TEST_ID
 };
 
-const returnShipmentMutationString = (service, shipment) => {
-  const shipmentMutation = `
+const returnShipmentMutation = (service, shipment) => {
+  const shipmentMutation = gqlast`
     mutation {
-      createLabel(type:"${service}", shipment: {
-        shipment: {
-          shipTo: {
-            contactName: "Shawn Ippotle",
-            street1: "${shipment.shipment.shipTo.street1}",
-            city: "${shipment.shipment.shipTo.city}",
-            state: "${shipment.shipment.shipTo.state}",
-            phone: "${shipment.shipment.shipTo.phone}",
-            email: "${shipment.shipment.shipTo.email}",
-            postalCode: "${shipment.shipment.shipTo.postalCode}",
-            countryCode: "${shipment.shipment.shipTo.countryCode}",
-            companyName: "SandTown",
-            
-          },
-          shipFrom: {
-            contactName: "Mr Hippo",
-            street1: "${shipment.shipment.shipFrom.street1}",
-            city: "${shipment.shipment.shipFrom.city}",
-            state: "${shipment.shipment.shipFrom.state}",
-            phone: "${shipment.shipment.shipFrom.phone}",
-            email: "${shipment.shipment.shipFrom.email}",
-            postalCode: "${shipment.shipment.shipFrom.postalCode}",
-            countryCode: "${shipment.shipment.shipFrom.countryCode}",
-            companyName: "SandDowny",
-          },
-          parcels: [
-            {
-              description: "Food Bar",
-              length: 5,
-              width: 5,
-              height: 5,
-              distanceUnit: "in",
-              boxType: "custom",
-              weight: {
-                unit: "kg",
-                value: 2
-              },
-              dimension: {
-                length: 13,
-                width: 12,
-                height: 9,
-                depth: 40,
-                unit: "cm"
-              },
-              massUnit: "lb",
-              items: [
-                {
-                  description: "Food Bar",
-                  originCountry: "CZ",
-                  quantity: 2,
-                  price: {
-                    amount: 3,
-                    currency: "EUR"
-                  },
-                  weight: {
-                    value: 0.6,
-                    unit: "kg"
-                  },
-                  sku: "imac2014"
-                }
-              ]
-            }
-          ]
-        },
-        shipmentDate: "${shipment.shipmentDate.toString()}",
+      createLabel(type: ${service}, shipment: {
+        shipment: ${shipment.shipment},
+        shipmentDate: ${shipment.shipmentDate.toString()},
         getLabel: ${shipment.getLabel},
-        serviceType: "${shipment.serviceType}"
+        serviceType: ${shipment.serviceType}
       }) {
         id
         labelUrl
@@ -104,4 +43,47 @@ const returnShipmentMutationString = (service, shipment) => {
 
   return shipmentMutation;
 };
-export { envFile, returnShipmentMutationString };
+
+const returnRatesQuery = (service, shipment) => {
+  // const query = gqlast`
+  //   query {
+  //     rates(
+  //       type: ${service},
+  //       shipment: {
+  //         shipment: ${shipment.shipment},
+  //         shipmentDate: ${shipment.shipmentDate.toString()},
+  //         getLabel: ${shipment.getLabel},
+  //         serviceType: ${shipment.serviceType}
+  //     }) {
+  //       id
+  //       status
+  //       totalCharge {
+  //         amount
+	//         currency
+  //       }
+  //       deliveryDate
+  //       serviceType
+  //     }
+  //   }
+  // `;
+
+  const query = gqlast`
+    query {
+      rates(type: ${service}, shipment: ${shipment}) {
+        id
+        status
+        totalCharge {
+          amount
+	        currency
+        }
+        deliveryDate
+        serviceType
+      }
+    }
+  `;
+
+  console.log("query", query);
+  return query;
+};
+
+export { envFile, returnShipmentMutation, returnRatesQuery };

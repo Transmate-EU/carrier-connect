@@ -1,6 +1,19 @@
+import moment from "moment";
+
 const today = new Date();
 const tomorrow = new Date(today);
-tomorrow.setDate(tomorrow.getDate() + 3);
+const tomorrowsDayOfTheWeek = moment(tomorrow).format("dddd");
+
+const endOfWeekDays = ["Thursday", "Friday", "Saturday", "Sunday"];
+
+if (endOfWeekDays.includes(tomorrowsDayOfTheWeek)) {
+  tomorrow.setDate(tomorrow.getDate() + 4);
+}
+
+if (!endOfWeekDays.includes(tomorrowsDayOfTheWeek)) {
+  tomorrow.setDate(tomorrow.getDate() + 2);
+}
+
 tomorrow.setHours(12, 0, 0, 0);
 
 const shipmentAddress = {
