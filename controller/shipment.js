@@ -40,7 +40,6 @@ const AFTER_SHIP_URL = "https://api.aftership.com/v4";
 function errorObj(error, type, validationErrors) {
   debug("error on error object", error);
   if (validationErrors) {
-    console.log("validation errors", validationErrors);
     return {
       data: {},
       warnings: [],
@@ -53,7 +52,6 @@ function errorObj(error, type, validationErrors) {
   }
   if (Array.isArray(error)) {
     if (type === "postmen") {
-      console.log("here here postmen");
       return {
         data: {},
         warnings: [],
@@ -65,24 +63,17 @@ function errorObj(error, type, validationErrors) {
     }
 
     if (type === "shippo") {
-      console.log("error in shippo", error);
       return {
         data: {},
         warnings: [],
-        errors: error
+        errors: error.map(err => ({
+          type,
+          info: err.text || err.info || err.transaction
+        }))
       };
-      // return {
-      //   data: {},
-      //   warnings: [],
-      //   errors: error.map(err => ({
-      //     type,
-      //     info: err.info
-      //   }))
-      // };
     }
 
     if (type === "dhl") {
-      console.log("error dhl", error);
       return {
         data: {},
         warnings: [],
@@ -97,16 +88,30 @@ function errorObj(error, type, validationErrors) {
     return {
       data: {},
       warnings: [],
-      errors: error
+      errors: error.map(err => ({
+        type,
+        info: err.Message || err.info || err.text
+      }))
     };
   }
 
   if (error.detail) {
-    console.log("here here detail");
+    if (type === "shippo") {
+      const errorValue = Object.values(error.detail);
+      return {
+        data: {},
+        warnings: [],
+        errors: errorValue.map(err => ({
+          type,
+          info: err[0]
+        }))
+      };
+    }
+
     return {
       data: {},
       warnings: [],
-      errors: [error.detail]
+      errors: [{ type, info: error.detail }]
     };
   }
 
@@ -125,14 +130,14 @@ function errorObj(error, type, validationErrors) {
     return {
       data: {},
       warnings: [],
-      errors: [error.response.data]
+      errors: [{ type, info: error.response.data }]
     };
   }
 
   return {
     data: {},
     warnings: [],
-    errors: [error.message]
+    errors: [{ type, info: error.message }]
   };
 }
 
@@ -184,11 +189,11 @@ class Shipment {
     };
     this.service = (service || "").toLowerCase();
     if (!["shippo", "postmen", "dhl"].includes(this.service))
-      throw Error("you must select a service (postmen/goshippo/dhl)");
+      throw new Error("you must select a service (postmen/goshippo/dhl)");
     if (this.service === "shippo" && !this.shippo)
-      throw Error("check keys for shippo!");
+      throw new Error("check keys for shippo!");
     if (this.service === "postmen" && !this.postmentApiKey)
-      throw Error("please provide postmen API key!");
+      throw new Error("please provide postmen API key!");
   }
 
   async createShipment(requestObject) {
@@ -212,7 +217,6 @@ class Shipment {
         },
         shipmentSchema
       );
-      console.log("requestObject.shipmentDate", requestObject.shipmentDate);
       if (errors) return errorObj(errors, this.service, true);
 
       const { shipmentDate } = requestObject;
@@ -248,11 +252,15 @@ class Shipment {
           label
         });
 
+        if (shipmentObj.messages && shipmentObj.status !== "QUEUED") {
+          return errorObj(shipmentObj.messages, this.service);
+        }
+
         return {
           data: {
             shipment
           },
-          warnings: shipmentObj.messages,
+          warnings: [],
           errors: []
         };
       }
@@ -418,23 +426,18 @@ class Shipment {
       if (this.service === "shippo") {
         const formatedManifest = {
           shipment_date: manifest.shipmentDate,
-          transactions: manifest.labels,
-          carrier_account: this.shipperAccount.id,
+          transactions: manifest.labelIds,
+          carrier_account: manifest.shipperManifestAccountId,
           address_from: manifest.shipFromId
         };
-
-        console.log("formatedManifest", formatedManifest);
 
         const resultObject = await this.shippo.manifest.create(
           formatedManifest
         );
 
-        console.log("resultObject", resultObject);
-
         return {
           data: {
             status: resultObject.status,
-            objectOwner: resultObject.object_owner,
             createdAt: resultObject.object_created,
             updatedAt: resultObject.object_updated,
             shipFromId: resultObject.address_from,
@@ -471,16 +474,19 @@ class Shipment {
           data.data.meta.message ===
           "Access to shipper_account locked during manifest/cancel-label operation."
         ) {
+          const manifests = await this.getAllManifests();
           return {
-            data: {},
-            warnings: [],
-            errors: [
-              "Manifestation of label ids has started/already in progress"
-            ]
+            data: {
+              manifest: manifests.data.manifests[0]
+            },
+            warnings: [
+              {
+                info: "Manifestation of label ids has started/already in progress"
+              }
+            ],
+            errors: []
           };
         }
-
-        console.log("data.data", data.data);
 
         if (data.data.meta.code !== 200 && data.data.meta.details.length > 0) {
           return {
@@ -515,10 +521,18 @@ class Shipment {
       }
     } catch (error) {
       if (error.message.search("temporary error")) {
-        return errorObj(
-          ["Manifestation of label ids has started/already in progress"],
-          this.service
-        );
+        const manifests = await this.getAllManifests();
+        return {
+          data: {
+            manifest: manifests.data.manifests[0]
+          },
+          warnings: [
+            {
+              info: "Manifestation of label ids has started/already in progress"
+            }
+          ],
+          errors: []
+        };
       }
       return errorObj(error, this.service);
     }
@@ -534,7 +548,10 @@ class Shipment {
         */
     try {
       if (this.service === "shippo" || this.service === "postmen") {
-        const shipmentResp = await this.createShipment(shipment);
+        const shipmentResp = await this.createShipment({
+          ...shipment,
+          getLabel: false
+        });
         if (shipmentResp.errors.length > 0) {
           return errorObj(shipmentResp.errors, this.service);
         }
@@ -711,8 +728,6 @@ class Shipment {
       );
       if (errors) return errorObj(errors, this.service, true);
 
-      console.log("errors in create label", errors);
-
       if (this.service === "shippo") {
         const { formattedObject: shipmentObject } = labelRequestFormatter(
           this.service,
@@ -794,7 +809,6 @@ class Shipment {
         if (shipmentResp.errors.length > 0) {
           return errorObj(shipmentResp.errors);
         }
-        console.log("shipmentResp", shipmentResp);
         return {
           data: {
             label: {
@@ -810,7 +824,6 @@ class Shipment {
         };
       }
     } catch (error) {
-      console.log("ERROR", error);
       return errorObj(error, this.service);
     }
   }
@@ -994,22 +1007,14 @@ class Shipment {
         }
 
         if (data.data.meta.code !== 200 && data.data.meta.details.length > 0) {
-          return {
-            data: {},
-            warnings: [],
-            errors: [...data.data.meta.details]
-          };
+          return errorObj([...data.data.meta.details], this.service);
         }
 
         if (
           data.data.meta.code !== 200 &&
           data.data.meta.details.length === 0
         ) {
-          return {
-            data: {},
-            warnings: [],
-            errors: [data.data.meta.message]
-          };
+          return errorObj([{ info: data.data.meta.message }], this.service);
         }
 
         const { manifests } = manifestResponseFormatter(this.service, [
@@ -1024,7 +1029,6 @@ class Shipment {
         };
       }
     } catch (error) {
-      console.log("error", error);
       return errorObj(error, this.service);
     }
   }
@@ -1240,9 +1244,13 @@ class Shipment {
         }
 
         const shipment = data.response.trackingResponse.TrackingResponse;
-        if (!shipment.AWBInfo.ArrayOfAWBInfoItem) {
+        if (!shipment.AWBInfo.ArrayOfAWBInfoItem[0].AWBNumber) {
           return errorObj(
-            [`no tracking details for DHL AWB ${trackingObj.trackingNumber}`],
+            [
+              {
+                info: `no tracking details for DHL AWB ${trackingObj.trackingNumber}`
+              }
+            ],
             this.service
           );
         }
@@ -1272,7 +1280,7 @@ class Shipment {
     try {
       if (!labelId) {
         return errorObj(
-          ["A label id is required to cancel label"],
+          [{ info: "A label id is required to cancel label" }],
           this.service
         );
       }
@@ -1308,22 +1316,14 @@ class Shipment {
         });
 
         if (data.data.meta.code !== 200 && data.data.meta.details.length > 0) {
-          return {
-            data: {},
-            warnings: [],
-            errors: [...data.data.meta.details]
-          };
+          return errorObj([...data.data.meta.details], this.service);
         }
 
         if (
           data.data.meta.code !== 200 &&
           data.data.meta.details.length === 0
         ) {
-          return {
-            data: {},
-            warnings: [],
-            errors: [data.data.meta.message]
-          };
+          return errorObj([{ info: data.data.meta.message }], this.service);
         }
 
         return {

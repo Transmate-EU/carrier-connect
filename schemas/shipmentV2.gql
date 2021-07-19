@@ -22,7 +22,7 @@ input AddressInput {
     state: String!
     phone: String!
     email: String!
-    companyName: String!
+    companyName: String
     countryCode: String!
     postalCode: String!
 }
@@ -203,13 +203,6 @@ type RateOutput {
     serviceType: String
 }
 
-input CalculateRate {
-    shipmentId: String
-    shipment: ShipmentInput
-    isDocument: Boolean,
-    shipperAccount: ShipperAccount
-}
-
 input CommoditiesInput {
     numberOfPieces: Int
     description: String
@@ -327,15 +320,8 @@ type Manifest {
 type ManifestType {
     id: String
     status: String
-    labels: [ManifestLabel]
-    files: FileType
     createdAt: String
-    shipFromId: String
-    shipmentDate: String
-    transactions: [String]
-    shipperAccount: ShipperAccountType
     updatedAt: String
-    documents: [String]
 }
 
 type LabelTypeCanceled {
@@ -346,8 +332,6 @@ type CanceledLabel {
     id: String
     status: String
     label: LabelTypeCanceled
-    objectOwner: String
-    transaction: String
     createdAt: String
     updatedAt: String
 }
@@ -488,10 +472,10 @@ input CustomInput {
 }
 
 input ManifestCreationInput {
-    shipperAccount: ShipperAccount
-    shipFromId: String
-    transactions: [String]
+    shipperManifestAccountId: String
+    labelIds: [String]
     shipmentDate: String
+    shipFromId: String
 }
 
 input InvoiceInput {
@@ -528,6 +512,7 @@ type ShipmentOutput {
     id: String
     shipmentDate: String
     trackingNumber: String
+    addressReturnId: String
     rates: [RateOutput]
     createdAt: String
     metadata: ShipmentOutputMetadataType
@@ -545,14 +530,14 @@ type Query {
     labels(type: String!): [LabelOutput!]!,
     manifest(type: String!, manifestId: String!): ManifestType!
     trackings(type: String!): [TrackingOutput!]!
-    trackingStatus(type: String!, tracking: TrackingInput!): TrackingOutput!
+    trackingStatus(type: String!, tracking: TrackingInput): TrackingOutput
     manifests(type: String!): [ManifestType!]!  
     shipments(type: ServiceTypes!): [ShipmentOutput]! 
 }
 
 type Mutation {
     validateAddress(type: String!, address: AddressInput!): AddressValidation!,
-    createManifest(type: String!, manifest: ManifestCreationInput!): ManifestType!
+    createManifest(type: String!, manifest: ManifestCreationInput!): ManifestType
     cancelOrDeleteLabel(type: String!, labelId: String!): CanceledLabel!
     createTracking(type: String!, tracking: CreateTrackingInput!): TrackingOutput!
     createLabel(type: String!, shipment: ShipmentInput!): LabelOutput!

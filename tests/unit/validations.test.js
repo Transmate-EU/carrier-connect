@@ -12,10 +12,10 @@ let api;
 
 console.log("test api rest");
 if (process.env.WEBPACK_TEST) {
-  api = require("../../dist/rest-local.js");
+  api = require("../../dist/rest-local");
   console.log("webpack test", "api", api);
 } else {
-  api = require("../../functions/rest.js");
+  api = require("../../functions/rest");
   console.log("normal test", "api", api);
 }
 
@@ -58,8 +58,8 @@ describe("Test Shipment for Postmen, Shippo and DHL", () => {
       debug("rates %o", response);
       const errors = JSON.parse(response.body.error.message);
       const errorBody = errors[0];
-      expect(errorBody).to.have.property("message");
-      expect(errorBody.message).to.be.equal("shipment is a required property");
+      expect(errorBody).to.have.property("info");
+      expect(errorBody.info).to.be.equal("shipment is a required property");
       expect(response.statusCode).to.be.equal(500);
     });
 
@@ -80,16 +80,16 @@ describe("Test Shipment for Postmen, Shippo and DHL", () => {
 
       debug("rates %o", response);
       const errors = JSON.parse(response.body.error.message);
-      expect(errors[0]).to.have.property("message");
-      expect(errors[1]).to.have.property("message");
-      expect(errors[2]).to.have.property("message");
-      expect(errors[0].message).to.be.equal(
+      expect(errors[0]).to.have.property("info");
+      expect(errors[1]).to.have.property("info");
+      expect(errors[2]).to.have.property("info");
+      expect(errors[0].info).to.be.equal(
         "must have required property 'shipTo'"
       );
-      expect(errors[1].message).to.be.equal(
+      expect(errors[1].info).to.be.equal(
         "must have required property 'shipFrom'"
       );
-      expect(errors[2].message).to.be.equal(
+      expect(errors[2].info).to.be.equal(
         "must have required property 'parcels'"
       );
       expect(response.statusCode).to.be.equal(500);
@@ -111,10 +111,8 @@ describe("Test Shipment for Postmen, Shippo and DHL", () => {
 
       debug("rates %o", response);
       const errors = JSON.parse(response.body.error.message);
-      expect(errors[0]).to.have.property("message");
-      expect(errors[0].message).to.be.equal(
-        "service type is required property"
-      );
+      expect(errors[0]).to.have.property("info");
+      expect(errors[0].info).to.be.equal("service type is required property");
       expect(response.statusCode).to.be.equal(500);
     });
 
@@ -138,38 +136,30 @@ describe("Test Shipment for Postmen, Shippo and DHL", () => {
 
       debug("rates %o", response);
       const errors = JSON.parse(response.body.error.message);
-      expect(errors[0]).to.have.property("message");
-      expect(errors[1]).to.have.property("message");
-      expect(errors[2]).to.have.property("message");
-      expect(errors[3]).to.have.property("message");
-      expect(errors[4]).to.have.property("message");
-      expect(errors[5]).to.have.property("message");
-      expect(errors[6]).to.have.property("message");
-      expect(errors[7]).to.have.property("message");
-      expect(errors[0].message).to.be.equal(
+      expect(errors[0]).to.have.property("info");
+      expect(errors[1]).to.have.property("info");
+      expect(errors[2]).to.have.property("info");
+      expect(errors[3]).to.have.property("info");
+      expect(errors[4]).to.have.property("info");
+      expect(errors[5]).to.have.property("info");
+      expect(errors[6]).to.have.property("info");
+      expect(errors[7]).to.have.property("info");
+      expect(errors[0].info).to.be.equal(
         "must have required property 'contactName'"
       );
-      expect(errors[1].message).to.be.equal(
+      expect(errors[1].info).to.be.equal(
         "must have required property 'street1'"
       );
-      expect(errors[2].message).to.be.equal(
-        "must have required property 'city'"
-      );
-      expect(errors[3].message).to.be.equal(
-        "must have required property 'state'"
-      );
-      expect(errors[4].message).to.be.equal(
+      expect(errors[2].info).to.be.equal("must have required property 'city'");
+      expect(errors[3].info).to.be.equal("must have required property 'state'");
+      expect(errors[4].info).to.be.equal(
         "must have required property 'postalCode'"
       );
-      expect(errors[5].message).to.be.equal(
+      expect(errors[5].info).to.be.equal(
         "must have required property 'countryCode'"
       );
-      expect(errors[6].message).to.be.equal(
-        "must have required property 'phone'"
-      );
-      expect(errors[7].message).to.be.equal(
-        "must have required property 'email'"
-      );
+      expect(errors[6].info).to.be.equal("must have required property 'phone'");
+      expect(errors[7].info).to.be.equal("must have required property 'email'");
       expect(response.statusCode).to.be.equal(500);
     });
 
@@ -196,8 +186,8 @@ describe("Test Shipment for Postmen, Shippo and DHL", () => {
 
       debug("rates %o", response);
       const errors = JSON.parse(response.body.error.message);
-      expect(errors[0]).to.have.property("message");
-      expect(errors[0].message).to.be.equal(
+      expect(errors[0]).to.have.property("info");
+      expect(errors[0].info).to.be.equal(
         "Must provide a valid postal code and it should not be less than 4 characters"
       );
       expect(response.statusCode).to.be.equal(500);
@@ -226,10 +216,8 @@ describe("Test Shipment for Postmen, Shippo and DHL", () => {
 
       debug("rates %o", response);
       const errors = JSON.parse(response.body.error.message);
-      expect(errors[0]).to.have.property("message");
-      expect(errors[0].message).to.be.equal(
-        "Must provide a valid email address"
-      );
+      expect(errors[0]).to.have.property("info");
+      expect(errors[0].info).to.be.equal("Must provide a valid email address");
       expect(response.statusCode).to.be.equal(500);
     });
 
@@ -256,8 +244,8 @@ describe("Test Shipment for Postmen, Shippo and DHL", () => {
 
       debug("rates %o", response);
       const errors = JSON.parse(response.body.error.message);
-      expect(errors[0]).to.have.property("message");
-      expect(errors[0].message).to.be.equal(
+      expect(errors[0]).to.have.property("info");
+      expect(errors[0].info).to.be.equal(
         "City must not have less than two characters"
       );
       expect(response.statusCode).to.be.equal(500);
@@ -286,8 +274,8 @@ describe("Test Shipment for Postmen, Shippo and DHL", () => {
 
       debug("rates %o", response);
       const errors = JSON.parse(response.body.error.message);
-      expect(errors[0]).to.have.property("message");
-      expect(errors[0].message).to.be.equal(
+      expect(errors[0]).to.have.property("info");
+      expect(errors[0].info).to.be.equal(
         "State must not have less than two characters"
       );
       expect(response.statusCode).to.be.equal(500);
@@ -316,8 +304,8 @@ describe("Test Shipment for Postmen, Shippo and DHL", () => {
 
       debug("rates %o", response);
       const errors = JSON.parse(response.body.error.message);
-      expect(errors[0]).to.have.property("message");
-      expect(errors[0].message).to.be.equal(
+      expect(errors[0]).to.have.property("info");
+      expect(errors[0].info).to.be.equal(
         "Must provide a valid country code e.g AT"
       );
       expect(response.statusCode).to.be.equal(500);
@@ -365,8 +353,8 @@ describe("Test Shipment for Postmen, Shippo and DHL", () => {
 
       debug("rates %o", response);
       const errors = JSON.parse(response.body.error.message);
-      expect(errors[0]).to.have.property("message");
-      expect(errors[0].message).to.be.equal("must NOT have fewer than 1 items");
+      expect(errors[0]).to.have.property("info");
+      expect(errors[0].info).to.be.equal("must NOT have fewer than 1 items");
       expect(response.statusCode).to.be.equal(500);
     });
 
@@ -390,42 +378,38 @@ describe("Test Shipment for Postmen, Shippo and DHL", () => {
 
       debug("rates %o", response);
       const errors = JSON.parse(response.body.error.message);
-      expect(errors[0]).to.have.property("message");
-      expect(errors[1]).to.have.property("message");
-      expect(errors[2]).to.have.property("message");
-      expect(errors[3]).to.have.property("message");
-      expect(errors[4]).to.have.property("message");
-      expect(errors[5]).to.have.property("message");
-      expect(errors[6]).to.have.property("message");
-      expect(errors[7]).to.have.property("message");
-      expect(errors[8]).to.have.property("message");
-      expect(errors[0].message).to.be.equal(
+      expect(errors[0]).to.have.property("info");
+      expect(errors[1]).to.have.property("info");
+      expect(errors[2]).to.have.property("info");
+      expect(errors[3]).to.have.property("info");
+      expect(errors[4]).to.have.property("info");
+      expect(errors[5]).to.have.property("info");
+      expect(errors[6]).to.have.property("info");
+      expect(errors[7]).to.have.property("info");
+      expect(errors[8]).to.have.property("info");
+      expect(errors[0].info).to.be.equal(
         "must have required property 'description'"
       );
-      expect(errors[1].message).to.be.equal(
+      expect(errors[1].info).to.be.equal(
         "must have required property 'length'"
       );
-      expect(errors[2].message).to.be.equal(
-        "must have required property 'width'"
-      );
-      expect(errors[3].message).to.be.equal(
+      expect(errors[2].info).to.be.equal("must have required property 'width'");
+      expect(errors[3].info).to.be.equal(
         "must have required property 'height'"
       );
-      expect(errors[4].message).to.be.equal(
+      expect(errors[4].info).to.be.equal(
         "must have required property 'distanceUnit'"
       );
-      expect(errors[5].message).to.be.equal(
+      expect(errors[5].info).to.be.equal(
         "must have required property 'boxType'"
       );
-      expect(errors[6].message).to.be.equal(
+      expect(errors[6].info).to.be.equal(
         "must have required property 'weight'"
       );
-      expect(errors[7].message).to.be.equal(
+      expect(errors[7].info).to.be.equal(
         "must have required property 'dimension'"
       );
-      expect(errors[8].message).to.be.equal(
-        "must have required property 'items'"
-      );
+      expect(errors[8].info).to.be.equal("must have required property 'items'");
       expect(response.statusCode).to.be.equal(500);
     });
   });

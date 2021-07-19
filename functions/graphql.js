@@ -1,9 +1,9 @@
 import typeDefs from "../schemas/shipmentV2.gql";
 import resolvers from "../resolvers/resolvers";
 
-const debug = require("debug")("graphql:endpoint");
-
 const { makeExecutableSchema } = require("@graphql-tools/schema");
+
+const debug = require("debug")("graphql:endpoint");
 
 const { graphql } = require("graphql");
 
@@ -13,7 +13,6 @@ async function gqlResolve(args) {
     resolvers
   });
   debug("schema %o", schemaWithResolvers);
-  // The resolver for this action
   debug("get graphql args %o", args);
   return graphql(
     schemaWithResolvers,

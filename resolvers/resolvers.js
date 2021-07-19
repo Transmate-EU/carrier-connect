@@ -9,7 +9,6 @@ function getContext(context) {
   }
 
   if (typeof context === "object") {
-    console.log("context is object");
     return context;
   }
   return null;
@@ -25,6 +24,14 @@ const resolvers = {
       }
       return labels.data.labels;
     },
+    rates: async (parent, args, context) => {
+      const apiCall = new Shipment(args.type, getContext(context));
+      const rates = await apiCall.getRates(args.shipment);
+      if (rates.errors.length > 0) {
+        throw new Error(JSON.stringify(rates.errors));
+      }
+      return rates.data.rates;
+    },
     manifests: async (parent, args, context) => {
       const apiCall = new Shipment(args.type, getContext(context));
       const manifests = await apiCall.getAllManifests();
@@ -39,7 +46,7 @@ const resolvers = {
       if (manifest.errors.length > 0) {
         throw new Error(JSON.stringify(manifest.errors));
       }
-      return manifest.data;
+      return manifest.data.manifest;
     },
     trackings: async (parent, args, context) => {
       const apiCall = new Shipment(args.type, getContext(context));
@@ -50,6 +57,7 @@ const resolvers = {
       return trackings.data.trackings;
     },
     trackingStatus: async (parent, args, context) => {
+      console.log("trackingStatus");
       const apiCall = new Shipment(args.type, getContext(context));
       const tracking = await apiCall.getTracking(args.tracking);
       if (tracking.errors.length > 0) {
@@ -97,7 +105,7 @@ const resolvers = {
       if (manifest.errors.length > 0) {
         throw new Error(JSON.stringify(manifest.errors));
       }
-      return manifest.data;
+      return manifest.data.manifest;
     },
     createTracking: async (parent, args, context) => {
       const apiCall = new Shipment(args.type, getContext(context));
@@ -113,7 +121,7 @@ const resolvers = {
       if (label.errors.length > 0) {
         throw new Error(JSON.stringify(label.errors));
       }
-      return label.data;
+      return label.data.label;
     },
     createAddress: async (parent, args, context) => {
       const apiCall = new Shipment(args.type, getContext(context));

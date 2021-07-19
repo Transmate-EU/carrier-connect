@@ -1,5 +1,4 @@
 import env from "../../.env.json";
-import { shipmentTesting } from "../../data/data";
 import gqlast from "../../utils/gqlast";
 
 const envFile = {
@@ -44,32 +43,39 @@ const returnShipmentMutation = (service, shipment) => {
   return shipmentMutation;
 };
 
-const returnRatesQuery = (service, shipment) => {
-  // const query = gqlast`
-  //   query {
-  //     rates(
-  //       type: ${service},
-  //       shipment: {
-  //         shipment: ${shipment.shipment},
-  //         shipmentDate: ${shipment.shipmentDate.toString()},
-  //         getLabel: ${shipment.getLabel},
-  //         serviceType: ${shipment.serviceType}
-  //     }) {
-  //       id
-  //       status
-  //       totalCharge {
-  //         amount
-	//         currency
-  //       }
-  //       deliveryDate
-  //       serviceType
-  //     }
-  //   }
-  // `;
+const returnCreateShipmentMutation = (service, shipment) => {
+  const shipmentMutation = gqlast`
+    mutation {
+      createShipment(type: ${service}, shipment: {
+        shipment: ${shipment.shipment},
+        shipmentDate: ${shipment.shipmentDate.toString()},
+        getLabel: ${shipment.getLabel},
+        serviceType: ${shipment.serviceType}
+      }) {
+        id
+        shipmentDate
+        addressReturnId 
+        label {
+          id
+        }
+      }
+    }
+  `;
 
+  return shipmentMutation;
+};
+
+const returnRatesQuery = (service, shipment) => {
   const query = gqlast`
-    query {
-      rates(type: ${service}, shipment: ${shipment}) {
+    {
+      rates(
+        type: ${service},
+        shipment: {
+          shipment: ${shipment.shipment},
+          shipmentDate: ${shipment.shipmentDate.toString()},
+          getLabel: ${shipment.getLabel},
+          serviceType: ${shipment.serviceType}
+      }) {
         id
         status
         totalCharge {
@@ -81,9 +87,77 @@ const returnRatesQuery = (service, shipment) => {
       }
     }
   `;
-
-  console.log("query", query);
   return query;
 };
 
-export { envFile, returnShipmentMutation, returnRatesQuery };
+const returnCancelLabelMutation = (service, labelId) => {
+  const query = gqlast`
+    mutation {
+      cancelOrDeleteLabel(type: ${service}, labelId: ${labelId}) {
+        id
+        status
+        createdAt
+        updatedAt
+      }
+    }
+  `;
+  return query;
+};
+
+const returnCreateManifestMutation = (service, manifest) => {
+  const query = gqlast`
+  mutation {
+    createManifest(type: ${service}, manifest: {
+      labelIds: ${manifest.labelIds},
+      shipperManifestAccountId: ${manifest.shipperManifestAccountId},
+      shipmentDate: ${manifest.shipmentDate},
+      shipFromId: ${manifest.shipFromId}
+    }) {
+      id
+      status
+      createdAt
+      updatedAt
+    }
+  }
+`;
+  return query;
+};
+
+const returnGetManifestQuery = (service, manifestId) => {
+  const query = gqlast`
+  query {
+    manifest(type: ${service}, manifestId: ${manifestId}) {
+      id
+      status
+      createdAt
+      updatedAt
+    }
+  }
+`;
+  return query;
+};
+
+const returnGetTrackingQuery = (service, tracking) => {
+  const query = gqlast`
+  query {
+    trackingStatus(type: ${service}, tracking: ${tracking}) {
+      shipmentWeight
+      shipmentWeightUnit
+      shipmentPackageCount
+      messageReference
+    }
+  }
+`;
+  return query;
+};
+
+export {
+  envFile,
+  returnShipmentMutation,
+  returnRatesQuery,
+  returnCancelLabelMutation,
+  returnCreateManifestMutation,
+  returnGetManifestQuery,
+  returnCreateShipmentMutation,
+  returnGetTrackingQuery
+};

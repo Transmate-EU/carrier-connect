@@ -10,10 +10,10 @@ let api;
 
 console.log("test api rest");
 if (process.env.WEBPACK_TEST) {
-  api = require("../../dist/rest-local.js");
+  api = require("../../dist/rest-local");
   console.log("webpack test", "api", api);
 } else {
-  api = require("../../functions/rest.js");
+  api = require("../../functions/rest");
   console.log("normal test", "api", api);
 }
 
@@ -173,8 +173,8 @@ describe("Test shippo REST API", () => {
       });
       debug("create label return %o", response);
       const error = JSON.parse(response.body.error.message);
-      expect(error[0]).to.have.property("servicelevel_token");
-      expect(error[0].servicelevel_token[0]).to.be.equal(
+      expect(error[0]).to.have.property("info");
+      expect(error[0].info).to.be.equal(
         "Servicelevel usps_priorty_express not found. See https://api.goshippo.com/docs for supported servicelevels."
       );
     });
@@ -225,8 +225,8 @@ describe("Test shippo REST API", () => {
         }
       });
       const error = JSON.parse(response.body.error.message);
-      expect(error[0]).to.have.property("transaction");
-      expect(error[0].transaction[0]).to.be.equal(
+      expect(error[0]).to.have.property("info");
+      expect(error[0].info).to.be.equal(
         "Transaction with supplied object_id not found."
       );
     });

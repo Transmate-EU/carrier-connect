@@ -9,10 +9,10 @@ let api;
 
 console.log("test api rest");
 if (process.env.WEBPACK_TEST) {
-  api = require("../../dist/rest-local.js");
+  api = require("../../dist/rest-local");
   console.log("webpack test", "api", api);
 } else {
-  api = require("../../functions/rest.js");
+  api = require("../../functions/rest");
   console.log("normal test", "api", api);
 }
 
@@ -171,7 +171,7 @@ describe("Test DHL REST API", () => {
         }
       });
       const errors = JSON.parse(response.body.error.message);
-      expect(errors[0]).to.be.equal(
+      expect(errors[0].info).to.be.equal(
         "DHL service type can only be one of these K, T, Y, E, P, U, D, N, H, W"
       );
       expect(response.statusCode).to.be.equal(500);

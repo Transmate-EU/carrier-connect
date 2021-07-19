@@ -1,19 +1,16 @@
 /* eslint-disable mocha/no-mocha-arrows */
 import { expect } from "chai";
-import {
-  shipmentAddress,
-  shipmentManifest,
-  shipmentTesting
-} from "../../data/data";
+import { shipmentAddress, shipmentTesting } from "../../data/data";
 import resolvers from "../../resolvers/resolvers";
 import { envFile } from "../data/test.data";
 
 describe("Testing postmen Resolvers", () => {
   let postmenLabel;
+  let postmenManifest;
 
-  describe("Get postmen rates", () => {
-    it("should get create shipment, get rates and a label", async () => {
-      const postmenShipment = await resolvers.Mutation.createShipment(
+  describe("Get Postmen rates and create labels", () => {
+    it("should create label for shipment USA -> HKG using USPS", async () => {
+      const response = await resolvers.Mutation.createLabel(
         null,
         {
           type: "postmen",
@@ -21,34 +18,83 @@ describe("Testing postmen Resolvers", () => {
             ...shipmentTesting,
             shipment: {
               ...shipmentTesting.shipment,
-              shipFrom: {
+              shipTo: {
                 ...shipmentTesting.shipment.shipFrom,
                 street1: "5/F Hull Lane",
+                phone: "18682306030",
                 city: "Sham Shui Po",
-                postalCode: null,
+                postalCode: "999077",
                 countryCode: "HK"
               },
-              shipTo: {
+              shipFrom: {
                 ...shipmentTesting.shipment.shipTo,
-                street1: "28292 Daugherty Orchard",
-                city: "Sacramento",
-                postalCode: "94209",
+                street1: "5160 Wiley Post Way",
+                city: "Salt Lake City",
+                postalCode: "10001",
                 countryCode: "US",
-                state: "CA"
+                email: "usps_discounted@test.com",
+                phone: "8095545803",
+                state: "UT"
               }
             },
-            getLabel: true,
-            serviceType: "fedex_international_priority"
+            getLabel: false,
+            serviceType: "usps-discounted_express_mail_international"
           }
         },
-        envFile
+        {
+          ...envFile,
+          SHIPPER_ACCOUNT_ID: "3ba41ff5-59a7-4ff0-8333-64a4375c7f21"
+        }
       );
-      postmenLabel = postmenShipment.label;
-      expect(postmenShipment).to.have.property("rates");
-      expect(postmenShipment).to.have.property("label");
-      expect(postmenShipment.rates[0]).to.have.property("totalCharge");
+      postmenLabel = response;
+      expect(response).to.have.property("status");
+      expect(response).to.have.property("labelUrl");
+      expect(response.status).to.have.be.equal("created");
+      expect(response).to.have.property("createdAt");
     });
-    it("should not get all rates when not provided shipment", async () => {
+    it("should get rates for shipment USA -> HKG using USPS", async () => {
+      const response = await resolvers.Query.rates(
+        null,
+        {
+          type: "postmen",
+          shipment: {
+            ...shipmentTesting,
+            shipment: {
+              ...shipmentTesting.shipment,
+              shipTo: {
+                ...shipmentTesting.shipment.shipFrom,
+                street1: "5/F Hull Lane",
+                phone: "18682306030",
+                city: "Sham Shui Po",
+                postalCode: "999077",
+                countryCode: "HK"
+              },
+              shipFrom: {
+                ...shipmentTesting.shipment.shipTo,
+                street1: "5160 Wiley Post Way",
+                city: "Salt Lake City",
+                postalCode: "10001",
+                countryCode: "US",
+                email: "usps_discounted@test.com",
+                phone: "8095545803",
+                state: "UT"
+              }
+            },
+            getLabel: false,
+            serviceType: "usps-discounted_express_mail_international"
+          }
+        },
+        {
+          ...envFile,
+          SHIPPER_ACCOUNT_ID: "3ba41ff5-59a7-4ff0-8333-64a4375c7f21"
+        }
+      );
+      expect(response[0]).to.have.property("status");
+      expect(response[0]).to.have.property("id");
+      expect(response[0].status).to.have.be.equal("calculated");
+      expect(response[0]).to.have.property("deliveryDate");
+    });
+    it("should not get rates when not provided shipment", async () => {
       try {
         await resolvers.Mutation.createShipment(
           null,
@@ -58,8 +104,8 @@ describe("Testing postmen Resolvers", () => {
       } catch (error) {
         const errorInArray = JSON.parse(error.message);
         expect(errorInArray.length).to.have.to.be.greaterThan(0);
-        expect(errorInArray[0]).to.be.equal(
-          "Cannot destructure property 'shipFrom' of 'requestObject.shipment' as it is undefined."
+        expect(errorInArray[0].info).to.be.equal(
+          "must have required property 'shipment'"
         );
       }
     });
@@ -75,8 +121,6 @@ describe("Testing postmen Resolvers", () => {
       expect(postmenLabels[0]).to.have.property("id");
       expect(postmenLabels[0]).to.have.property("status");
       expect(postmenLabels[0]).to.have.property("labelUrl");
-      expect(postmenLabels[0]).to.have.property("rate");
-      expect(postmenLabels[0].rate).to.have.property("totalCharge");
     });
   });
 
@@ -87,11 +131,8 @@ describe("Testing postmen Resolvers", () => {
         { type: "postmen", address: shipmentAddress },
         envFile
       );
-      expect(postmenAddy).to.have.property("id");
-      expect(postmenAddy).to.have.property("status");
-      expect(postmenAddy.status).to.have.be.equal("valid");
-      expect(postmenAddy).to.have.property("createdAt");
-      expect(postmenAddy).to.have.property("updatedAt");
+      expect(postmenAddy.address).to.have.property("status");
+      expect(postmenAddy.address.status).to.have.be.equal("valid");
     });
 
     it("should not validate address if not provided a body", async () => {
@@ -104,15 +145,49 @@ describe("Testing postmen Resolvers", () => {
       } catch (error) {
         const errorInArray = JSON.parse(error.message);
         expect(errorInArray.length).to.be.greaterThan(0);
-        expect(errorInArray[0].message).to.be.equal(
-          "should have required property 'street1'"
+        expect(errorInArray[0].info).to.be.equal(
+          "data.address.street1 is a required property"
+        );
+        expect(errorInArray[1].info).to.be.equal(
+          "data.address.country is a required property"
         );
       }
     });
   });
 
-  describe("Get postmen manifest", () => {
-    it("should not get postmen mainfest details if not provided manifest", async () => {
+  describe("Get create and get a postmen manifest", () => {
+    it("should create a postmen manifest", async () => {
+      const manifest = await resolvers.Mutation.createManifest(
+        null,
+        {
+          type: "postmen",
+          manifest: {
+            shipperManifestAccountId: "3ba41ff5-59a7-4ff0-8333-64a4375c7f21",
+            labelIds: [postmenLabel.id]
+          }
+        },
+        envFile
+      );
+      postmenManifest = manifest;
+      expect(manifest).to.have.property("id");
+      expect(manifest).to.have.property("status");
+      expect(manifest.status).to.be.equal("manifesting");
+    });
+
+    it("should get postmen mainfest details if manifest id is provided", async () => {
+      const manifest = await resolvers.Query.manifest(
+        null,
+        {
+          type: "postmen",
+          manifestId: postmenManifest.id
+        },
+        envFile
+      );
+      expect(manifest).to.have.property("id");
+      expect(manifest).to.have.property("status");
+    });
+
+    it("should not get postmen mainfest details if not provided right manifest id", async () => {
       try {
         await resolvers.Query.manifest(
           null,
@@ -122,28 +197,8 @@ describe("Testing postmen Resolvers", () => {
       } catch (error) {
         const errorInArray = JSON.parse(error.message);
         expect(errorInArray.length).to.be.greaterThan(0);
-        expect(errorInArray[0]).to.be.equal("Item does not exist.");
+        expect(errorInArray[0].info).to.be.equal("Item does not exist.");
       }
-    });
-
-    it("should get postmen mainfest details if manifest id is provided", async () => {
-      await resolvers.Mutation.createManifest(
-        null,
-        { type: "postmen", manifest: shipmentManifest },
-        envFile
-      );
-      const manifests = await resolvers.Query.manifests(
-        null,
-        { type: "postmen" },
-        envFile
-      );
-      const manifest = await resolvers.Query.manifest(
-        null,
-        { type: "postmen", manifestId: manifests[0].id },
-        envFile
-      );
-      expect(manifest).to.have.property("id");
-      expect(manifest).to.have.property("status");
     });
   });
 
@@ -158,7 +213,6 @@ describe("Testing postmen Resolvers", () => {
       expect(canceledLabel).to.have.property("status");
       expect(canceledLabel.status).to.be.equal("cancelled");
     });
-
     it("should not cancel postmen label if not provided label id", async () => {
       try {
         await resolvers.Mutation.cancelOrDeleteLabel(
@@ -169,7 +223,7 @@ describe("Testing postmen Resolvers", () => {
       } catch (error) {
         const errorInArray = JSON.parse(error.message);
         expect(errorInArray.length).to.be.greaterThan(0);
-        expect(errorInArray[0]).to.be.equal("Item not found");
+        expect(errorInArray[0].info).to.be.equal("Item not found");
       }
     });
   });

@@ -201,7 +201,9 @@ const manifestSchema = {
   type: "object",
   properties: {
     shipperManifestAccountId: { type: "string" },
-    labelIds: { type: "array" }
+    labelIds: { type: "array" },
+    shipFromId: { type: "string" },
+    shipmentDate: { type: "string" }
   },
   required: ["shipperManifestAccountId", "labelIds"],
   additionalProperties: false

@@ -13,10 +13,10 @@ let api;
 
 console.log("test api rest");
 if (process.env.WEBPACK_TEST) {
-  api = require("../../dist/rest-local.js");
+  api = require("../../dist/rest-local");
   console.log("webpack test", "api", api);
 } else {
-  api = require("../../functions/rest.js");
+  api = require("../../functions/rest");
   console.log("normal test", "api", api);
 }
 
@@ -40,9 +40,8 @@ describe("Test postmen REST API", () => {
         }
       });
       debug("rates %o", response);
-      const errorMessage = response.body.error.message;
       expect(response.body.error).to.have.property("message");
-      expect(errorMessage).to.be.equal("Please provide postmen API key!");
+      expect(response.body.error.message).to.be.equal("please provide postmen API key!");
       expect(response.statusCode).to.be.equal(400);
     });
 
@@ -255,13 +254,12 @@ describe("Test postmen REST API", () => {
           }
         }
       });
-
-      const errorBody = JSON.parse(response.body.error.message);
-      const errorMessage = errorBody[0];
-
-      expect(errorMessage).to.have.be.equal(
-        "Manifestation of label ids has started/already in progress"
-      );
+      postmenManifest = response.body.result
+      expect(response.body.result).to.have.property("id");
+      expect(response.body.result).to.have.property("status");
+      expect(response.body.result).to.have.property("createdAt");
+      expect(response.body.result).to.have.property("updatedAt");
+      expect(response.statusCode).to.be.equal(200);
     });
 
     it("should get labels", async () => {
@@ -301,7 +299,6 @@ describe("Test postmen REST API", () => {
           type: "postmen"
         }
       });
-      postmenManifest = response.body.result[0];
       expect(response.body.result[0]).to.have.property("id");
       expect(response.body.result[0]).to.have.property("status");
       expect(response.statusCode).to.be.equal(200);
@@ -341,7 +338,7 @@ describe("Test postmen REST API", () => {
         type: "cancelordeleteLabel",
         request: {
           type: "postmen",
-          labelId: postmenLabelOne.id
+           labelId: postmenLabelOne.id
         }
       });
       expect(response.body.result).to.have.property("id");

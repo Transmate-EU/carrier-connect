@@ -346,7 +346,7 @@ const ratesRequestFormatter = (returnType, objct) => {
             }
           }
         },
-        ShipTimestamp: getIsoDateTimeGmt(shipmentDate),
+        ShipTimestamp: getIsoDateTimeGmt(new Date(shipmentDate)),
         UnitOfMeasurement: parcels[0].massUnit === "lb" ? "SI" : "SU",
         Content:
           shipmentMetadata && shipmentMetadata.internationalDetail
@@ -372,8 +372,8 @@ const ratesResponseFormatter = (returnType, objct) => {
         serviceType: rate.attributes.type,
         status: "calculated",
         totalCharge: {
-          amount: rate.TotalNet.Amount,
-          currency: rate.TotalNet.Currency
+          amount: rate.TotalNet[0].Amount,
+          currency: rate.TotalNet[0].Currency
         },
         deliveryDate: rate.DeliveryTime
       }))

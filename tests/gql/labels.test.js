@@ -3,7 +3,11 @@
 /* eslint-disable global-require */
 import { expect } from "chai";
 import { shipmentTesting } from "../../data/data";
-import { envFile, returnShipmentMutationString } from "../data/test.data";
+import {
+  envFile,
+  returnShipmentMutation,
+  returnCancelLabelMutation
+} from "../data/test.data";
 
 const debug = require("debug")("test:gql");
 
@@ -19,9 +23,11 @@ if (process.env.WEBPACK_TEST) {
 }
 
 describe("Testing serverless graphql", () => {
+  let labelIdToCancelPostmen;
+  let labelIdToCancelShippo;
   describe("should test label fetching and creation postmen", () => {
     it("should create label when given shipment [Postmen USPS*USA -> HKG]", async () => {
-      const query = returnShipmentMutationString("postmen", {
+      const query = returnShipmentMutation("postmen", {
         ...shipmentTesting,
         shipment: {
           ...shipmentTesting.shipment,
@@ -55,14 +61,35 @@ describe("Testing serverless graphql", () => {
           SANDBOX: true
         }
       });
+      debug("debug %o", result);
+      labelIdToCancelPostmen = result.data.createLabel.id;
       expect(result.data.createLabel).to.have.property("id");
       expect(result.data.createLabel).to.have.property("labelUrl");
       expect(result.data.createLabel).to.have.property("trackingNumbers");
       expect(result.data.createLabel).to.have.property("status");
       expect(result.data.createLabel.status).to.be.equal("created");
     });
+    it("should cancel created label provided the right label id", async () => {
+      const query = returnCancelLabelMutation(
+        "postmen",
+        labelIdToCancelPostmen
+      );
+      const result = await api.gqlResolve({
+        query,
+        context: {
+          ...envFile,
+          SANDBOX: true
+        }
+      });
+      debug("debug %o", result);
+      expect(result.data.cancelOrDeleteLabel).to.have.property("id");
+      expect(result.data.cancelOrDeleteLabel).to.have.property("status");
+      expect(result.data.cancelOrDeleteLabel).to.have.property("createdAt");
+      expect(result.data.cancelOrDeleteLabel).to.have.property("updatedAt");
+      expect(result.data.cancelOrDeleteLabel.status).to.be.equal("cancelled");
+    });
     it("should not create label when given wrong service type for postmen", async () => {
-      const query = returnShipmentMutationString("postmen", {
+      const query = returnShipmentMutation("postmen", {
         ...shipmentTesting,
         shipment: {
           ...shipmentTesting.shipment,
@@ -96,6 +123,7 @@ describe("Testing serverless graphql", () => {
           SANDBOX: true
         }
       });
+      debug("labels %o", result);
       const errors = JSON.parse(result.errors[0].message);
       expect(errors[0]).to.property("info");
       expect(errors[0].info).to.be.equal(
@@ -105,7 +133,7 @@ describe("Testing serverless graphql", () => {
   });
   describe("should test label fetching and creation shippo", () => {
     it("should create label when given shipment [Shippo USPS*USA -> USA]", async () => {
-      const query = returnShipmentMutationString("shippo", {
+      const query = returnShipmentMutation("shippo", {
         ...shipmentTesting,
         shipment: {
           ...shipmentTesting.shipment,
@@ -139,14 +167,50 @@ describe("Testing serverless graphql", () => {
           SANDBOX: true
         }
       });
+      labelIdToCancelShippo = result.data.createLabel.id;
       expect(result.data.createLabel).to.have.property("id");
       expect(result.data.createLabel).to.have.property("labelUrl");
       expect(result.data.createLabel).to.have.property("trackingNumbers");
       expect(result.data.createLabel).to.have.property("status");
       expect(result.data.createLabel.status).to.be.equal("created");
     });
+    it("should cancel created label provided the right label id", async () => {
+      const query = returnCancelLabelMutation("shippo", labelIdToCancelShippo);
+      const result = await api.gqlResolve({
+        query,
+        context: {
+          ...envFile,
+          SANDBOX: true
+        }
+      });
+      debug("debug %o", result);
+      expect(result.data.cancelOrDeleteLabel).to.have.property("id");
+      expect(result.data.cancelOrDeleteLabel).to.have.property("status");
+      expect(result.data.cancelOrDeleteLabel).to.have.property("createdAt");
+      expect(result.data.cancelOrDeleteLabel).to.have.property("updatedAt");
+      expect(result.data.cancelOrDeleteLabel.status).to.be.equal("cancelled");
+    });
+    it("should not cancel label provided the wrong id", async () => {
+      const query = returnCancelLabelMutation(
+        "shippo",
+        "labelIdToCancelShippo"
+      );
+      const result = await api.gqlResolve({
+        query,
+        context: {
+          ...envFile,
+          SANDBOX: true
+        }
+      });
+      debug("debug %o", result);
+      const errors = JSON.parse(result.errors[0].message);
+      expect(errors[0]).to.property("info");
+      expect(errors[0].info).to.be.equal(
+        "Transaction with supplied object_id not found."
+      );
+    });
     it("should not create label when given wrong service type", async () => {
-      const query = returnShipmentMutationString("shippo", {
+      const query = returnShipmentMutation("shippo", {
         ...shipmentTesting,
         shipment: {
           ...shipmentTesting.shipment,
@@ -185,13 +249,12 @@ describe("Testing serverless graphql", () => {
       expect(errors[0].info).to.be.equal(
         "Servicelevel usps_pririty_express not found. See https://api.goshippo.com/docs for supported servicelevels."
       );
-      console.log("errors", errors);
     });
   });
 
   describe("should test label fetching and creation dhl", () => {
     it("should create label when given shipment [DHL *AT -> US]", async () => {
-      const query = returnShipmentMutationString("dhl", {
+      const query = returnShipmentMutation("dhl", {
         ...shipmentTesting,
         shipment: {
           ...shipmentTesting.shipment,
@@ -226,8 +289,80 @@ describe("Testing serverless graphql", () => {
       expect(result.data.createLabel).to.have.property("status");
       expect(result.data.createLabel.status).to.be.equal("created");
     });
+    it("should create label when given shipment [DHL *AT -> IT]", async () => {
+      const query = returnShipmentMutation("dhl", {
+        ...shipmentTesting,
+        shipment: {
+          ...shipmentTesting.shipment,
+          shipFrom: {
+            ...shipmentTesting.shipment.shipFrom,
+            street1: "215 Clayton St.",
+            city: "Prague",
+            postalCode: "1100",
+            countryCode: "AT"
+          },
+          shipTo: {
+            ...shipmentTesting.shipment.shipTo,
+            street1: "Broadway 1",
+            city: "New York",
+            postalCode: "50127",
+            countryCode: "IT"
+          }
+        },
+        getLabel: false,
+        serviceType: "P"
+      });
+      const result = await api.gqlResolve({
+        query,
+        context: {
+          ...envFile,
+          SANDBOX: true
+        }
+      });
+      expect(result.data.createLabel).to.have.property("id");
+      expect(result.data.createLabel).to.have.property("labelUrl");
+      expect(result.data.createLabel).to.have.property("trackingNumbers");
+      expect(result.data.createLabel).to.have.property("status");
+      expect(result.data.createLabel.status).to.be.equal("created");
+    });
+    it("should create label when given shipment [DHL *AT -> UG]", async () => {
+      const query = returnShipmentMutation("dhl", {
+        ...shipmentTesting,
+        shipment: {
+          ...shipmentTesting.shipment,
+          shipFrom: {
+            ...shipmentTesting.shipment.shipFrom,
+            street1: "215 Clayton St.",
+            city: "Prague",
+            postalCode: "1100",
+            countryCode: "AT"
+          },
+          shipTo: {
+            ...shipmentTesting.shipment.shipTo,
+            street1: "Kampala street",
+            city: "Kampala",
+            postalCode: "0000",
+            countryCode: "UG"
+          }
+        },
+        getLabel: false,
+        serviceType: "P"
+      });
+      const result = await api.gqlResolve({
+        query,
+        context: {
+          ...envFile,
+          SANDBOX: true
+        }
+      });
+      expect(result.data.createLabel).to.have.property("id");
+      expect(result.data.createLabel).to.have.property("labelUrl");
+      expect(result.data.createLabel).to.have.property("trackingNumbers");
+      expect(result.data.createLabel).to.have.property("status");
+      expect(result.data.createLabel.status).to.be.equal("created");
+    });
     it("should not create label when given wrong service type", async () => {
-      const query = returnShipmentMutationString("dhl", {
+      const query = returnShipmentMutation("dhl", {
         ...shipmentTesting,
         shipment: {
           ...shipmentTesting.shipment,
